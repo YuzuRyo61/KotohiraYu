@@ -21,9 +21,22 @@ class user_listener(StreamListener):
     def on_notification(self, notification):
         if notification['type'] == 'mention':
             txt = KotohiraUtil.h2t(notification['status']['content'])
-            # 自分宛てのメンションはとりあえずふぁぼる
+
+            # bot属性のアカウントの場合は無視する
+            if notification['account']['bot'] == True:
+                return
+
+            # とりあえずふぁぼる
             print('お手紙っ！：@{0} < {1}'.format(notification['account']['acct'], txt))
             mastodon.status_favourite(notification['status']['id'])
+
+            # 正規表現とか
+            followReq = re.search(r'(フォロー|(f|F)ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)', txt)
+
+            # メンションでフォローリクエストされたとき
+            # (作成途中っ)
+            #if followReq:
+            #    pass
         else:
             pp.pprint(notification)
 
