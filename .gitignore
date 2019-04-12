@@ -102,3 +102,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Internal
+.db/
+config.ini
+accesstoken.txt
+panic-log/
+tmp/
+
+# Editor
+.vscode/
