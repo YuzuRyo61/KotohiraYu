@@ -32,7 +32,7 @@ class user_listener(StreamListener):
             mastodon.status_favourite(notification['status']['id'])
 
             # 正規表現とか
-            followReq = re.search(r'(フォロー|(f|F)ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)', txt)
+            followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)', txt)
 
             # メンションでフォローリクエストされたとき
             # (作成途中っ)
