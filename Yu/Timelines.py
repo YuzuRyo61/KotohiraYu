@@ -35,8 +35,8 @@ class user_listener(StreamListener):
 
             # メンションでフォローリクエストされたとき
             # (作成途中っ)
-            #if followReq:
-            #    pass
+            if followReq:
+                pass
         else:
             pp.pprint(notification)
 

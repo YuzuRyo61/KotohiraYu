@@ -17,6 +17,7 @@ from Yu import Yu, KotohiraUtil, local, home
 
 def main():
     features = []
+    # タイムライン系
     features.append( threading.Thread(target=local) )
     features.append( threading.Thread(target=home) )
 
