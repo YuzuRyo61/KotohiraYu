@@ -11,6 +11,7 @@ License: MIT License (See LICENSE)
 
 import threading
 import sys
+import os
 
 from Yu import Yu, KotohiraUtil, local, home
 
@@ -28,4 +29,7 @@ def main():
         KotohiraUtil.PANIC()
 
 if __name__ == '__main__':
+    if not os.path.isfile('config/config.ini') or not os.path.isfile('config/accesstoken.txt'):
+        print('＊設定ファイルやアクセストークンがありませんっ！！')
+        sys.exit(1)
     main()
