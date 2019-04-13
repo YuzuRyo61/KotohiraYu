@@ -13,7 +13,7 @@ import threading
 import sys
 import os
 
-from Yu import Yu, KotohiraUtil, local, home
+from Yu import Yu, KotohiraUtil, KotohiraMemory, local, home
 
 def main():
     features = []
@@ -33,4 +33,6 @@ if __name__ == '__main__':
     if not os.path.isfile('config/config.ini') or not os.path.isfile('config/accesstoken.txt'):
         print('＊設定ファイルやアクセストークンがありませんっ！！')
         sys.exit(1)
+    km = KotohiraMemory()
+    del km
     main()

@@ -1,4 +1,5 @@
 from mastodon import Mastodon, StreamListener
+import datetime
 import configparser
 import time
 import re
@@ -6,7 +7,7 @@ import re
 # デバッグ用！
 import pprint as pp
 
-from Yu import KotohiraUtil
+from Yu import KotohiraUtil, KotohiraMemory
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
@@ -51,6 +52,22 @@ class local_listener(StreamListener):
         if config['user']['me'] == status['account']['acct']:
             return
 
+        # データベース初期化
+        memory = KotohiraMemory(showLog=config['log']['enable'])
+
+        # ユウちゃんが知ってるユーザーか調べる
+        # 知らない場合はユウちゃんは記憶しますっ！
+        isknown = memory.select('known_users', status['account']['id'])
+        if len(isknown) == 0:
+            now = datetime.datetime.now()
+            dt = now.strftime("%Y-%m-%d %H:%M:%S")
+            memory.insert('known_users', status['account']['id'], status['account']['acct'], dt)
+            print('覚えたっ！： @{0}'.format(status['account']['acct']))
+            # トゥートカウントが10以下の場合は新規さん向けの挨拶しますっ！
+            if status['account']['statuses_count'] <= 10:
+                print('新規さん！: @{0}'.format(status['account']['acct']))
+                mastodon.toot('新規さんっ！はじめましてっ！ユウって言いますっ！\nよろしくねっ！\n\n@{0}'.format(status['account']['acct']))
+
         # トゥート内のHTMLタグを除去
         txt = KotohiraUtil.h2t(status['content'])
 
@@ -74,6 +91,9 @@ class local_listener(StreamListener):
             mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(status['account']['display_name']))
         else:
             print('@{0} < {1}'.format(status['account']['acct'], txt))
+
+        # データベース切断
+        del memory
 
 def local():
     print('Initializing feature: local')
