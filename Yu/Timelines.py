@@ -38,8 +38,6 @@ class user_listener(StreamListener):
             # (作成途中っ)
             if followReq:
                 pass
-        else:
-            pp.pprint(notification)
 
 # ローカルタイムラインのリスナー
 class local_listener(StreamListener):
