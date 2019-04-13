@@ -108,6 +108,7 @@ config.ini
 accesstoken.txt
 panic-log/
 tmp/
+*.db*
 
 # Editor
 .vscode/
