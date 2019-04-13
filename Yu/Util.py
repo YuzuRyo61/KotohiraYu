@@ -11,11 +11,12 @@ class KotohiraUtil:
     def PANIC():
         now = datetime.now(timezone('Asia/Tokyo'))
         nowFormat = now.strftime("%Y/%m/%d %H:%M:%S")
-        nowFileFormat = now.strftime("%Y%m%d%H%M%S")
+        nowFileFormat = now.strftime("%Y%m%d")
         os.makedirs('panic-log', exist_ok=True)
         with open(f'panic-log/PANIC-{nowFileFormat}.TXT', 'a') as f:
             f.write('--- PANIC! {} ---\n'.format(nowFormat))
             traceback.print_exc(file=f)
+            f.write('\n')
         print("＊ユウちゃんパニックですぅ・・・！\n{}".format(traceback.format_exc()))
 
     @staticmethod
