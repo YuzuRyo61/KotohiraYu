@@ -104,7 +104,6 @@ venv.bak/
 .mypy_cache/
 
 # Internal
-.db/
 config.ini
 accesstoken.txt
 panic-log/
