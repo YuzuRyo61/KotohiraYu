@@ -66,6 +66,7 @@ class local_listener(StreamListener):
             # トゥートカウントが10以下の場合は新規さん向けの挨拶しますっ！
             if status['account']['statuses_count'] <= 10:
                 print('新規さん！: @{0}'.format(status['account']['acct']))
+                mastodon.status_reblog(status['id'])
                 mastodon.toot('新規さんっ！はじめましてっ！ユウって言いますっ！\nよろしくねっ！\n\n@{0}'.format(status['account']['acct']))
 
         # トゥート内のHTMLタグを除去
@@ -75,6 +76,7 @@ class local_listener(StreamListener):
         isMeMention = re.search('@{}'.format(config['user']['me']), txt)
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ユウ|ﾕｳ)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう))', txt)
+        passage = re.search(r'(通過|つうか|ツウカ)', txt)
 
         # 自分宛てのメンションはここのリスナーでは無視する
         if isMeMention:
@@ -89,6 +91,11 @@ class local_listener(StreamListener):
         if iBack:
             print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
             mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(status['account']['display_name']))
+
+        # 通過 とか言ったら阻止しちゃうよっ！
+        if passage:
+            print('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
+            mastodon.toot('阻止っ！！(*`ω´*)')
         else:
             print('@{0} < {1}'.format(status['account']['acct'], txt))
 

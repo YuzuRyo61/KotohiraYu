@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS `known_users` (
 	`didWBack_at`	TEXT,
 	`didGNight_at`	TEXT,
 	`didUpdated_at`	TEXT,
+	`didPassage_at` TEXT,
 	`known_at`	TEXT
 );
