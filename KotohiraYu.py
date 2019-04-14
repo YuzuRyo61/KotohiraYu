@@ -32,6 +32,8 @@ def main():
     # タイムライン系
     features.append( threading.Thread(target=local) )
     features.append( threading.Thread(target=home) )
+    # cron系
+    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(Yu.timeReport,['**:00'])) )
 
     try:
         # スレッド開始

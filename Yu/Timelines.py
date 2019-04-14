@@ -1,5 +1,6 @@
 from mastodon import Mastodon, StreamListener
 import datetime
+from pytz import timezone
 import configparser
 import time
 import re
@@ -57,7 +58,7 @@ class local_listener(StreamListener):
         # 知らない場合はユウちゃんは記憶しますっ！
         isknown = memory.select('known_users', status['account']['id'])
         if len(isknown) == 0:
-            now = datetime.datetime.now()
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S")
             memory.insert('known_users', status['account']['id'], status['account']['acct'], dt)
             print('覚えたっ！： @{0}'.format(status['account']['acct']))
