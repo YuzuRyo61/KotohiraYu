@@ -24,9 +24,12 @@ class KotohiraMemory:
         # データベーステーブル初期化
         if tableInit:
             self.init_table()
+        
+        self.__log('INIT')
 
     def init_table(self):
         # sqlフォルダのinit- から始まるSQLファイルのリストを読み込み、1つずつSQLを実行していく
+        self.__log('TABLE INIT')
         init_sqls = glob.glob('sql/init-*.sql')
         for sql in init_sqls:
             with open(sql, "r") as s:
@@ -37,6 +40,7 @@ class KotohiraMemory:
     def close(self, DISCARD=False):
         # 接続終了処理。DISCARDがTrueになってる場合はコミットせずに切断する
         if not DISCARD:
+            self.__log('COMMIT')
             self.conn.commit()
         self.conn.close()
 
@@ -86,5 +90,5 @@ class KotohiraMemory:
             raise Exception(f"Update SQL file was not found: {table}")
 
     def drop(self, table, *args):
-        # 指定したテーブルのデータをドロップ
+        # 指定したテーブルのデータをドロップ（未実装）
         pass
