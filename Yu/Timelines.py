@@ -76,7 +76,7 @@ class local_listener(StreamListener):
         isknown = memory.select('known_users', status['account']['id'])
         if len(isknown) == 0:
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            dt = now.strftime("%Y-%m-%d %H:%M:%S")
+            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
             memory.insert('known_users', status['account']['id'], status['account']['acct'], dt)
             print('覚えたっ！： @{0}'.format(status['account']['acct']))
             # トゥートカウントが10以下の場合は新規さん向けの挨拶しますっ！
@@ -110,9 +110,9 @@ class local_listener(StreamListener):
             # タプル型なので6番目のデータがおかえりした日付
             didWBAt = userInfo[5]
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            dt = now.strftime("%Y-%m-%d %H:%M:%S")
+            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
             if didWBAt != None:
-                didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S')
+                didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S%z')
                 dateDiff = now - didWBAtRaw
                 # 前回のただいまから10分以上経過していれば応答する
                 if dateDiff.seconds >= 600:

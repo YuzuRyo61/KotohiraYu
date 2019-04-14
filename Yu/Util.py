@@ -12,7 +12,7 @@ class KotohiraUtil:
     def PANIC():
         # raiseされたら実行する。別途スクリプトで例外処理する必要がある
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
-        nowFormat = now.strftime("%Y/%m/%d %H:%M:%S")
+        nowFormat = now.strftime("%Y/%m/%d %H:%M:%S%z")
         nowFileFormat = now.strftime("%Y%m%d")
         os.makedirs('panic-log', exist_ok=True)
         with open(f'panic-log/PANIC-{nowFileFormat}.TXT', 'a') as f:
