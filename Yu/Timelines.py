@@ -68,6 +68,9 @@ class local_listener(StreamListener):
         if config['user']['me'] == status['account']['acct']:
             return
 
+        # トゥート内のHTMLタグを除去
+        txt = KotohiraUtil.h2t(status['content'])
+
         # 自分宛てのメンションはここのリスナーでは無視する
         isMeMention = re.search('@{}'.format(config['user']['me']), txt)
         if isMeMention:
@@ -90,9 +93,6 @@ class local_listener(StreamListener):
                 mastodon.status_reblog(status['id'])
                 mastodon.toot('新規さんっ！はじめましてっ！琴平ユウって言いますっ！\nよろしくねっ！\n\n@{0}'.format(status['account']['acct']))
 
-        # トゥート内のHTMLタグを除去
-        txt = KotohiraUtil.h2t(status['content'])
-
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ユウ|ﾕｳ)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう))', txt)
@@ -107,15 +107,15 @@ class local_listener(StreamListener):
         if iBack:
             # データベースからデータ取得
             userInfo = memory.select('known_users', status['account']['id'])[0]
-            # タプル型なので6番目のデータがおかえりした日付
+            # タプル型なので6番目のデータが通過阻止した日付
             didWBAt = userInfo[5]
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
             if didWBAt != None:
                 didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S%z')
                 dateDiff = now - didWBAtRaw
-                # 前回のただいまから10分以上経過していれば応答する
-                if dateDiff.seconds >= 600:
+                # 前回の「通過」etc...から5分以上経過していれば応答する
+                if dateDiff.seconds >= 300:
                     doIt = True
                 else:
                     doIt = False
@@ -129,8 +129,25 @@ class local_listener(StreamListener):
 
         # 通過 とか言ったら阻止しちゃうよっ！
         if passage:
-            print('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
-            mastodon.toot('阻止っ！！(*`ω´*)')
+            userInfo = memory.select('known_users', status['account']['id'])[0]
+            # タプル型なので9番目のデータが通過した日付
+            didAt = userInfo[8]
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
+            if didAt != None:
+                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
+                dateDiff = now - didAtRaw
+                # 前回の「ただいま」etc...から10分以上経過していれば応答する
+                if dateDiff.seconds >= 600:
+                    doIt = True
+                else:
+                    doIt = False
+            else:
+                doIt = True
+            
+            if doIt:
+                print('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
+                mastodon.toot('阻止っ！！(*`ω´*)')
         else:
             print('@{0} < {1}'.format(status['account']['acct'], txt))
 
