@@ -47,20 +47,20 @@ def main():
 
 if __name__ == '__main__':
     # 設定ファイルがあるかチェック。ない場合は弾く
-    if not os.path.isfile('config/config.ini') or not os.path.isfile('config/accesstoken.txt'):
+    if os.path.isfile('config/config.ini') and os.path.isfile('config/accesstoken.txt'):
+        # config.iniにあるIDと実際に取り寄せたIDが一致しない場合は弾く
+        res = mastodon.account_verify_credentials()
+        if config['user']['me'] != res.acct:
+            print('＊設定したアカウントIDと一致しませんっ！！')
+            sys.exit(1)
+
+        # 問題なさそうであれば起動
+
+        # データベース初期化
+        km = KotohiraMemory(showLog=config['log']['enable'])
+        del km
+
+        main()
+    else:
         print('＊設定ファイルやアクセストークンがありませんっ！！')
         sys.exit(1)
-
-    # config.iniにあるIDと実際に取り寄せたIDが一致しない場合は弾く
-    res = mastodon.account_verify_credentials()
-    if config['user']['me'] != res.acct:
-        print('＊設定したアカウントIDと一致しませんっ！！')
-        sys.exit(1)
-
-    # 問題なさそうであれば起動
-
-    # データベース初期化
-    km = KotohiraMemory(showLog=config['log']['enable'])
-    del km
-
-    main()
