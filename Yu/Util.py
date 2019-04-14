@@ -9,6 +9,7 @@ import os
 class KotohiraUtil:
     @staticmethod
     def PANIC():
+        # raiseされたら実行する。別途スクリプトで例外処理する必要がある
         now = datetime.now(timezone('Asia/Tokyo'))
         nowFormat = now.strftime("%Y/%m/%d %H:%M:%S")
         nowFileFormat = now.strftime("%Y%m%d")
