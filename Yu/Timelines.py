@@ -21,7 +21,10 @@ mastodon = Mastodon(
 # ホームタイムラインのリスナー(主に通知リスナー)
 class user_listener(StreamListener):
     def on_notification(self, notification):
-        if notification['type'] == 'mention':
+        # 代入してちょっと見栄え良く
+        notifyType = notification['type']
+        if notifyType == 'mention':
+            # 返信とか
             txt = KotohiraUtil.h2t(notification['status']['content'])
 
             # bot属性のアカウントの場合は無視する
@@ -39,6 +42,20 @@ class user_listener(StreamListener):
             # (作成途中っ)
             if followReq:
                 pass
+        
+        elif notifyType == 'favourite':
+            # ふぁぼられ
+            print('ふぁぼられたっ！：@{0}'.format(notification['account']['acct']))
+            # 今後好感度とか上げる機能とか入れる
+        
+        elif notifyType == 'reblog':
+            # ブーストされ
+            print('ブーストされたっ！：@{0}'.format(notification['account']['acct']))
+            # ふぁぼられと同様な機能とか
+        
+        elif notifyType == 'follow':
+            # フォローされ
+            print('フォローされたっ！：@{0}'.format(notification['account']['acct']))
 
 # ローカルタイムラインのリスナー
 class local_listener(StreamListener):
@@ -66,7 +83,7 @@ class local_listener(StreamListener):
             if status['account']['statuses_count'] <= 10:
                 print('新規さん！: @{0}'.format(status['account']['acct']))
                 mastodon.status_reblog(status['id'])
-                mastodon.toot('新規さんっ！はじめましてっ！ユウって言いますっ！\nよろしくねっ！\n\n@{0}'.format(status['account']['acct']))
+                mastodon.toot('新規さんっ！はじめましてっ！琴平ユウって言いますっ！\nよろしくねっ！\n\n@{0}'.format(status['account']['acct']))
 
         # トゥート内のHTMLタグを除去
         txt = KotohiraUtil.h2t(status['content'])
@@ -88,8 +105,27 @@ class local_listener(StreamListener):
 
         # 帰ったよ〜 とか言ったらトゥート
         if iBack:
-            print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-            mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(status['account']['display_name']))
+            # データベースからデータ取得
+            userInfo = memory.select('known_users', status['account']['id'])[0]
+            # タプル型なので6番目のデータがおかえりした日付
+            didWBAt = userInfo[5]
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            dt = now.strftime("%Y-%m-%d %H:%M:%S")
+            if didWBAt != None:
+                didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S')
+                dateDiff = now - didWBAtRaw
+                # 前回のただいまから10分以上経過していれば応答する
+                if dateDiff.seconds >= 600:
+                    doIt = True
+                else:
+                    doIt = False
+            else:
+                doIt = True
+
+            if doIt:
+                print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+                mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(status['account']['display_name']))
+                memory.update('known_users-wb', dt, status['account']['id'])
 
         # 通過 とか言ったら阻止しちゃうよっ！
         if passage:
