@@ -68,6 +68,11 @@ class local_listener(StreamListener):
         if config['user']['me'] == status['account']['acct']:
             return
 
+        # 自分宛てのメンションはここのリスナーでは無視する
+        isMeMention = re.search('@{}'.format(config['user']['me']), txt)
+        if isMeMention:
+            return
+        
         # データベース初期化
         memory = KotohiraMemory(showLog=config['log']['enable'])
 
@@ -89,14 +94,9 @@ class local_listener(StreamListener):
         txt = KotohiraUtil.h2t(status['content'])
 
         # 正規表現チェック
-        isMeMention = re.search('@{}'.format(config['user']['me']), txt)
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ユウ|ﾕｳ)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう))', txt)
         passage = re.search(r'(通過|つうか|ツウカ)', txt)
-
-        # 自分宛てのメンションはここのリスナーでは無視する
-        if isMeMention:
-            return
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
         if calledYuChan:
