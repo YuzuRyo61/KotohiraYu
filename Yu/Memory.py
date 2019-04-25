@@ -25,12 +25,12 @@ class KotohiraMemory:
         if tableInit:
             self.init_table()
         
-        self.__log('INIT')
+        self.__log('CONNECT')
 
     def init_table(self):
         # sqlフォルダのinit- から始まるSQLファイルのリストを読み込み、1つずつSQLを実行していく
         self.__log('TABLE INIT')
-        init_sqls = glob.glob('sql/init-*.sql')
+        init_sqls = glob.glob('sql/!INIT/*.sql')
         for sql in init_sqls:
             with open(sql, "r") as s:
                 schema = s.read()
@@ -50,7 +50,7 @@ class KotohiraMemory:
         self.__log('COMMIT')
 
     def __del__(self):
-        # del命令がかかったらclose関数を呼ぶ
+        # del命令がかかったらclose関数を呼ぶ。コミットも自動的に行う
         self.close()
 
     def __log(self, message):
@@ -60,8 +60,8 @@ class KotohiraMemory:
 
     def insert(self, table, *args):
         # SQLファイルに沿ってデータ挿入（sqlファイル内の insert- から始まるSQLファイル）
-        if os.path.isfile(f"sql/insert-{table}.sql"):
-            with open(f"sql/insert-{table}.sql") as sqltxt:
+        if os.path.isfile(f"sql/{table}/insert.sql"):
+            with open(f"sql/{table}/insert.sql") as sqltxt:
                 sql = sqltxt.read()
                 self.cursor.execute(sql, args)
                 self.__log(f"Insert: {table} => {args}")
@@ -70,8 +70,8 @@ class KotohiraMemory:
 
     def select(self, table, *args):
         # SQLファイルに沿ってデータ検索（sqlファイル内の select- から始まるSQLファイル）
-        if os.path.isfile(f"sql/select-{table}.sql"):
-            with open(f"sql/select-{table}.sql") as sqltxt:
+        if os.path.isfile(f"sql/{table}/select.sql"):
+            with open(f"sql/{table}/select.sql") as sqltxt:
                 sql = sqltxt.read()
                 self.cursor.execute(sql, args)
                 self.__log(f"Select: {table} => {args}")
@@ -81,8 +81,8 @@ class KotohiraMemory:
 
     def update(self, table, *args):
         # SQLファイルに沿ってデータ挿入（sqlファイル内の update- から始まるSQLファイル）
-        if os.path.isfile(f"sql/update-{table}.sql"):
-            with open(f"sql/update-{table}.sql") as sqltxt:
+        if os.path.isfile(f"sql/{table}/update.sql"):
+            with open(f"sql/{table}/update.sql") as sqltxt:
                 sql = sqltxt.read()
                 self.cursor.execute(sql, args)
                 self.__log(f"Update: {table} => {args}")
@@ -91,4 +91,10 @@ class KotohiraMemory:
 
     def drop(self, table, *args):
         # 指定したテーブルのデータをドロップ（未実装）
-        pass
+        if os.path.isfile(f"sql/{table}/drop.sql"):
+            with open(f"sql/{table}/drop.sql") as sqltxt:
+                sql = sqltxt.read()
+                self.cursor.execute(sql, args)
+                self.__log(f"Drop: {table} => {args}")
+        else:
+            raise Exception(f"Drop SQL file was not found: {table}")
