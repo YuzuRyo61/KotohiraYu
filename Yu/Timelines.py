@@ -26,6 +26,8 @@ class user_listener(StreamListener):
         notifyType = notification['type']
         if notifyType == 'mention':
             # 返信とか
+
+            # テキスト化
             txt = KotohiraUtil.h2t(notification['status']['content'])
 
             # bot属性のアカウントの場合は無視する
@@ -49,10 +51,13 @@ class user_listener(StreamListener):
             if followReq:
                 pass
             
+            # 占いのリクエストがされたとき
             if fortune:
                 Yu.fortune(notification['status']['id'], notification['account']['acct'])
+                # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
             
+            # クローズと共に保存
             del memory
         
         elif notifyType == 'favourite':
@@ -97,14 +102,18 @@ class local_listener(StreamListener):
         if len(isknown) == 0:
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            memory.insert('known_users', status['account']['id'], status['account']['acct'], dt, dt)
+            memory.insert('known_users', status['account']['id'], status['account']['acct'], dt)
             memory.insert('fav_rate', status['account']['id'])
+            memory.insert('updated_users', status['account']['id'], dt)
             print('覚えたっ！： @{0}'.format(status['account']['acct']))
+            newUser = True
             # トゥートカウントが10以下の場合は新規さん向けの挨拶しますっ！
             if status['account']['statuses_count'] <= 10:
                 print('新規さん！: @{0}'.format(status['account']['acct']))
                 mastodon.status_reblog(status['id'])
                 mastodon.toot('新規さんっ！はじめましてっ！琴平ユウって言いますっ！\nよろしくねっ！\n\n@{0}'.format(status['account']['acct']))
+        else:
+            newUser = False
 
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ユウ|ﾕｳ)', txt)
@@ -121,12 +130,15 @@ class local_listener(StreamListener):
         # 帰ったよ〜 とか言ったらトゥート
         if iBack:
             # データベースからデータ取得
-            userInfo = memory.select('known_users', status['account']['id'])[0]
-            # タプル型なので6番目のデータが帰ったよ日付
-            didWBAt = userInfo[5]
+            userInfo = memory.select('wel_back', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            if didWBAt != None:
+            if len(userInfo) == 0:
+                # データがない場合はデータ挿入しておかえり実行
+                memory.insert('wel_back', status['account']['id'], dt)
+                doIt = True
+            else:
+                didWBAt = userInfo[0][2]
                 didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S%z')
                 dateDiff = now - didWBAtRaw
                 # 前回の「帰ったよ」etc...から10分以上経過していれば応答する
@@ -134,22 +146,23 @@ class local_listener(StreamListener):
                     doIt = True
                 else:
                     doIt = False
-            else:
-                doIt = True
 
             if doIt:
                 print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(status['account']['display_name']))
-                memory.update('known_users-wb', dt, status['account']['id'])
+                memory.update('wel_back', dt, status['account']['id'])
 
         # 通過 とか言ったら阻止しちゃうよっ！
         if passage:
-            userInfo = memory.select('known_users', status['account']['id'])[0]
-            # タプル型なので9番目のデータが通過阻止した日付
-            didAt = userInfo[8]
+            userInfo = memory.select('passage', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            if didAt != None:
+            if len(userInfo) == 0:
+                # データがない場合はデータ挿入して阻止実行
+                memory.insert('passage', status['account']['id'], dt)
+                doIt = True
+            else:
+                didAt = userInfo[0][2]
                 didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
                 dateDiff = now - didAtRaw
                 # 前回の「通過」etc...から5分以上経過していれば応答する
@@ -157,20 +170,20 @@ class local_listener(StreamListener):
                     doIt = True
                 else:
                     doIt = False
-            else:
-                doIt = True
             
             if doIt:
                 print('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot('阻止っ！！(*`ω´*)')
-                memory.update('known_users-wb', dt, status['account']['id'])
+                memory.update('passage', dt, status['account']['id'])
         else:
             print('@{0} < {1}'.format(status['account']['acct'], txt))
 
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-        memory.update('known_users-lu', dt, status['account']['id'])
+        # ２重更新防策
+        if not newUser:
+            memory.update('updated_users', dt, status['account']['id'])
 
         # データベース切断
         del memory
