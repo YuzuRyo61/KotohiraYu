@@ -63,7 +63,22 @@ class user_listener(StreamListener):
         elif notifyType == 'favourite':
             # ふぁぼられ
             print('ふぁぼられたっ！：@{0}'.format(notification['account']['acct']))
-            # 今後好感度とか上げる機能とか入れる
+            # ふぁぼ連対策
+            memory = KotohiraMemory(showLog=config['log']['enable'])
+            favInfo = memory.select('recent_favo', notification['account']['id'])
+            if len(favInfo) == 0:
+                # データがない場合は追加して好感度アップ
+                memory.insert('recent_favo', notification['account']['id'], notification['status']['id'])
+                memory.update('fav_rate', 1, notification['account']['id'])
+            else:
+                # 最後にふぁぼったトゥートが同じものでないこと
+                if notification['status']['id'] != favInfo[0][2]:
+                    memory.update('recent_favo', notification['status']['id'], notification['account']['id'])
+                    memory.update('fav_rate', 1, notification['account']['id'])
+            
+            # コミット
+            del memory
+
         
         elif notifyType == 'reblog':
             # ブーストされ
@@ -119,6 +134,7 @@ class local_listener(StreamListener):
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ユウ|ﾕｳ)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう))', txt)
         passage = re.search(r'(通過|つうか|ツウカ)', txt)
+        sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
         if calledYuChan:
@@ -175,6 +191,30 @@ class local_listener(StreamListener):
                 print('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot('阻止っ！！(*`ω´*)')
                 memory.update('passage', dt, status['account']['id'])
+        
+        if sinkiSagi and status['account']['statuses_count'] > 10:
+            # 新規詐欺見破りっ！
+            userInfo = memory.select('sin_sagi', status['account']['id'])
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
+            if len(userInfo) == 0:
+                # データがない場合はデータ挿入して新規詐欺見破り実行
+                memory.insert('sin_sagi', status['account']['id'], dt)
+                doIt = True
+            else:
+                didAt = userInfo[0][2]
+                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
+                dateDiff = now - didAtRaw
+                # 前回の詐欺の「新規だよ」etc...から5分以上経過していれば応答する
+                if dateDiff.seconds >= 300:
+                    doIt = True
+                else:
+                    doIt = False
+            
+            if doIt:
+                print('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
+                mastodon.toot('新規詐欺は行けませんっ！！(*`ω´*)')
+                memory.update('sin_sagi', status['account']['id'], dt)
         else:
             print('@{0} < {1}'.format(status['account']['acct'], txt))
 
