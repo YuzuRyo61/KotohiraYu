@@ -39,7 +39,7 @@ class user_listener(StreamListener):
             mastodon.status_favourite(notification['status']['id'])
 
             # 好感度を少し上げる
-            memory = KotohiraMemory(showLog=config['log']['enable'])
+            memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
             memory.update('fav_rate', 1, notification['account']['id'])
 
             # 正規表現とか
@@ -64,7 +64,7 @@ class user_listener(StreamListener):
             # ふぁぼられ
             print('ふぁぼられたっ！：@{0}'.format(notification['account']['acct']))
             # ふぁぼ連対策
-            memory = KotohiraMemory(showLog=config['log']['enable'])
+            memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
             favInfo = memory.select('recent_favo', notification['account']['id'])
             if len(favInfo) == 0:
                 # データがない場合は追加して好感度アップ
@@ -109,7 +109,7 @@ class local_listener(StreamListener):
             return
         
         # データベース初期化
-        memory = KotohiraMemory(showLog=config['log']['enable'])
+        memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
 
         # ユウちゃんが知ってるユーザーか調べる
         # 知らない場合はユウちゃんは記憶しますっ！
@@ -215,14 +215,18 @@ class local_listener(StreamListener):
                 print('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot('新規詐欺は行けませんっ！！(*`ω´*)')
                 memory.update('sin_sagi', status['account']['id'], dt)
-        else:
-            print('@{0} < {1}'.format(status['account']['acct'], txt))
-
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
         # ２重更新防策
         if not newUser:
+            updated_at = memory.select('updated_users', status['account']['id'])[0]
+            updatedAtRaw = datetime.datetime.strptime(updated_at[2], '%Y-%m-%d %H:%M:%S%z')
+            dateDiff = now - updatedAtRaw
+            # 3時間以上更新がなかった場合は挨拶する
+            if dateDiff.seconds >= 10800:
+                print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
+                mastodon.toot("""{0}さん、こんにちはっ！""".format(repr(status['account']['display_name'])[1:-1]))
             memory.update('updated_users', dt, status['account']['id'])
 
         # データベース切断

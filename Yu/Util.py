@@ -6,6 +6,11 @@ from bs4 import BeautifulSoup
 import traceback
 import os
 from time import sleep
+import configparser
+import requests
+
+config = configparser.ConfigParser()
+config.read('config/config.ini')
 
 class KotohiraUtil:
     @staticmethod
@@ -20,6 +25,12 @@ class KotohiraUtil:
             traceback.print_exc(file=f)
             f.write('\n')
         print("＊ユウちゃんパニックですぅ・・・！\n{}".format(traceback.format_exc()))
+        if config['linenotify'].getboolean('enable') == True:
+            headers = {"Authorization": "Bearer " + config['linenotify']['token']}
+            payload = {"message": "＊ユウちゃんがパニックになりました。\nパニック時刻: " + nowFormat + "\n詳細はログを確認してくださいっ"}
+            req = requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
+            if req.status_code != 200:
+                print("[FATAL] LINE NOTIFY ACCESS FAILED")
 
     @staticmethod
     def h2t(txt):
