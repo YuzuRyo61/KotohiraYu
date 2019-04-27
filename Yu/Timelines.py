@@ -165,7 +165,7 @@ class local_listener(StreamListener):
 
             if doIt:
                 print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(status['account']['display_name']))
+                mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(repr(status['account']['display_name'])[1:-1]))
                 memory.update('wel_back', dt, status['account']['id'])
 
         # 通過 とか言ったら阻止しちゃうよっ！
