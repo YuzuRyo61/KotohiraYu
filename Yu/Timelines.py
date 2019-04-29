@@ -277,10 +277,16 @@ class local_listener(StreamListener):
             dateDiff = now - updatedAtRaw
             # 3時間以上更新がなかった場合は挨拶する
             if dateDiff.seconds >= 10800:
-                print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                # issue: #4
-                
-                mastodon.toot("""{0}さん、こんにちはっ！""".format(name))
+                if now.hour < 12 and now.hour >= 5:
+                    print("おはようございますっ！：@{0} < {1}".format(status['account']['acct'], txt))
+                    mastodon.toot("""{0}さん、おはようございますっ！🌄""".format(name))
+                if now.hour >= 12 and now.hour < 17:
+                    print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
+                    mastodon.toot("""{0}さん、こんにちはっ！☀""".format(name))
+                if now.hour >= 17 and now.hour < 5:
+                    print("こんばんはっ！：@{0} < {1}".format(status['account']['acct'], txt))
+                    mastodon.toot("""{0}さん、こんばんはっ！🌙""".format(name))
+
             memory.update('updated_users', dt, status['account']['id'])
 
         # データベース切断
