@@ -264,7 +264,7 @@ class local_listener(StreamListener):
             else:
                 memory.update('nickname', name, status['account']['id'])
             # 変更通知
-            mastodon.status_post(f'@{status['account']['acct']}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=status['id'])
+            mastodon.status_post('@{0}\nわかりましたっ！今度から\n「{1}」と呼びますねっ！'.format(status['account']['acct'], name), in_reply_to_id=status['id'])
 
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
