@@ -1,1 +1,1 @@
-UPDATE `nickname` SET date = ? WHERE ID_Inst = ?
+UPDATE `nickname` SET nickname = ? WHERE ID_Inst = ?

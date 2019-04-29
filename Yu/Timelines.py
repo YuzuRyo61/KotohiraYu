@@ -148,6 +148,7 @@ class local_listener(StreamListener):
         passage = re.search(r'(通過|つうか|ツウカ)', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
+        nick = re.seach(r'^(あだ名|ニックネーム)[:：は]\s?', txt)
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
         if calledYuChan:
@@ -253,6 +254,18 @@ class local_listener(StreamListener):
                 mastodon.toot('ｶﾞｯ')
                 memory.update('null_point', status['account']['id'], dt)
 
+        # ニックネームの設定
+        if nick:
+            userInfo = memory.select('nickname', status['account']['id'])
+            name = re.sub(r'^(あだ名|ニックネーム)[:：は]\s?', '', txt, 1)
+            name = name.replace('\n', '')
+            if len(userInfo) == 0:
+                memory.insert('nickname', status['account']['id'], name)
+            else:
+                memory.update('nickname', name, status['account']['id'])
+            # 変更通知
+            mastodon.status_post(f'@{status['account']['acct']}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=status['id'])
+
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -265,6 +278,7 @@ class local_listener(StreamListener):
             if dateDiff.seconds >= 10800:
                 print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
                 # issue: #4
+                
                 mastodon.toot("""{0}さん、こんにちはっ！""".format(name))
             memory.update('updated_users', dt, status['account']['id'])
 
