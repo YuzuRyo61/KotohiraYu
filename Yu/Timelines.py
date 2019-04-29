@@ -152,6 +152,9 @@ class local_listener(StreamListener):
                 # Unicodeのエスケープを削除して挿入
                 dpname = repr(status['account']['display_name'])[1:-1]
                 name = re.sub(r"\\u[0-9a-f]{4}", '', dpname)
+        else:
+            # ニックネームが設定されている場合はそちらを優先
+            name = nameDic[0][2]
 
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ)', txt)
