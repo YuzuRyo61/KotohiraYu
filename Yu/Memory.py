@@ -27,15 +27,26 @@ class KotohiraMemory:
         
         self.__log('CONNECT')
 
-    def init_table(self):
-        # sqlフォルダのinit- から始まるSQLファイルのリストを読み込み、1つずつSQLを実行していく
+    def init_table(self, table=None):
+        # "!INIT"フォルダにあるSQLファイルのリストを読み込み、1つずつSQLを実行していく
         self.__log('TABLE INIT')
-        init_sqls = glob.glob('sql/!INIT/*.sql')
-        for sql in init_sqls:
-            with open(sql, "r") as s:
-                schema = s.read()
-                self.cursor.execute(schema)
-                self.__log(f'Insert: {sql}')
+        if table == None:
+            # テーブルが未指定の場合は"!INIT"フォルダ内にあるsqlファイルをすべて読みこんでテーブル作成
+            init_sqls = glob.glob('sql/!INIT/*.sql')
+            for sql in init_sqls:
+                with open(sql, "r") as s:
+                    schema = s.read()
+                    self.cursor.execute(schema)
+                    self.__log(f'Insert: {sql}')
+        else:
+            # テーブル指定があった場合はそのファイルを開き挿入
+            if os.path.isfile(f'sql/!INIT/{table}.sql'):
+                with open(f'sql/!INIT/{table}.sql', 'r') as s:
+                    schema = s.read()
+                    self.cursor.execute(schema)
+                    self.__log(f'Insert: {table}')
+            else:
+                raise Exception(f"Init SQL file was not found: {table}")
 
     def close(self, DISCARD=False):
         # 接続終了処理。DISCARDがTrueになってる場合はコミットせずに切断する
@@ -54,12 +65,12 @@ class KotohiraMemory:
         self.close()
 
     def __log(self, message):
-        # ログ表示用。ただしクラス初期化時にログ表示をするように設定する必要がある
+        # ログ表示用。ただしクラス初期化時にログ表示をするように設定する必要がある or (クラス変数).showLog をTrueに変更すればログ表示可
         if self.showLog:
             print(f"[DATABASE] {message}")
 
     def insert(self, table, *args):
-        # SQLファイルに沿ってデータ挿入（sqlファイル内の insert- から始まるSQLファイル）
+        # SQLファイルに沿ってデータ挿入（指定したテーブルのフォルダ内のinsert.sqlファイル）
         if os.path.isfile(f"sql/{table}/insert.sql"):
             with open(f"sql/{table}/insert.sql") as sqltxt:
                 sql = sqltxt.read()
@@ -69,7 +80,7 @@ class KotohiraMemory:
             raise Exception(f"Insert SQL file was not found: {table}")
 
     def select(self, table, *args):
-        # SQLファイルに沿ってデータ検索（sqlファイル内の select- から始まるSQLファイル）
+        # SQLファイルに沿ってデータ検索（指定したテーブルのフォルダ内のselect.sqlファイル）
         if os.path.isfile(f"sql/{table}/select.sql"):
             with open(f"sql/{table}/select.sql") as sqltxt:
                 sql = sqltxt.read()
@@ -80,7 +91,7 @@ class KotohiraMemory:
             raise Exception(f"Select SQL file was not found: {table}")
 
     def update(self, table, *args):
-        # SQLファイルに沿ってデータ挿入（sqlファイル内の update- から始まるSQLファイル）
+        # SQLファイルに沿ってデータ変更（指定したテーブルのフォルダ内のupdate.sqlファイル）
         if os.path.isfile(f"sql/{table}/update.sql"):
             with open(f"sql/{table}/update.sql") as sqltxt:
                 sql = sqltxt.read()
@@ -90,7 +101,7 @@ class KotohiraMemory:
             raise Exception(f"Update SQL file was not found: {table}")
 
     def drop(self, table, *args):
-        # 指定したテーブルのデータをドロップ（未実装）
+        # SQLファイルに沿ってデータ削除（指定したテーブルのフォルダ内のdrop.sqlファイル）
         if os.path.isfile(f"sql/{table}/drop.sql"):
             with open(f"sql/{table}/drop.sql") as sqltxt:
                 sql = sqltxt.read()

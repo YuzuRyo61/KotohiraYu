@@ -43,3 +43,7 @@ class Yu:
             mastodon.status_post(f'@{acctId}\n😞 末吉ですっ', in_reply_to_id=mentionId)
         if rnd == 4:
             mastodon.status_post(f'@{acctId}\n😥 凶ですっ・・・。', in_reply_to_id=mentionId)
+    
+    @staticmethod
+    def meow_time():
+        mastodon.toot("にゃんにゃん！")

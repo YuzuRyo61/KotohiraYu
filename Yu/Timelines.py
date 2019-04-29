@@ -1,4 +1,5 @@
-from mastodon import Mastodon, StreamListener
+from mastodon import Mastodon, StreamListener, MastodonNetworkError
+from sqlite3 import OperationalError
 import datetime
 from pytz import timezone
 import configparser
@@ -130,9 +131,20 @@ class local_listener(StreamListener):
         else:
             newUser = False
 
+        # 名前
+        nameDic = memory.select('nickname', status['account']['id'])
+        if len(nameDic) == 0:
+            # ニックネームが指定されていない場合は基の名前を使用する
+            if status['account']['display_name'] == None:
+                name = status['account']['acct']
+            else:
+                # Unicodeのエスケープを削除して挿入
+                dpname = repr(status['account']['display_name'])[1:-1]
+                name = re.sub(r"\\u[0-9a-f]{4}", '', dpname)
+
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ユウ|ﾕｳ)', txt)
-        iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう))', txt)
+        iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう|中|ちゅう))', txt)
         passage = re.search(r'(通過|つうか|ツウカ)', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         
@@ -165,7 +177,7 @@ class local_listener(StreamListener):
 
             if doIt:
                 print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(repr(status['account']['display_name'])[1:-1]))
+                mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(name))
                 memory.update('wel_back', dt, status['account']['id'])
 
         # 通過 とか言ったら阻止しちゃうよっ！
@@ -192,8 +204,8 @@ class local_listener(StreamListener):
                 mastodon.toot('阻止っ！！(*`ω´*)')
                 memory.update('passage', dt, status['account']['id'])
         
+        # 新規詐欺見破りっ！
         if sinkiSagi and status['account']['statuses_count'] > 10:
-            # 新規詐欺見破りっ！
             userInfo = memory.select('sin_sagi', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -215,6 +227,7 @@ class local_listener(StreamListener):
                 print('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot('新規詐欺は行けませんっ！！(*`ω´*)')
                 memory.update('sin_sagi', status['account']['id'], dt)
+        
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -226,7 +239,7 @@ class local_listener(StreamListener):
             # 3時間以上更新がなかった場合は挨拶する
             if dateDiff.seconds >= 10800:
                 print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                mastodon.toot("""{0}さん、こんにちはっ！""".format(repr(status['account']['display_name'])[1:-1]))
+                mastodon.toot("""{0}さん、こんにちはっ！""".format(name))
             memory.update('updated_users', dt, status['account']['id'])
 
         # データベース切断
@@ -236,14 +249,18 @@ def local():
     print('Initializing feature: local')
     try:
         mastodon.stream_local(local_listener(), timeout=20)
-    except requests.exceptions.ReadTimeout:
+    except OperationalError:
+        print('＊データベースにアクセスできないようですっ。３０秒後にやり直しますっ！')
+        time.sleep(30)
+        local()
+    except (requests.exceptions.ReadTimeout, MastodonNetworkError):
         print('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         local()
     except:
         KotohiraUtil.PANIC()
-        print('ローカルタイムラインを五秒待って読み込みし直しますねっ！')
-        time.sleep(5)
+        print('ローカルタイムラインを十秒待って読み込みし直しますねっ！')
+        time.sleep(10)
         local()
 
 def home():
@@ -253,12 +270,16 @@ def home():
         res = mastodon.account_verify_credentials()
         print('Fetched account: @{}'.format(res.acct))
         mastodon.stream_user(user_listener(), timeout=20)
-    except requests.exceptions.ReadTimeout:
+    except OperationalError:
+        print('＊データベースにアクセスできないようですっ。３０秒後にやり直しますっ！')
+        time.sleep(30)
+        local()
+    except (requests.exceptions.ReadTimeout, MastodonNetworkError):
         print('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         home()
     except:
         KotohiraUtil.PANIC()
-        print('ホームタイムラインを五秒待って読み込みし直しますねっ！')
-        time.sleep(5)
+        print('ホームタイムラインを十秒待って読み込みし直しますねっ！')
+        time.sleep(10)
         home()

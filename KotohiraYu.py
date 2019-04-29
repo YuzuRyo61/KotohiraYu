@@ -34,6 +34,7 @@ def main():
     features.append( threading.Thread(target=home) )
     # cron系
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(Yu.timeReport,['**:00'])) )
+    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(Yu.meow_time, ['22:22'])) )
 
     try:
         # スレッド開始
@@ -57,7 +58,7 @@ if __name__ == '__main__':
         # 問題なさそうであれば起動
 
         # データベース初期化
-        km = KotohiraMemory(showLog=config['log']['enable'])
+        km = KotohiraMemory(showLog=config['log'].getboolean('enable'))
         del km
 
         main()

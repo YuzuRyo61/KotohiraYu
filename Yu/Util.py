@@ -27,10 +27,12 @@ class KotohiraUtil:
         print("＊ユウちゃんパニックですぅ・・・！\n{}".format(traceback.format_exc()))
         if config['linenotify'].getboolean('enable') == True:
             headers = {"Authorization": "Bearer " + config['linenotify']['token']}
-            payload = {"message": "＊ユウちゃんがパニックになりました。\nパニック時刻: " + nowFormat + "\n詳細はログを確認してくださいっ"}
+            payload = {"message": "\n＊ユウちゃんがパニックになりました。\nパニック時刻: \n" + nowFormat + "\n詳細はログを確認してくださいっ"}
             req = requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
             if req.status_code != 200:
                 print("[FATAL] LINE NOTIFY ACCESS FAILED")
+            else:
+                print("LINET NOTIFY SENT")
 
     @staticmethod
     def h2t(txt):
@@ -38,7 +40,7 @@ class KotohiraUtil:
     
     @staticmethod
     def schedule(func, doTimeList):
-        # 指定した時間帯に実施する関数
+        # 指定した時間帯に実施する関数。設定時間は24時間表記で設定する
         print(f"Setting feature: {func} at {doTimeList}")
         try:
             while True:
