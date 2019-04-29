@@ -60,9 +60,14 @@ class user_listener(StreamListener):
                 memory.update('fav_rate', 4, notification['account']['id'])
             
             elif deleteNick:
-                memory.delete('nickname', notification['account']['id'])
-                print('ニックネーム削除っ！：@{}'.format(notification['account']['acct']))
-                mastodon.status_post('@{}\nわかりましたっ！今度から普通に呼ばせていただきますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                isexistname = memory.select('nickname', notification['account']['id'])
+                if len(isexistname) != 0:
+                    memory.delete('nickname', notification['account']['id'])
+                    print('ニックネーム削除っ！：@{}'.format(notification['account']['acct']))
+                    mastodon.status_post('@{}\nわかりましたっ！今度から普通に呼ばせていただきますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                else:
+                    print('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(notification['account']['acct']))
+                    mastodon.status_post('@{}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
 
             # クローズと共に保存
             del memory
