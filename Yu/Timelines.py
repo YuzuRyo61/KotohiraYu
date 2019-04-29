@@ -239,6 +239,7 @@ class local_listener(StreamListener):
             # 3時間以上更新がなかった場合は挨拶する
             if dateDiff.seconds >= 10800:
                 print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
+                # issue: #4
                 mastodon.toot("""{0}さん、こんにちはっ！""".format(name))
             memory.update('updated_users', dt, status['account']['id'])
 
