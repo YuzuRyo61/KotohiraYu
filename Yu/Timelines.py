@@ -135,7 +135,7 @@ class local_listener(StreamListener):
         nameDic = memory.select('nickname', status['account']['id'])
         if len(nameDic) == 0:
             # ニックネームが指定されていない場合は基の名前を使用する
-            if status['account']['display_name'] == None:
+            if status['account']['display_name'] == '':
                 name = status['account']['acct']
             else:
                 # Unicodeのエスケープを削除して挿入
@@ -264,6 +264,7 @@ class local_listener(StreamListener):
             else:
                 memory.update('nickname', name, status['account']['id'])
             # 変更通知
+            print('ニックネーム変更っ！：@{0} => {1}'.format(status['account']['acct'], name))
             mastodon.status_post('@{0}\nわかりましたっ！今度から\n「{1}」と呼びますねっ！'.format(status['account']['acct'], name), in_reply_to_id=status['id'])
 
         # 最終更新を変更
