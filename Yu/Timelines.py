@@ -143,10 +143,11 @@ class local_listener(StreamListener):
                 name = re.sub(r"\\u[0-9a-f]{4}", '', dpname)
 
         # 正規表現チェック
-        calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ユウ|ﾕｳ)', txt)
+        calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう|中|ちゅう))', txt)
         passage = re.search(r'(通過|つうか|ツウカ)', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
+        nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
         if calledYuChan:
@@ -228,6 +229,30 @@ class local_listener(StreamListener):
                 mastodon.toot('新規詐欺は行けませんっ！！(*`ω´*)')
                 memory.update('sin_sagi', status['account']['id'], dt)
         
+        # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
+        if nullPoint:
+            userInfo = memory.select('null_point', status['account']['id'])
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
+            if len(userInfo) == 0:
+                # データがない場合はデータ挿入してガッ実行
+                memory.insert('null_point', status['account']['id'], dt)
+                doIt = True
+            else:
+                didAt = userInfo[0][2]
+                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
+                dateDiff = now - didAtRaw
+                # 前回の詐欺の「ぬるぽ」etc...から3分以上経過していれば応答する
+                if dateDiff.seconds >= 180:
+                    doIt = True
+                else:
+                    doIt = False
+            
+            if doIt:
+                print('がっ:@{0} < {1}'.format(status['account']['acct'], txt))
+                mastodon.toot('ｶﾞｯ')
+                memory.update('null_point', status['account']['id'], dt)
+
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
