@@ -100,12 +100,12 @@ class KotohiraMemory:
         else:
             raise Exception(f"Update SQL file was not found: {table}")
 
-    def drop(self, table, *args):
-        # SQLファイルに沿ってデータ削除（指定したテーブルのフォルダ内のdrop.sqlファイル）
-        if os.path.isfile(f"sql/{table}/drop.sql"):
-            with open(f"sql/{table}/drop.sql") as sqltxt:
+    def delete(self, table, *args):
+        # SQLファイルに沿ってデータ削除（指定したテーブルのフォルダ内のdelete.sqlファイル）
+        if os.path.isfile(f"sql/{table}/delete.sql"):
+            with open(f"sql/{table}/delete.sql") as sqltxt:
                 sql = sqltxt.read()
                 self.cursor.execute(sql, args)
-                self.__log(f"Drop: {table} => {args}")
+                self.__log(f"Delete: {table} => {args}")
         else:
-            raise Exception(f"Drop SQL file was not found: {table}")
+            raise Exception(f"Delete SQL file was not found: {table}")

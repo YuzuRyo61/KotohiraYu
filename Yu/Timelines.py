@@ -46,6 +46,7 @@ class user_listener(StreamListener):
             # 正規表現とか
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
+            deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
 
             # メンションでフォローリクエストされたとき
             # (作成途中っ)
@@ -53,11 +54,16 @@ class user_listener(StreamListener):
                 pass
             
             # 占いのリクエストがされたとき
-            if fortune:
+            elif fortune:
                 Yu.fortune(notification['status']['id'], notification['account']['acct'])
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
             
+            elif deleteNick:
+                memory.delete('nickname', notification['account']['id'])
+                print('ニックネーム削除っ！：@{}'.format(notification['account']['acct']))
+                mastodon.status_post('@{}\nわかりましたっ！今度から普通に呼ばせていただきますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+
             # クローズと共に保存
             del memory
         
