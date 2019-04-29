@@ -145,7 +145,7 @@ class local_listener(StreamListener):
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう|中|ちゅう))', txt)
-        passage = re.search(r'(通過|つうか|ツウカ)', txt)
+        passage = re.search(r'(通過|つうか|ツウカ)(?!.*(おめ|した))', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
         nick = re.search(r'^(あだ名|ニックネーム)[:：は]\s?', txt)
@@ -250,7 +250,7 @@ class local_listener(StreamListener):
                     doIt = False
             
             if doIt:
-                print('がっ:@{0} < {1}'.format(status['account']['acct'], txt))
+                print('がっ：@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot('ｶﾞｯ')
                 memory.update('null_point', status['account']['id'], dt)
 
