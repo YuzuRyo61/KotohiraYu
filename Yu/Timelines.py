@@ -48,6 +48,7 @@ class user_listener(StreamListener):
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
             deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
+            rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
 
             # メンションでフォローリクエストされたとき
             # (作成途中っ)
@@ -69,6 +70,70 @@ class user_listener(StreamListener):
                 else:
                     print('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(notification['account']['acct']))
                     mastodon.status_post('@{}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+
+            # ユウちゃんとじゃんけんっ！
+            elif rspOtt:
+                # 選択項目チェック
+                ott = re.sub(r'じゃんけん\s?', '', txt, 1)
+                # グー
+                rock = re.search(r'(グー|✊|👊)', ott)
+                # チョキ
+                scissors = re.search(r'(チョキ|✌)', ott)
+                # パー
+                papers = re.search(r'(パー|✋)', ott)
+
+                # 抽選っ！
+                yuOttChoose = random.randint(0, 2)
+
+                # 抽選した数値で絵文字にパースする
+                if yuOttChoose == 0:
+                    yuOttChooseEmoji = "✊"
+                elif yuOttChooseEmoji == 1:
+                    yuOttChooseEmoji = "✌"
+                elif yuOttChooseEmoji == 2:
+                    yuOttChooseEmoji = "✋"
+
+                # 挑戦者が勝ちかどうかの判別変数。勝ちはTrue、負けはFalse、あいこはNoneとする
+                isChallengerWin = None
+                challengerChoose = None
+
+                if rock:
+                    print("じゃんけんっ！：@{0} => ✊ vs {1}".format(notification['account']['acct'], yuOttChoose))
+                    challengerChoose = "✊"
+                    if yuOttChoose == 0:
+                        isChallengerWin = None
+                    elif yuOttChoose == 1:
+                        isChallengerWin = True
+                    elif yuOttChoose == 2:
+                        isChallengerWin = False
+                elif scissors:
+                    print("じゃんけんっ！：@{0} => ✌ vs {1}".format(notification['account']['acct'], yuOttChoose))
+                    challengerChoose = "✌"
+                    if yuOttChoose == 0:
+                        isChallengerWin = False
+                    elif yuOttChoose == 1:
+                        isChallengerWin = None
+                    elif yuOttChoose == 2:
+                        isChallengerWin = True
+                elif papers:
+                    print("じゃんけんっ！：@{0} => ✋ vs {1}".format(notification['account']['acct'], yuOttChoose))
+                    challengerChoose = "✋"
+                    if yuOttChoose == 0:
+                        isChallengerWin = True
+                    elif yuOttChoose == 1:
+                        isChallengerWin = False
+                    elif yuOttChoose == 2:
+                        isChallengerWin = None
+
+                if isChallengerWin == True:
+                    mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n🎉 あなたの勝ちですっ！！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
+                elif isChallengerWin == None:
+                    mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👍 あいこですっ'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
+                elif isChallengerWin == False:
+                    mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👏 ユウちゃんの勝ちですっ！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
+                
+                # 更に４つ加算
+                memory.update('fav_rate', 4, notification['account']['id'])
 
             # クローズと共に保存
             del memory
