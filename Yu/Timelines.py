@@ -163,7 +163,7 @@ class local_listener(StreamListener):
         passage = re.search(r'(通過|つうか|ツウカ)(?!.*(おめ|した))', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
-        nick = re.search(r'^(あだ名|ニックネーム)[:：は]\s?', txt)
+        nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
         if calledYuChan:
@@ -272,7 +272,7 @@ class local_listener(StreamListener):
         # ニックネームの設定
         if nick:
             userInfo = memory.select('nickname', status['account']['id'])
-            name = re.sub(r'^(あだ名|ニックネーム)[:：は]\s?', '', txt, 1)
+            name = re.sub(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
             name = name.replace('\n', '')
             if len(userInfo) == 0:
                 memory.insert('nickname', status['account']['id'], name)
