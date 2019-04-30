@@ -238,7 +238,7 @@ class local_listener(StreamListener):
             
             if doIt:
                 print('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot('新規詐欺は行けませんっ！！(*`ω´*)')
+                mastodon.toot('新規詐欺はいけませんっ！！(*`ω´*)')
                 memory.update('sin_sagi', status['account']['id'], dt)
         
         # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
