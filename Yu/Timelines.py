@@ -98,7 +98,7 @@ class user_listener(StreamListener):
                 challengerChoose = None
 
                 if rock:
-                    print("じゃんけんっ！：@{0} => ✊ vs {1}".format(notification['account']['acct'], yuOttChoose))
+                    print("じゃんけんっ！：@{0} => ✊ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
                     challengerChoose = "✊"
                     if yuOttChoose == 0:
                         isChallengerWin = None
@@ -107,7 +107,7 @@ class user_listener(StreamListener):
                     elif yuOttChoose == 2:
                         isChallengerWin = False
                 elif scissors:
-                    print("じゃんけんっ！：@{0} => ✌ vs {1}".format(notification['account']['acct'], yuOttChoose))
+                    print("じゃんけんっ！：@{0} => ✌ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
                     challengerChoose = "✌"
                     if yuOttChoose == 0:
                         isChallengerWin = False
@@ -116,7 +116,7 @@ class user_listener(StreamListener):
                     elif yuOttChoose == 2:
                         isChallengerWin = True
                 elif papers:
-                    print("じゃんけんっ！：@{0} => ✋ vs {1}".format(notification['account']['acct'], yuOttChoose))
+                    print("じゃんけんっ！：@{0} => ✋ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
                     challengerChoose = "✋"
                     if yuOttChoose == 0:
                         isChallengerWin = True
