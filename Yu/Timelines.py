@@ -146,6 +146,7 @@ class local_listener(StreamListener):
         nameDic = memory.select('nickname', status['account']['id'])
         if len(nameDic) == 0:
             # ニックネームが指定されていない場合は基の名前を使用する
+            # 名前が設定されていない場合はユーザーIDを使用する
             if status['account']['display_name'] == '':
                 name = status['account']['acct']
             else:
