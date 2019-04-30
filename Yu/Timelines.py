@@ -49,6 +49,7 @@ class user_listener(StreamListener):
             fortune = re.search(r'(占|うらな)(って|い)', txt)
             deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
             rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
+            isPing = re.search(r'[pP][iI][nN][gG]', txt)
 
             # メンションでフォローリクエストされたとき
             # (作成途中っ)
@@ -134,6 +135,11 @@ class user_listener(StreamListener):
                 
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
+
+            # 応答チェッカー
+            elif isPing:
+                print('PINGっ！：@{}'.format(notification['account']['acct']))
+                mastodon.status_post('@{}\nPONG!'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
 
             # クローズと共に保存
             del memory
