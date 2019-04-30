@@ -1,6 +1,7 @@
 from mastodon import Mastodon, StreamListener, MastodonNetworkError
 from sqlite3 import OperationalError
 import datetime
+import random
 from pytz import timezone
 import configparser
 import time
@@ -171,6 +172,18 @@ class local_listener(StreamListener):
             mastodon.status_favourite(status['id'])
             # 好感度ちょいアップ
             memory.update('fav_rate', 1, status['account']['id'])
+
+        # 投票型のトゥートだったら投票する（期限切れでないかつ投票してないこと）
+        # issue: #5
+        # Mastodon.pyで未検証みたいなのでしばらく見送り
+        """
+        if status['poll'] != None:
+            if status['poll']['expired'] == False and status['poll']['voted'] == False:
+                # ここで投票する場所を抽選
+                voteOptions = status['poll']['options']
+                voteChoose = random.randint(0, len(voteOptions) - 1)
+                mastodon.poll_vote(status['id'], voteChoose)
+        """
 
         # 帰ったよ〜 とか言ったらトゥート
         if iBack:
