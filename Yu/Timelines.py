@@ -88,9 +88,9 @@ class user_listener(StreamListener):
                 # 抽選した数値で絵文字にパースする
                 if yuOttChoose == 0:
                     yuOttChooseEmoji = "✊"
-                elif yuOttChooseEmoji == 1:
+                elif yuOttChoose == 1:
                     yuOttChooseEmoji = "✌"
-                elif yuOttChooseEmoji == 2:
+                elif yuOttChoose == 2:
                     yuOttChooseEmoji = "✋"
 
                 # 挑戦者が勝ちかどうかの判別変数。勝ちはTrue、負けはFalse、あいこはNoneとする
