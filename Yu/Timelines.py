@@ -65,16 +65,16 @@ class user_listener(StreamListener):
 
             # ニックネームの設定
             elif nick:
-                userInfo = memory.select('nickname', status['account']['id'])
+                userInfo = memory.select('nickname', notification['account']['id'])
                 name = re.sub(r'^@[a-zA-Z0-9_]+(\s|\n)?(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
                 name = name.replace('\n', '')
                 if len(userInfo) == 0:
-                    memory.insert('nickname', status['account']['id'], name)
+                    memory.insert('nickname', notification['account']['id'], name)
                 else:
-                    memory.update('nickname', name, status['account']['id'])
+                    memory.update('nickname', name, notification['account']['id'])
                 # 変更通知
-                print('ニックネーム変更っ！：@{0} => {1}'.format(status['account']['acct'], name))
-                mastodon.status_post('@{0}\nわかりましたっ！今度から\n「{1}」と呼びますねっ！'.format(status['account']['acct'], name), in_reply_to_id=status['id'])
+                print('ニックネーム変更っ！：@{0} => {1}'.format(notification['account']['acct'], name))
+                mastodon.status_post('@{0}\nわかりましたっ！今度から\n「{1}」と呼びますねっ！'.format(notification['account']['acct'], name), in_reply_to_id=notification['status']['id'])
 
             elif deleteNick:
                 isexistname = memory.select('nickname', notification['account']['id'])
