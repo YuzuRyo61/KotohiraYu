@@ -47,6 +47,7 @@ class user_listener(StreamListener):
             # 正規表現とか
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
+            nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
             deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
             rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
             isPing = re.search(r'[pP][iI][nN][gG]', txt)
@@ -61,7 +62,20 @@ class user_listener(StreamListener):
                 Yu.fortune(notification['status']['id'], notification['account']['acct'])
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
-            
+
+            # ニックネームの設定
+            elif nick:
+                userInfo = memory.select('nickname', status['account']['id'])
+                name = re.sub(r'^@[a-zA-Z0-9_]+(\s|\n)?(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
+                name = name.replace('\n', '')
+                if len(userInfo) == 0:
+                    memory.insert('nickname', status['account']['id'], name)
+                else:
+                    memory.update('nickname', name, status['account']['id'])
+                # 変更通知
+                print('ニックネーム変更っ！：@{0} => {1}'.format(status['account']['acct'], name))
+                mastodon.status_post('@{0}\nわかりましたっ！今度から\n「{1}」と呼びますねっ！'.format(status['account']['acct'], name), in_reply_to_id=status['id'])
+
             elif deleteNick:
                 isexistname = memory.select('nickname', notification['account']['id'])
                 if len(isexistname) != 0:
