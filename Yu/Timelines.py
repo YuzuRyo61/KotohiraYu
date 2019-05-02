@@ -270,8 +270,8 @@ class local_listener(StreamListener):
                 mastodon.poll_vote(status['id'], voteChoose)
         """
 
-        # 帰ったよ〜 とか言ったらトゥート
         if iBack:
+            # 帰ったよ〜 とか言ったらトゥート
             # データベースからデータ取得
             userInfo = memory.select('wel_back', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
@@ -295,8 +295,8 @@ class local_listener(StreamListener):
                 mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(name))
                 memory.update('wel_back', dt, status['account']['id'])
 
-        # 通過 とか言ったら阻止しちゃうよっ！
-        if passage:
+        elif passage:
+            # 通過 とか言ったら阻止しちゃうよっ！
             userInfo = memory.select('passage', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -318,9 +318,9 @@ class local_listener(StreamListener):
                 print('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot('阻止っ！！(*`ω´*)')
                 memory.update('passage', dt, status['account']['id'])
-        
-        # 新規詐欺見破りっ！
-        if sinkiSagi and status['account']['statuses_count'] > 10:
+
+        elif sinkiSagi and status['account']['statuses_count'] > 10:
+            # 新規詐欺見破りっ！
             userInfo = memory.select('sin_sagi', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -343,8 +343,8 @@ class local_listener(StreamListener):
                 mastodon.toot('新規詐欺はいけませんっ！！(*`ω´*)')
                 memory.update('sin_sagi', status['account']['id'], dt)
         
-        # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
-        if nullPoint:
+        elif nullPoint:
+            # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
             userInfo = memory.select('null_point', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
@@ -367,8 +367,8 @@ class local_listener(StreamListener):
                 mastodon.toot('ｶﾞｯ')
                 memory.update('null_point', status['account']['id'], dt)
 
-        # ニックネームの設定
-        if nick:
+        elif nick:
+            # ニックネームの設定
             userInfo = memory.select('nickname', status['account']['id'])
             name = re.sub(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
             name = name.replace('\n', '')
