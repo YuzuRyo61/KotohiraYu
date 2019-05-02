@@ -249,6 +249,7 @@ class local_listener(StreamListener):
         passage = re.search(r'(通過|つうか|ツウカ)(?!.*(おめ|した))', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
+        notNicoFri = re.search(r'(にこふれ|ニコフレ|ﾆｺﾌﾚ)', txt)
         nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
@@ -366,6 +367,30 @@ class local_listener(StreamListener):
                 print('がっ：@{0} < {1}'.format(status['account']['acct'], txt))
                 mastodon.toot('ｶﾞｯ')
                 memory.update('null_point', status['account']['id'], dt)
+
+        elif notNicoFri:
+            # ニコフレじゃないよっ！
+            userInfo = memory.select('not_nikofure', status['account']['id'])
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
+            if len(userInfo) == 0:
+                # データがない場合はデータ挿入してニコフレじゃないよっ実行
+                memory.insert('not_nikofure', status['account']['id'], dt)
+                doIt = True
+            else:
+                didAt = userInfo[0][2]
+                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
+                dateDiff = now - didAtRaw
+                # 前回の詐欺の「ニコフレ」etc...から3分以上経過していれば応答する
+                if dateDiff.seconds >= 180:
+                    doIt = True
+                else:
+                    doIt = False
+            
+            if doIt:
+                print('がっ：@{0} < {1}'.format(status['account']['acct'], txt))
+                mastodon.toot('ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)')
+                memory.update('not_nikofure', status['account']['id'], dt)
 
         elif nick:
             # ニックネームの設定
