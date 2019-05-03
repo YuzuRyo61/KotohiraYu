@@ -11,7 +11,7 @@ import requests.exceptions
 # デバッグ用！
 import pprint as pp
 
-from Yu import KotohiraUtil, KotohiraMemory, Yu
+from Yu import KotohiraUtil, KotohiraMemory, YuChan
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
@@ -48,7 +48,7 @@ class user_listener(StreamListener):
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)?', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
             nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
-            deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
+            deleteNick = re.search(r'(ニックネーム|あだ名)を(消して|削除|けして|さくじょ)', txt)
             rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
             isPing = re.search(r'[pP][iI][nN][gG]', txt)
 
@@ -76,94 +76,21 @@ class user_listener(StreamListener):
             
             # 占いのリクエストがされたとき
             elif fortune:
-                Yu.fortune(notification['status']['id'], notification['account']['acct'])
+                YuChan.fortune(notification['status']['id'], notification['account']['acct'])
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
 
+            # ニックネームの削除
+            elif deleteNick:
+                YuChan.del_nickname(notification['status']['id'], notification['account']['id'], notification['account']['acct'], memory)
+
             # ニックネームの設定
             elif nick:
-                userInfo = memory.select('nickname', notification['account']['id'])
-                name = re.sub(r'^@[a-zA-Z0-9_]+(\s|\n)?(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
-                name = name.replace('\n', '')
-                if len(userInfo) == 0:
-                    memory.insert('nickname', notification['account']['id'], name)
-                else:
-                    memory.update('nickname', name, notification['account']['id'])
-                # 変更通知
-                print('ニックネーム変更っ！：@{0} => {1}'.format(notification['account']['acct'], name))
-                mastodon.status_post('@{0}\nわかりましたっ！今度から\n「{1}」と呼びますねっ！'.format(notification['account']['acct'], name), in_reply_to_id=notification['status']['id'])
-
-            elif deleteNick:
-                isexistname = memory.select('nickname', notification['account']['id'])
-                if len(isexistname) != 0:
-                    memory.delete('nickname', notification['account']['id'])
-                    print('ニックネーム削除っ！：@{}'.format(notification['account']['acct']))
-                    mastodon.status_post('@{}\nわかりましたっ！今度から普通に呼ばせていただきますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
-                else:
-                    print('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(notification['account']['acct']))
-                    mastodon.status_post('@{}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                YuChan.set_nickname(txt, notification['status']['id'], notification['account']['id'], notification['account']['acct'], memory)
 
             # ユウちゃんとじゃんけんっ！
             elif rspOtt:
-                # 選択項目チェック
-                ott = re.sub(r'じゃんけん\s?', '', txt, 1)
-                # グー
-                rock = re.search(r'(グー|✊|👊)', ott)
-                # チョキ
-                scissors = re.search(r'(チョキ|✌)', ott)
-                # パー
-                papers = re.search(r'(パー|✋)', ott)
-
-                # 抽選っ！
-                yuOttChoose = random.randint(0, 2)
-
-                # 抽選した数値で絵文字にパースする
-                if yuOttChoose == 0:
-                    yuOttChooseEmoji = "✊"
-                elif yuOttChoose == 1:
-                    yuOttChooseEmoji = "✌"
-                elif yuOttChoose == 2:
-                    yuOttChooseEmoji = "✋"
-
-                # 挑戦者が勝ちかどうかの判別変数。勝ちはTrue、負けはFalse、あいこはNoneとする
-                isChallengerWin = None
-                challengerChoose = None
-
-                if rock:
-                    print("じゃんけんっ！：@{0} => ✊ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
-                    challengerChoose = "✊"
-                    if yuOttChoose == 0:
-                        isChallengerWin = None
-                    elif yuOttChoose == 1:
-                        isChallengerWin = True
-                    elif yuOttChoose == 2:
-                        isChallengerWin = False
-                elif scissors:
-                    print("じゃんけんっ！：@{0} => ✌ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
-                    challengerChoose = "✌"
-                    if yuOttChoose == 0:
-                        isChallengerWin = False
-                    elif yuOttChoose == 1:
-                        isChallengerWin = None
-                    elif yuOttChoose == 2:
-                        isChallengerWin = True
-                elif papers:
-                    print("じゃんけんっ！：@{0} => ✋ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
-                    challengerChoose = "✋"
-                    if yuOttChoose == 0:
-                        isChallengerWin = True
-                    elif yuOttChoose == 1:
-                        isChallengerWin = False
-                    elif yuOttChoose == 2:
-                        isChallengerWin = None
-
-                if isChallengerWin == True:
-                    mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n🎉 あなたの勝ちですっ！！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
-                elif isChallengerWin == None:
-                    mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👍 あいこですっ'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
-                elif isChallengerWin == False:
-                    mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👏 ユウちゃんの勝ちですっ！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
-                
+                YuChan.rsp(txt, notification)                
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
 
@@ -289,140 +216,33 @@ class local_listener(StreamListener):
         """
 
         if iBack:
-            # 帰ったよ〜 とか言ったらトゥート
-            # データベースからデータ取得
-            if Yu.msg_hook('wel_back', 600, f"{name}さん、おかえりなさいませっ！", status, memory):
+            # おかえりとか言ったら実行
+            if YuChan.msg_hook('wel_back', 600, f"{name}さん、おかえりなさいませっ！", status, memory):
                 print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-
-            """userInfo = memory.select('wel_back', status['account']['id'])
-            now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            if len(userInfo) == 0:
-                # データがない場合はデータ挿入しておかえり実行
-                memory.insert('wel_back', status['account']['id'], dt)
-                doIt = True
-            else:
-                didWBAt = userInfo[0][2]
-                didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S%z')
-                dateDiff = now - didWBAtRaw
-                # 前回の「帰ったよ」etc...から10分以上経過していれば応答する
-                if dateDiff.seconds >= 600:
-                    doIt = True
-                else:
-                    doIt = False
-
-            if doIt:
-                mastodon.toot("{0}さん、おかえりなさいませっ！".format(name))
-                memory.update('wel_back', dt, status['account']['id'])"""
 
         elif passage:
             # 通過 とか言ったら阻止しちゃうよっ！
-            userInfo = memory.select('passage', status['account']['id'])
-            now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            if len(userInfo) == 0:
-                # データがない場合はデータ挿入して阻止実行
-                memory.insert('passage', status['account']['id'], dt)
-                doIt = True
-            else:
-                didAt = userInfo[0][2]
-                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
-                dateDiff = now - didAtRaw
-                # 前回の「通過」etc...から5分以上経過していれば応答する
-                if dateDiff.seconds >= 300:
-                    doIt = True
-                else:
-                    doIt = False
-            
-            if doIt:
+            if YuChan.msg_hook('passage', 300, "阻止っ！！(*`ω´*)", status, memory):
                 print('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot('阻止っ！！(*`ω´*)')
-                memory.update('passage', dt, status['account']['id'])
 
         elif sinkiSagi and status['account']['statuses_count'] > 10:
-            # 新規詐欺見破りっ！
-            userInfo = memory.select('sin_sagi', status['account']['id'])
-            now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            if len(userInfo) == 0:
-                # データがない場合はデータ挿入して新規詐欺見破り実行
-                memory.insert('sin_sagi', status['account']['id'], dt)
-                doIt = True
-            else:
-                didAt = userInfo[0][2]
-                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
-                dateDiff = now - didAtRaw
-                # 前回の詐欺の「新規だよ」etc...から5分以上経過していれば応答する
-                if dateDiff.seconds >= 300:
-                    doIt = True
-                else:
-                    doIt = False
-            
-            if doIt:
+            # 新規詐欺見破りっ！            
+            if YuChan.msg_hook('sin_sagi', 300, "新規詐欺はいけませんっ！！(*`ω´*)", status, memory):
                 print('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot('新規詐欺はいけませんっ！！(*`ω´*)')
-                memory.update('sin_sagi', status['account']['id'], dt)
         
         elif nullPoint:
             # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
-            userInfo = memory.select('null_point', status['account']['id'])
-            now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            if len(userInfo) == 0:
-                # データがない場合はデータ挿入してガッ実行
-                memory.insert('null_point', status['account']['id'], dt)
-                doIt = True
-            else:
-                didAt = userInfo[0][2]
-                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
-                dateDiff = now - didAtRaw
-                # 前回の詐欺の「ぬるぽ」etc...から3分以上経過していれば応答する
-                if dateDiff.seconds >= 180:
-                    doIt = True
-                else:
-                    doIt = False
-            
-            if doIt:
+            if YuChan.msg_hook('null_point', 180, "ｶﾞｯ", status, memory):
                 print('がっ：@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot('ｶﾞｯ')
-                memory.update('null_point', status['account']['id'], dt)
 
         elif notNicoFri:
             # ニコフレじゃないよっ！
-            userInfo = memory.select('not_nikofure', status['account']['id'])
-            now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-            if len(userInfo) == 0:
-                # データがない場合はデータ挿入してニコフレじゃないよっ実行
-                memory.insert('not_nikofure', status['account']['id'], dt)
-                doIt = True
-            else:
-                didAt = userInfo[0][2]
-                didAtRaw = datetime.datetime.strptime(didAt, '%Y-%m-%d %H:%M:%S%z')
-                dateDiff = now - didAtRaw
-                # 前回の詐欺の「ニコフレ」etc...から3分以上経過していれば応答する
-                if dateDiff.seconds >= 180:
-                    doIt = True
-                else:
-                    doIt = False
-            
-            if doIt:
-                print('がっ：@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot('ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)')
-                memory.update('not_nikofure', status['account']['id'], dt)
+            if YuChan.msg_hook('not_nikofure', 300, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)", status, memory):
+                print('ニコフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
         elif nick:
             # ニックネームの設定
-            userInfo = memory.select('nickname', status['account']['id'])
-            name = re.sub(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
-            name = name.replace('\n', '')
-            if len(userInfo) == 0:
-                memory.insert('nickname', status['account']['id'], name)
-            else:
-                memory.update('nickname', name, status['account']['id'])
-            # 変更通知
-            print('ニックネーム変更っ！：@{0} => {1}'.format(status['account']['acct'], name))
-            mastodon.status_post('@{0}\nわかりましたっ！今度から\n「{1}」と呼びますねっ！'.format(status['account']['acct'], name), in_reply_to_id=status['id'])
+            YuChan.set_nickname(txt, status['id'], status['account']['id'], status['account']['acct'], memory)
 
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))

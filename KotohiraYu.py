@@ -16,7 +16,7 @@ import configparser
 
 from mastodon import Mastodon
 
-from Yu import Yu, KotohiraUtil, KotohiraMemory, local, home
+from Yu import YuChan, KotohiraUtil, KotohiraMemory, local, home
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
@@ -33,8 +33,8 @@ def main():
     features.append( threading.Thread(target=local) )
     features.append( threading.Thread(target=home) )
     # cron系
-    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(Yu.timeReport,['**:00'])) )
-    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(Yu.meow_time, ['22:22'])) )
+    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.timeReport,['**:00'])) )
+    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.meow_time, ['22:22'])) )
 
     try:
         # スレッド開始
