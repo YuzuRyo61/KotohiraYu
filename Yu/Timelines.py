@@ -45,7 +45,7 @@ class user_listener(StreamListener):
             memory.update('fav_rate', 1, notification['account']['id'])
 
             # 正規表現とか
-            followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)', txt)
+            followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)?', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
             nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
             deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
@@ -55,7 +55,24 @@ class user_listener(StreamListener):
             # メンションでフォローリクエストされたとき
             # (作成途中っ)
             if followReq:
-                pass
+                reqRela = mastodon.account_relationships(notification['account']['id'])[0]
+                # フォローしていないこと
+                if reqRela['following'] == False:
+                    if reqRela['followed_by'] == True: # フォローされていること
+                        reqMem = memory.select('fav_rate', notification['account']['id'])
+                        if reqMem[2] >= 200: # 200以上だったら合格
+                            print('フォローっ！：@{}'.format(notification['account']['acct']))
+                            mastodon.account_follow(notification['account']['id'])
+                            mastodon.status_post('@{}\nフォローしましたっ！これからもよろしくねっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                        else: # 不合格の場合はレスポンスして終了
+                            print('もうちょっと仲良くなってからっ！：@{}'.format(notification['account']['acct']))
+                            mastodon.status_post('@{}\nもうちょっと仲良くなってからですっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                    else:
+                        print('先にフォローしてっ！:@{}'.format(notification['account']['acct']))
+                        mastodon.status_post('@{}\nユウちゃんをフォローしてくれたら考えますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                else: # フォローしている場合は省く
+                    print('フォロー済みっ！：@{}'.format(notification['account']['acct']))
+                    mastodon.status_post('@{}\nもうフォローしてますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
             
             # 占いのリクエストがされたとき
             elif fortune:
