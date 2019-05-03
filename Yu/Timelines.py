@@ -291,7 +291,10 @@ class local_listener(StreamListener):
         if iBack:
             # 帰ったよ〜 とか言ったらトゥート
             # データベースからデータ取得
-            userInfo = memory.select('wel_back', status['account']['id'])
+            if Yu.msg_hook('wel_back', 600, f"{name}さん、おかえりなさいませっ！", status, memory):
+                print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+
+            """userInfo = memory.select('wel_back', status['account']['id'])
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
             dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
             if len(userInfo) == 0:
@@ -309,9 +312,8 @@ class local_listener(StreamListener):
                     doIt = False
 
             if doIt:
-                print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.toot("""{0}さん、おかえりなさいませっ！""".format(name))
-                memory.update('wel_back', dt, status['account']['id'])
+                mastodon.toot("{0}さん、おかえりなさいませっ！".format(name))
+                memory.update('wel_back', dt, status['account']['id'])"""
 
         elif passage:
             # 通過 とか言ったら阻止しちゃうよっ！

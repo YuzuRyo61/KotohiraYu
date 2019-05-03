@@ -6,6 +6,8 @@ import random
 from pytz import timezone
 from mastodon import Mastodon
 
+from . import KotohiraMemory
+
 config = configparser.ConfigParser()
 config.read('config/config.ini')
 
@@ -47,3 +49,30 @@ class Yu:
     @staticmethod
     def meow_time():
         mastodon.toot("にゃんにゃん！")
+
+    @staticmethod
+    def msg_hook(tableName, coolDown, sendFormat, status, ktMemory):
+        # タイムラインで正規表現にかかった場合に実行
+        # status(生の情報)とKotohiraMemoryクラス情報を受け流す必要がある
+        userInfo = ktMemory.select(tableName, status['account']['id'])
+        now = datetime.datetime.now(timezone('Asia/Tokyo'))
+        dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
+        if len(userInfo) == 0:
+            # データがない場合はデータ挿入して実行
+            ktMemory.insert(tableName, status['account']['id'], dt)
+            doIt = True
+        else:
+            didWBAt = userInfo[0][2]
+            didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S%z')
+            dateDiff = now - didWBAtRaw
+            # 前回の実行から指定秒数までクールダウンしたかを確認して実行するか決める
+            if dateDiff.seconds >= coolDown:
+                doIt = True
+            else:
+                doIt = False
+
+        if doIt:
+            mastodon.toot(status)
+            ktMemory.update(tableName, dt, status['account']['id'])
+        
+        return doIt
