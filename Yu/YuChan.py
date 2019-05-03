@@ -152,15 +152,35 @@ class YuChan:
         else:
             didWBAt = userInfo[0][2]
             didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S%z')
-            dateDiff = now - didWBAtRaw
+            dateDiff = now >= (didWBAtRaw + datetime.timedelta(seconds=coolDown))
+
             # 前回の実行から指定秒数までクールダウンしたかを確認して実行するか決める
-            if dateDiff.seconds >= coolDown:
+            if dateDiff == True:
                 doIt = True
             else:
                 doIt = False
 
-        if doIt:
+        globalDate = ktMemory.select('latest_ran', tableName)
+        # 現在時刻から1分先がグローバルクールダウンタイム
+        globalDeltaRaw = now + datetime.timedelta(minutes=1)
+        globalDelta = globalDeltaRaw.strftime("%Y-%m-%d %H:%M:%S%z")
+        if len(globalDate) == 0:
+            # テーブル名が見つからなかった場合は挿入して実行
+            ktMemory.insert('latest_ran', tableName, globalDelta)
+            globalCoolDowned = True
+        else:
+            # 差異を検証する
+            globalCooldownRaw = datetime.datetime.strptime(globalDate[0][2], "%Y-%m-%d %H:%M:%S%z")
+            globalCooldownDiff = now >= globalCooldownRaw
+            if globalCooldownDiff: # 60秒以上であればグローバルクールダウン済み
+                globalCoolDowned = True
+            else:
+                globalCoolDowned = False
+
+        # グローバルクールダウンしたを確認する
+        if doIt and globalCoolDowned == True:
             mastodon.toot(sendFormat)
             ktMemory.update(tableName, dt, status['account']['id'])
+            ktMemory.update('latest_ran', globalDelta, tableName)
         
         return doIt
