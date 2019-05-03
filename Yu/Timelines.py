@@ -59,7 +59,7 @@ class user_listener(StreamListener):
                 # フォローしていないこと
                 if reqRela['following'] == False:
                     if reqRela['followed_by'] == True: # フォローされていること
-                        reqMem = memory.select('fav_rate', notification['account']['id'])
+                        reqMem = memory.select('fav_rate', notification['account']['id'])[0]
                         if reqMem[2] >= 200: # 200以上だったら合格
                             print('フォローっ！：@{}'.format(notification['account']['acct']))
                             mastodon.account_follow(notification['account']['id'])
