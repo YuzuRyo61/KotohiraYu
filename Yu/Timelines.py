@@ -63,41 +63,41 @@ class user_listener(StreamListener):
                         if int(reqMem[2]) >= 200: # 200以上だったら合格
                             print('フォローっ！：@{}'.format(notification['account']['acct']))
                             mastodon.account_follow(notification['account']['id'])
-                            mastodon.status_post('@{}\nフォローしましたっ！これからもよろしくねっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                            mastodon.status_post('@{}\nフォローしましたっ！これからもよろしくねっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
                         else: # 不合格の場合はレスポンスして終了
                             print('もうちょっと仲良くなってからっ！：@{}'.format(notification['account']['acct']))
-                            mastodon.status_post('@{}\nもうちょっと仲良くなってからですっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                            mastodon.status_post('@{}\nもうちょっと仲良くなってからですっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
                     else:
                         print('先にフォローしてっ！:@{}'.format(notification['account']['acct']))
-                        mastodon.status_post('@{}\nユウちゃんをフォローしてくれたら考えますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                        mastodon.status_post('@{}\nユウちゃんをフォローしてくれたら考えますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
                 else: # フォローしている場合は省く
                     print('フォロー済みっ！：@{}'.format(notification['account']['acct']))
-                    mastodon.status_post('@{}\nもうフォローしてますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                    mastodon.status_post('@{}\nもうフォローしてますっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
             
             # 占いのリクエストがされたとき
             elif fortune:
-                YuChan.fortune(notification['status']['id'], notification['account']['acct'])
+                YuChan.fortune(notification['status']['id'], notification['account']['acct'], notification['status']['visibility'])
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
 
             # ニックネームの削除
             elif deleteNick:
-                YuChan.del_nickname(notification['status']['id'], notification['account']['id'], notification['account']['acct'], memory)
+                YuChan.del_nickname(notification['status']['id'], notification['account']['id'], notification['account']['acct'], notification['status']['visibility'], memory)
 
             # ニックネームの設定
             elif nick:
-                YuChan.set_nickname(txt, notification['status']['id'], notification['account']['id'], notification['account']['acct'], memory)
+                YuChan.set_nickname(txt, notification['status']['id'], notification['account']['id'], notification['account']['acct'], notification['status']['visibility'], memory)
 
             # ユウちゃんとじゃんけんっ！
             elif rspOtt:
-                YuChan.rsp(txt, notification)                
+                YuChan.rsp(txt, notification)
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
 
             # 応答チェッカー
             elif isPing:
                 print('PINGっ！：@{}'.format(notification['account']['acct']))
-                mastodon.status_post('@{}\nPONG!'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'])
+                mastodon.status_post('@{}\nPONG!'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
 
             # クローズと共に保存
             del memory
@@ -242,7 +242,7 @@ class local_listener(StreamListener):
 
         elif nick:
             # ニックネームの設定
-            YuChan.set_nickname(txt, status['id'], status['account']['id'], status['account']['acct'], memory)
+            YuChan.set_nickname(txt, status['id'], status['account']['id'], status['account']['acct'], status['visibility'], memory)
 
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))

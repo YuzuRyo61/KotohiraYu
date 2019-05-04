@@ -24,29 +24,29 @@ class YuChan:
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         nowH = now.strftime("%H")
         if nowH == "12":
-            mastodon.toot(f"琴平ユウちゃんが正午をお知らせしますっ！")
+            mastodon.toot("琴平ユウちゃんが正午をお知らせしますっ！")
         elif nowH == "23":
-            mastodon.toot(f"琴平ユウちゃんがテレホタイムをお知らせしますっ！")
+            mastodon.toot("琴平ユウちゃんがテレホタイムをお知らせしますっ！")
         elif nowH == "00" or nowH == "0":
-            mastodon.toot(f"琴平ユウちゃんが日付が変わったことをお知らせしますっ！")
+            mastodon.toot("琴平ユウちゃんが日付が変わったことをお知らせしますっ！")
         else:
             mastodon.toot(f"琴平ユウちゃんが{nowH}時をお知らせしますっ！")
 
     @staticmethod
-    def fortune(mentionId, acctId):
+    def fortune(mentionId, acctId, visibility):
         # 乱数作成
         rnd = random.randrange(5)
         print(f"占いっ！：@{acctId} => {rnd}")
         if rnd == 0:
-            mastodon.status_post(f'@{acctId}\n🎉 大吉ですっ！', in_reply_to_id=mentionId)
+            mastodon.status_post(f'@{acctId}\n🎉 大吉ですっ！', in_reply_to_id=mentionId, visibility=visibility)
         if rnd == 1:
-            mastodon.status_post(f'@{acctId}\n👏 吉ですっ！', in_reply_to_id=mentionId)
+            mastodon.status_post(f'@{acctId}\n👏 吉ですっ！', in_reply_to_id=mentionId, visibility=visibility)
         if rnd == 2:
-            mastodon.status_post(f'@{acctId}\n👍 中吉ですっ！', in_reply_to_id=mentionId)
+            mastodon.status_post(f'@{acctId}\n👍 中吉ですっ！', in_reply_to_id=mentionId, visibility=visibility)
         if rnd == 3:
-            mastodon.status_post(f'@{acctId}\n😞 末吉ですっ', in_reply_to_id=mentionId)
+            mastodon.status_post(f'@{acctId}\n😞 末吉ですっ', in_reply_to_id=mentionId, visibility=visibility)
         if rnd == 4:
-            mastodon.status_post(f'@{acctId}\n😥 凶ですっ・・・。', in_reply_to_id=mentionId)
+            mastodon.status_post(f'@{acctId}\n😥 凶ですっ・・・。', in_reply_to_id=mentionId, visibility=visibility)
     
     @staticmethod
     def meow_time():
@@ -108,14 +108,14 @@ class YuChan:
                 isChallengerWin = None
 
         if isChallengerWin == True:
-            mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n🎉 あなたの勝ちですっ！！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
+            mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n🎉 あなたの勝ちですっ！！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
         elif isChallengerWin == None:
-            mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👍 あいこですっ'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
+            mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👍 あいこですっ'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
         elif isChallengerWin == False:
-            mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👏 ユウちゃんの勝ちですっ！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'])
+            mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👏 ユウちゃんの勝ちですっ！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
 
     @staticmethod
-    def set_nickname(txt, reply_id, ID_Inst, acct, ktMemory):
+    def set_nickname(txt, reply_id, ID_Inst, acct, visibility, ktMemory):
         # txtはHTMLタグ除去を施したもの、reply_idにリプライのIDをつける
         userInfo = ktMemory.select('nickname', ID_Inst)
         name = re.sub(r'^(@[a-zA-Z0-9_]+(\s|\n)?)?(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
@@ -126,18 +126,18 @@ class YuChan:
             ktMemory.update('nickname', name, ID_Inst)
         # 変更通知
         print('ニックネーム変更っ！：@{0} => {1}'.format(acct, name))
-        mastodon.status_post(f'@{acct}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=reply_id)
+        mastodon.status_post(f'@{acct}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=reply_id, visibility=visibility)
     
     @staticmethod
-    def del_nickname(reply_id, ID_Inst, acct, ktMemory):
+    def del_nickname(reply_id, ID_Inst, acct, visibility, ktMemory):
         isexistname = ktMemory.select('nickname', ID_Inst)
         if len(isexistname) != 0:
             ktMemory.delete('nickname', ID_Inst)
             print('ニックネーム削除っ！：@{}'.format(acct))
-            mastodon.status_post(f'@{acct}\nわかりましたっ！今度から普通に呼ばせていただきますっ！', in_reply_to_id=reply_id)
+            mastodon.status_post(f'@{acct}\nわかりましたっ！今度から普通に呼ばせていただきますっ！', in_reply_to_id=reply_id, visibility=visibility)
         else:
             print('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(acct))
-            mastodon.status_post(f'@{acct}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。', in_reply_to_id=reply_id)
+            mastodon.status_post(f'@{acct}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
 
     @staticmethod
     def msg_hook(tableName, coolDown, sendFormat, status, ktMemory):
