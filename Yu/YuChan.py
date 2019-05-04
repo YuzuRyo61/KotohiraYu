@@ -8,6 +8,7 @@ from pytz import timezone
 from mastodon import Mastodon
 
 from Yu.Memory import KotohiraMemory
+from Yu.Timer import Timer
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
