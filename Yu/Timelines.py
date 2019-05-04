@@ -194,6 +194,7 @@ class local_listener(StreamListener):
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
         notNicoFri = re.search(r'(にこふれ|ニコフレ|ﾆｺﾌﾚ)', txt)
+        sad = re.search(r'((泣|な)いてる|しくしく|シクシク|ｼｸｼｸ|ぐすん|グスン|ｸﾞｽﾝ|ぶわっ|ブワッ|ﾌﾞﾜｯ)', txt)
         nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
@@ -239,6 +240,11 @@ class local_listener(StreamListener):
             # ニコフレじゃないよっ！
             if YuChan.msg_hook('not_nikofure', 300, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)", status, memory):
                 print('ニコフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+
+        elif sad:
+            # よしよしっ
+            if YuChan.msg_hook('yoshiyoshi', 180, "(´･ω･`)ヾ(･ω･｡)ﾖｼﾖｼ", status, memory):
+                print('よしよしっ：@{0} < {1}'.format(status['account']['acct'], txt))
 
         elif nick:
             # ニックネームの設定
