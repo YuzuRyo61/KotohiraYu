@@ -61,3 +61,7 @@ class KotohiraUtil:
             print('五秒待って読み込みし直しますねっ！')
             sleep(5)
             KotohiraUtil.schedule(func, doTimeList)
+    
+    @staticmethod
+    def parse_userEmoji(acct):
+        return f":@{acct}:"
