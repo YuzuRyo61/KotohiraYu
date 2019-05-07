@@ -53,7 +53,6 @@ class user_listener(StreamListener):
             isPing = re.search(r'[pP][iI][nN][gG]', txt)
 
             # メンションでフォローリクエストされたとき
-            # (作成途中っ)
             if followReq:
                 reqRela = mastodon.account_relationships(notification['account']['id'])[0]
                 # フォローしていないこと
@@ -228,7 +227,7 @@ class local_listener(StreamListener):
 
         elif sinkiSagi and status['account']['statuses_count'] > 10:
             # 新規詐欺見破りっ！            
-            if YuChan.msg_hook('sin_sagi', 300, "新規詐欺はいけませんっ！！(*`ω´*)", status, memory):
+            if YuChan.msg_hook('sin_sagi', 10800, "新規詐欺はいけませんっ！！(*`ω´*)", status, memory):
                 print('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
         
         elif nullPoint:
@@ -238,7 +237,7 @@ class local_listener(StreamListener):
 
         elif notNicoFri:
             # ニコフレじゃないよっ！
-            if YuChan.msg_hook('not_nikofure', 300, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)", status, memory):
+            if YuChan.msg_hook('not_nikofure', 10800, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)", status, memory):
                 print('ニコフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
         elif sad:
@@ -257,9 +256,10 @@ class local_listener(StreamListener):
         if not newUser:
             updated_at = memory.select('updated_users', status['account']['id'])[0]
             updatedAtRaw = datetime.datetime.strptime(updated_at[2], '%Y-%m-%d %H:%M:%S%z')
-            dateDiff = now - updatedAtRaw
+            greetableTime = updatedAtRaw + datetime.timedelta(hours=3)
+            shouldGreet = now >= greetableTime
             # 3時間以上更新がなかった場合は挨拶する
-            if dateDiff.seconds >= 10800:
+            if shouldGreet:
                 if now.hour < 12 and now.hour >= 5:
                     print("おはようございますっ！：@{0} < {1}".format(status['account']['acct'], txt))
                     mastodon.toot("""{0}さん、おはようございますっ！🌄""".format(name))
@@ -270,6 +270,7 @@ class local_listener(StreamListener):
                     print("こんばんはっ！：@{0} < {1}".format(status['account']['acct'], txt))
                     mastodon.toot("""{0}さん、こんばんはっ！🌙""".format(name))
 
+            # 最終更新を変更
             memory.update('updated_users', dt, status['account']['id'])
 
         # データベース切断

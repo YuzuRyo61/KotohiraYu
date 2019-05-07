@@ -9,6 +9,9 @@ YuzuRyo61 Presents
 License: MIT License (See LICENSE)
 """
 
+# 意外にもみんなからソースコード分かりやすいって高評価受けてて驚きです。
+# by 神様。
+
 import threading
 import sys
 import os

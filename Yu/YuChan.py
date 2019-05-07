@@ -178,7 +178,7 @@ class YuChan:
             else:
                 globalCoolDowned = False
 
-        # グローバルクールダウンしたを確認する
+        # 実行可能な状態であるかつ、グローバルクールダウンが終わったかを確認し、実行
         if doIt and globalCoolDowned == True:
             mastodon.toot(sendFormat)
             ktMemory.update(tableName, dt, status['account']['id'])
