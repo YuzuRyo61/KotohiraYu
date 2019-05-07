@@ -4,6 +4,7 @@ import datetime
 import configparser
 import random
 import re
+import json
 from pytz import timezone
 from mastodon import Mastodon
 
@@ -185,3 +186,63 @@ class YuChan:
             ktMemory.update('latest_ran', globalDelta, tableName)
         
         return doIt
+
+    @staticmethod
+    def write_memo(fromUser, body, ktMemory):
+        # メモを書き込むっ！30文字以内であることが条件っ！
+        if len(body) > 30:
+            # 30文字オーバーの場合は弾く
+            return False
+        now = datetime.datetime.now(timezone('Asia/Tokyo'))
+        dt = now.strftime("%Y_%m%d_%H%z")
+        memo = ktMemory.select('user_memos', dt)
+        if len(memo) == 0:
+            # データがない場合は新しく挿入
+            memRaw = [{'from': fromUser, 'body': body}]
+            memJson = json.dumps(memRaw)
+            ktMemory.insert('user_memos', dt, memJson)
+        else:
+            # データがある場合は読み込んで更新
+            memJson = memo[0][2]
+            memRaw = json.loads(memJson)
+            memRaw.append({'from': fromUser, 'body': body})
+            memNewJson = json.dumps(memRaw)
+            ktMemory.update('user_memos', memNewJson, dt)
+
+    @staticmethod
+    def toot_memo():
+        # その時間帯に集められたメモを集約して投稿っ！
+        memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+        now = datetime.datetime.now(timezone('Asia/Tokyo'))
+        dt = now.strftime("%Y_%m%d_%H%z")
+        memo = memory.select('user_memos', dt)
+        # データがない場合は何もしない
+        if len(memo) != 0:
+            memRaw = json.loads(memo[0][2])
+            # for文に入るための変数初期化
+            tootList = []
+            tootSep = 0
+            tootBody = ['']
+            # 一度トゥート文型化してリストに挿入
+            for i in memRaw:
+                tootList.append( ":@{0}: {1}\n".format(i['from'], i['body']))
+            # トゥート可能な文面にする
+            for i in tootList:
+                # 内容の文字数が450を超える場合はセパレート
+                if (len(tootBody[tootSep])) > 450:
+                    tootBody.append('')
+                    tootSep += 1
+                tootBody[tootSep] += i
+            # まとめる
+            sepCount = 0
+            for t in tootBody:
+                tootCwTemplate = "{0}時のメモのまとめですっ！({1}/{2})".format(now.hour, sepCount + 1, tootSep + 1)
+                mastodon.status_post(t, spoiler_text=tootCwTemplate)
+        
+        # クリーンアップ
+        del memory
+
+    # 実装中
+    @staticmethod
+    def update_userdict(targetUser, fromUser, body, replyTootID, ktMemory):
+        pass

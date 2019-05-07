@@ -195,6 +195,8 @@ class local_listener(StreamListener):
         notNicoFri = re.search(r'(にこふれ|ニコフレ|ﾆｺﾌﾚ)', txt)
         sad = re.search(r'((泣|な)いてる|しくしく|シクシク|ｼｸｼｸ|ぐすん|グスン|ｸﾞｽﾝ|ぶわっ|ブワッ|ﾌﾞﾜｯ)', txt)
         nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
+        writeDict = re.search(r'^:@[a-zA-Z0-9_]+:(さん|くん|君|殿|どの|ちゃん)?はこんな人[:：]', txt)
+        writeMemo = re.search(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：]', txt)
         
         # ユウちゃん etc... とか呼ばれたらふぁぼる
         if calledYuChan:
@@ -248,6 +250,21 @@ class local_listener(StreamListener):
         elif nick:
             # ニックネームの設定
             YuChan.set_nickname(txt, status['id'], status['account']['id'], status['account']['acct'], status['visibility'], memory)
+
+        elif writeDict:
+            # 辞書登録っ
+            # (実装中)
+            # YuChan.update_userdict()
+            pass
+        
+        elif writeMemo:
+            # メモの書き込みっ
+            memoBody = re.sub(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：]', '', txt, 1)
+            mastodon.status_reblog(status['id'])
+            print('メモっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+            res = YuChan.write_memo(status['account']['acct'], memoBody, memory)
+            if res == False:
+                mastodon.status_post('@{}\n長いのでまとめられそうにありませんっ・・・'.format(status['account']['acct']), in_reply_to_id=status['id'])
 
         # 最終更新を変更
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
