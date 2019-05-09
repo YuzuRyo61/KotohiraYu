@@ -41,7 +41,7 @@ class KotohiraUtil:
     @staticmethod
     def schedule(func, doTimeList):
         # 指定した時間帯に実施する関数。設定時間は24時間表記で設定する
-        print(f"Setting feature: {func} at {doTimeList}")
+        print(f"Setting feature: {func.__name__} at {doTimeList}")
         try:
             while True:
                 now = datetime.datetime.now(timezone('Asia/Tokyo'))
