@@ -220,7 +220,7 @@ class local_listener(StreamListener):
 
         if iBack:
             # おかえりとか言ったら実行
-            if YuChan.msg_hook('wel_back', 600, f":@{name}: {name}さん、おかえりなさいませっ！", status, memory):
+            if YuChan.msg_hook('wel_back', 600, ":@{0}: {1}さん、おかえりなさいませっ！".format(status['account']['acct'], name), status, memory):
                 print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
         elif passage:
@@ -280,13 +280,13 @@ class local_listener(StreamListener):
             if shouldGreet:
                 if now.hour < 12 and now.hour >= 5:
                     print("おはようございますっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                    mastodon.toot(""":@{0}: {0}さん、おはようございますっ！🌄""".format(name))
+                    mastodon.toot(""":@{1}: {0}さん、おはようございますっ！🌄""".format(name, status['account']['acct']))
                 if now.hour >= 12 and now.hour < 17:
                     print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                    mastodon.toot(""":@{0}: {0}さん、こんにちはっ！☀""".format(name))
+                    mastodon.toot(""":@{1}: {0}さん、こんにちはっ！☀""".format(name, status['account']['acct']))
                 if now.hour >= 17 and now.hour < 5:
                     print("こんばんはっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                    mastodon.toot(""":@{0}: {0}さん、こんばんはっ！🌙""".format(name))
+                    mastodon.toot(""":@{1}: {0}さん、こんばんはっ！🌙""".format(name, status['account']['acct']))
 
             # 最終更新を変更
             memory.update('updated_users', dt, status['account']['id'])
