@@ -121,6 +121,11 @@ class YuChan:
         userInfo = ktMemory.select('nickname', ID_Inst)
         name = re.sub(r'^(@[a-zA-Z0-9_]+(\s|\n)?)?(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
         name = name.replace('\n', '')
+        # 30文字超えは弾きますっ！
+        if len(name) > 30:
+            print('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
+            mastodon.status_post(f'@{acct}\n長すぎて覚えられませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
+            return
         if len(userInfo) == 0:
             ktMemory.insert('nickname', ID_Inst, name)
         else:
