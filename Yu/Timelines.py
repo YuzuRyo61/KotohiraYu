@@ -185,6 +185,7 @@ class local_listener(StreamListener):
         else:
             # ニックネームが設定されている場合はそちらを優先
             name = nameDic[0][2]
+        name = name.replace('@', '@ ')
 
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
