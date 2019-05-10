@@ -19,7 +19,7 @@ import configparser
 
 from mastodon import Mastodon
 
-from Yu import YuChan, KotohiraUtil, KotohiraMemory, local, home
+from Yu import YuChan, KotohiraUtil, KotohiraMemory, local, home, WEBRUN
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
@@ -39,6 +39,9 @@ def main():
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.timeReport,['**:00'])) )
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.toot_memo, ['**:55'])) )
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.meow_time, ['22:22'])) )
+    # ウェブコンソール（不要な場合はコメントアウトで）
+    # ポート番号は 7878 でListenされます
+    features.append( threading.Thread(target=WEBRUN) )
 
     try:
         # スレッド開始
