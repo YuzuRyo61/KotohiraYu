@@ -79,12 +79,12 @@ def list_usermemos(date):
     try:
         conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
         c = conn.cursor()
-        c.execute('SELECT body FROM user_memos WHERE memo_time = ?', (date, ))
+        c.execute('SELECT * FROM user_memos WHERE memo_time = ?', (date, ))
         memoRaw = c.fetchall()
         if memoRaw == None:
             abort(404, "This memo time was not found")
         else:
-            memo = json.loads(memoRaw)
+            memo = json.loads(memoRaw[2])
             return memo
     except:
         traceback.print_exc()
