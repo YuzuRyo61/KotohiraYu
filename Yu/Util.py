@@ -29,7 +29,7 @@ class KotohiraUtil:
             headers = {"Authorization": "Bearer " + config['linenotify']['token']}
             payload = {"message": "\n＊ユウちゃんがパニックになりました。\nパニック時刻: \n" + nowFormat + "\n詳細はログを確認してくださいっ"}
             if config['web'].getboolean('enable'):
-                payload['message'] += "\n" + config['web']['base'] + "/panic-log/" + nowFileFormat"
+                payload['message'] += "\n" + config['web']['base'] + "/panic-log/" + nowFileFormat
             req = requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
             if req.status_code != 200:
                 print("[FATAL] LINE NOTIFY ACCESS FAILED")
