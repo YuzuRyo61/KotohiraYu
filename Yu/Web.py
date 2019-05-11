@@ -7,6 +7,7 @@ import sqlite3
 import traceback
 import json
 from bottle import route, run, auth_basic, abort, response
+from sqlite3 import OperationalError
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
@@ -80,15 +81,21 @@ def list_usermemos(date):
         conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
         c = conn.cursor()
         c.execute('SELECT * FROM user_memos WHERE memo_time = ?', (date, ))
-        memoRaw = c.fetchall()
+        memoRaw = c.fetchone()
         if memoRaw == None:
             abort(404, "This memo time was not found")
         else:
-            memo = json.loads(memoRaw[2])
-            return memo
-    except:
+            memo = json.loads(memoRaw[2], encoding="utf-8")
+            output = f"<!DOCTYPE html><html><head><title>UESR MEMO SHOW: {date}</title></head><body><h1>UESR MEMO SHOW: {date}</h1><table><tr><th>User</th><th>Memo</th></tr>"
+            for me in memo:
+                output += f"<tr><td><a href=\"https://{config['instance']['address']}/@{me['from']}\">@{me['from']}</a></td><td>{me['body']}</td></tr>"
+            output += "</table></body>\n"
+            return output
+    except OperationalError:
         traceback.print_exc()
         abort(500, "INTERNAL SERVER ERROR")
+    finally:
+        conn.close()
 
 @route('/panic-log/<panicdate:int>')
 @auth_basic(VERIFY)
