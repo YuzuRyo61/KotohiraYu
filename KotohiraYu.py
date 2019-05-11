@@ -39,9 +39,10 @@ def main():
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.timeReport,['**:00'])) )
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.toot_memo, ['**:55'])) )
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.meow_time, ['22:22'])) )
-    # ウェブコンソール（不要な場合はコメントアウトで）
+    # ウェブコンソール（不要な場合はconfigファイルで）
     # ポート番号は 7878 でListenされます
-    features.append( threading.Thread(target=WEBRUN) )
+    if config['web'].getboolean('enable'):
+        features.append( threading.Thread(target=WEBRUN) )
 
     try:
         # スレッド開始
