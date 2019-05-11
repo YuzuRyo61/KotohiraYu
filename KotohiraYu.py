@@ -48,6 +48,7 @@ def main():
         # スレッド開始
         for ft in features:
             ft.start()
+        print("ALL SYSTEMS READY!")
     except KeyboardInterrupt:
         # 動作する気はしない
         sys.exit()

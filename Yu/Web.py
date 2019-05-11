@@ -5,6 +5,7 @@ import configparser
 import glob
 import sqlite3
 import traceback
+import json
 from bottle import route, run, auth_basic, abort, response
 
 config = configparser.ConfigParser()
@@ -71,6 +72,23 @@ def list_dbtable(table):
         abort(404, "TABLE NOT FOUND")
     finally:
         conn.close()
+
+@route('/user-memos/<date:re:[0-9_+]+>')
+@auth_basic(VERIFY)
+def list_usermemos(date):
+    try:
+        conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
+        c = conn.cursor()
+        c.cursor('SELECT body FROM user_memos WHERE memo_time = ?', (date, ))
+        memoRaw = c.fetchall()
+        if memoRaw == None:
+            abort(404, "This memo time was not found")
+        else:
+            memo = json.loads(memoRaw)
+            return memo
+    except:
+        traceback.print_exc()
+        abort(500, "INTERNAL SERVER ERROR")
 
 @route('/panic-log/<panicdate:int>')
 @auth_basic(VERIFY)
