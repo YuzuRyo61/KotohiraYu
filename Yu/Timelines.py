@@ -179,9 +179,10 @@ class local_listener(StreamListener):
             if status['account']['display_name'] == '':
                 name = status['account']['acct']
             else:
-                # Unicodeのエスケープを削除して挿入
+                # repr化して、Unicodeのエスケープを削除して戻してどーん
                 dpname = repr(status['account']['display_name'])[1:-1]
                 name = re.sub(r"\\u[0-9a-f]{4}", '', dpname)
+                name = str(name)
         else:
             # ニックネームが設定されている場合はそちらを優先
             name = nameDic[0][2]
