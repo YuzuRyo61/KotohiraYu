@@ -243,7 +243,7 @@ class local_listener(StreamListener):
         elif notNicoFri:
             # ニコフレじゃないよっ！
             if YuChan.msg_hook('not_nikofure', 10800, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)", status, memory):
-                print('ニコフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+                print('ベスフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
         elif sad:
             # よしよしっ
