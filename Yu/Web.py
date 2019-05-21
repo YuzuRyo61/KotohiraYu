@@ -6,7 +6,7 @@ import glob
 import sqlite3
 import traceback
 import json
-from bottle import route, run, auth_basic, abort, response
+from bottle import route, run, auth_basic, abort, response, request
 from sqlite3 import OperationalError
 
 config = configparser.ConfigParser()
@@ -61,7 +61,19 @@ def list_dbtable(table):
         for tn in c.execute(f"PRAGMA table_info('{table}')"):
             output += f"<th>{tn[1]}</th>"
         output += "</tr>"
-        for tb in c.execute(f"SELECT * FROM {table}"):
+        operate = f"SELECT * FROM {table}"
+        sort = request.query.get('sort')
+        sort = "" if sort is None else sort
+        order = request.query.get('order')
+        order = "" if order is None else order
+        if sort != "":
+            operate += f" ORDER BY {sort}"
+        if sort != "" and order != "":
+            if order == "1":
+                operate += f" ASC"
+            else:
+                operate += f" DESC"
+        for tb in c.execute(operate):
             output += f"<tr>"
             for i in tb:
                 output += f"<td>{i}</td>"
