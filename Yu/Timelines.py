@@ -48,7 +48,7 @@ class user_listener(StreamListener):
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)?', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
             nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
-            deleteNick = re.search(r'(ニックネーム|あだ名)を(消して|削除|けして|さくじょ)', txt)
+            deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
             rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
             isPing = re.search(r'[pP][iI][nN][gG]', txt)
 
@@ -179,9 +179,10 @@ class local_listener(StreamListener):
             if status['account']['display_name'] == '':
                 name = status['account']['acct']
             else:
-                # Unicodeのエスケープを削除して挿入
-                dpname = repr(status['account']['display_name'])[1:-1]
-                name = re.sub(r"\\u[0-9a-f]{4}", '', dpname)
+                # デコードして、\u202e(文字が逆さまになるやつ)を削除して戻してどーん
+                dpname = status['account']['display_name'].encode('unicode-escape')
+                dpname = re.sub(rb"\\\\u(202e)", '', dpname)
+                name = dpname.decode('unicode-escape')
         else:
             # ニックネームが設定されている場合はそちらを優先
             name = nameDic[0][2]
@@ -242,7 +243,7 @@ class local_listener(StreamListener):
         elif notNicoFri:
             # ニコフレじゃないよっ！
             if YuChan.msg_hook('not_nikofure', 10800, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)", status, memory):
-                print('ニコフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+                print('ベスフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
         elif sad:
             # よしよしっ
