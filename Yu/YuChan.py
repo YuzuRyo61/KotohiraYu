@@ -38,6 +38,7 @@ class YuChan:
         # 乱数作成
         rnd = random.randrange(5)
         print(f"占いっ！：@{acctId} => {rnd}")
+        time.sleep(0.5)
         if rnd == 0:
             mastodon.status_post(f'@{acctId}\n🎉 大吉ですっ！', in_reply_to_id=mentionId, visibility=visibility)
         if rnd == 1:
@@ -108,6 +109,7 @@ class YuChan:
             elif yuOttChoose == 2:
                 isChallengerWin = None
 
+        time.sleep(0.5)
         if isChallengerWin == True:
             mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n🎉 あなたの勝ちですっ！！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
         elif isChallengerWin == None:
@@ -190,6 +192,7 @@ class YuChan:
 
         # 実行可能な状態であるかつ、グローバルクールダウンが終わったかを確認し、実行
         if doIt and globalCoolDowned == True:
+            time.sleep(0.5)
             mastodon.toot(sendFormat)
             ktMemory.update(tableName, dt, status['account']['id'])
             ktMemory.update('latest_ran', globalDelta, tableName)

@@ -167,6 +167,7 @@ class local_listener(StreamListener):
             if status['account']['statuses_count'] <= 10:
                 print('新規さん！: @{0}'.format(status['account']['acct']))
                 mastodon.status_reblog(status['id'])
+                time.sleep(0.5)
                 mastodon.toot('新規さんっ！はじめましてっ！琴平ユウって言いますっ！\nよろしくねっ！\n\n:@{0}: @{0}'.format(status['account']['acct']))
         else:
             newUser = False
@@ -280,6 +281,7 @@ class local_listener(StreamListener):
             shouldGreet = now >= greetableTime
             # 3時間以上更新がなかった場合は挨拶する
             if shouldGreet:
+                time.sleep(0.5)
                 if now.hour < 12 and now.hour >= 5:
                     print("おはようございますっ！：@{0} < {1}".format(status['account']['acct'], txt))
                     mastodon.toot(""":@{1}: {0}さん、おはようございますっ！🌄""".format(name, status['account']['acct']))
