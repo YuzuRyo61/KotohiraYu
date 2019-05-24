@@ -119,7 +119,11 @@ class YuChan:
     def set_nickname(txt, reply_id, ID_Inst, acct, visibility, ktMemory):
         # txtはHTMLタグ除去を施したもの、reply_idにリプライのIDをつける
         userInfo = ktMemory.select('nickname', ID_Inst)
-        name = re.sub(r'^(@[a-zA-Z0-9_]+(\s|\n)?)?(あだ(名|な)|ニックネーム)[:：は]?\s?', '', txt, 1)
+        # 定義プレフィックス削除
+        name = re.sub(r'^(@[a-zA-Z0-9_]+(\s|\n)?)?(あだ(名|な)|ニックネーム)[:：は]\s?', '', txt, 1)
+        # @(半角)を含むもの、コロンは除去
+        name = re.sub(r'[：:@]+', '', name)
+        # 改行は削除
         name = name.replace('\n', '')
         # 30文字超えは弾きますっ！
         if len(name) > 30:

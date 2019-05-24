@@ -47,7 +47,7 @@ class user_listener(StreamListener):
             # 正規表現とか
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)?', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
-            nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
+            nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
             deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
             rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
             isPing = re.search(r'[pP][iI][nN][gG]', txt)
@@ -197,7 +197,7 @@ class local_listener(StreamListener):
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
         notNicoFri = re.search(r'(にこふれ|ニコフレ|ﾆｺﾌﾚ)', txt)
         sad = re.search(r'((泣|な)いてる|しくしく|シクシク|ｼｸｼｸ|ぐすん|グスン|ｸﾞｽﾝ|ぶわっ|ブワッ|ﾌﾞﾜｯ)', txt)
-        nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]?\s?', txt)
+        nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
         writeDict = re.search(r'^:@[a-zA-Z0-9_]+:(さん|くん|君|殿|どの|ちゃん)?はこんな人[:：]', txt)
         writeMemo = re.search(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：]', txt)
         
