@@ -5,6 +5,7 @@ import configparser
 import random
 import re
 import json
+import time
 from pytz import timezone
 from mastodon import Mastodon
 
