@@ -212,7 +212,7 @@ class local_listener(StreamListener):
         # 投票型のトゥートだったら投票する（期限切れでないかつ投票してないこと）
         # issue: #5
         if status['poll'] != None:
-            if status['poll']['expired'] == False and ('voted' in status['poll'] and status['poll']['voted'] != True):
+            if status['poll']['expired'] == False and not ('voted' in status['poll'] and status['poll']['voted'] == False):
                 # ここで投票する場所を抽選
                 voteOptions = status['poll']['options']
                 voteChoose = random.randint(0, len(voteOptions) - 1)
