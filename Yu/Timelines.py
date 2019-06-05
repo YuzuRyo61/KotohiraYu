@@ -211,15 +211,14 @@ class local_listener(StreamListener):
 
         # 投票型のトゥートだったら投票する（期限切れでないかつ投票してないこと）
         # issue: #5
-        # Mastodon.pyで未検証みたいなのでしばらく見送り
-        """
         if status['poll'] != None:
             if status['poll']['expired'] == False and status['poll']['voted'] == False:
                 # ここで投票する場所を抽選
                 voteOptions = status['poll']['options']
                 voteChoose = random.randint(0, len(voteOptions) - 1)
-                mastodon.poll_vote(status['id'], voteChoose)
-        """
+                mastodon.poll_vote(status['poll']['id'], voteChoose)
+                # 投票したものをトゥートする
+                mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']), in_reply_to_id=status['id'])
 
         if iBack:
             # おかえりとか言ったら実行
