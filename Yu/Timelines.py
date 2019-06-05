@@ -326,7 +326,7 @@ def home():
     except OperationalError:
         print('＊データベースにアクセスできないか、エラーが起きたようですっ。３０秒後にやり直しますっ！')
         time.sleep(30)
-        local()
+        home()
     except (requests.exceptions.ReadTimeout, MastodonNetworkError):
         print('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
