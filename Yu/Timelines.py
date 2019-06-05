@@ -182,7 +182,7 @@ class local_listener(StreamListener):
             else:
                 # デコードして、\u202e(文字が逆さまになるやつ)を削除して戻してどーん
                 dpname = status['account']['display_name'].encode('unicode-escape')
-                dpname = re.sub(rb"\\\\u(202e)", '', dpname)
+                dpname = dpname.replace(b"\\u202e", b'')
                 name = dpname.decode('unicode-escape')
         else:
             # ニックネームが設定されている場合はそちらを優先
