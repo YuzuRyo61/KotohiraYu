@@ -219,7 +219,7 @@ class local_listener(StreamListener):
                 mastodon.poll_vote(status['poll']['id'], voteChoose)
                 # 投票したものをトゥートする
                 print('投票っ！：@{0} => {1}'.format(status['account']['acct'], status['poll']['options'][voteChoose]['title']))
-                mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']), in_reply_to_id=status['id'])
+                mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']))
 
         if iBack:
             # おかえりとか言ったら実行
