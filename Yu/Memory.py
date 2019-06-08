@@ -31,8 +31,8 @@ class KotohiraMemory:
         # "!INIT"フォルダにあるSQLファイルのリストを読み込み、1つずつSQLを実行していく
         self.__log('TABLE INIT')
         if table == None:
-            # テーブルが未指定の場合は"!INIT"フォルダ内にあるsqlファイルをすべて読みこんでテーブル作成
-            init_sqls = glob.glob('sql/!INIT/*.sql')
+            # テーブルが未指定の場合は各フォルダ内にあるinit.sqlファイルをすべて読みこんでテーブル作成
+            init_sqls = glob.glob('sql/*/init.sql')
             for sql in init_sqls:
                 with open(sql, "r") as s:
                     schema = s.read()
@@ -40,8 +40,8 @@ class KotohiraMemory:
                     self.__log(f'Insert: {sql}')
         else:
             # テーブル指定があった場合はそのファイルを開き挿入
-            if os.path.isfile(f'sql/!INIT/{table}.sql'):
-                with open(f'sql/!INIT/{table}.sql', 'r') as s:
+            if os.path.isfile(f'sql/{table}/init.sql'):
+                with open(f'sql/{table}/init.sql', 'r') as s:
                     schema = s.read()
                     self.cursor.execute(schema)
                     self.__log(f'Insert: {table}')
