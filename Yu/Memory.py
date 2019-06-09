@@ -51,8 +51,8 @@ class KotohiraMemory:
     def close(self, DISCARD=False):
         # 接続終了処理。DISCARDがTrueになってる場合はコミットせずに切断する
         if not DISCARD:
-            self.__log('COMMIT')
             self.conn.commit()
+            self.__log('COMMIT')
         self.conn.close()
 
     def commit(self):

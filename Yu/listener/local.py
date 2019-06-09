@@ -81,11 +81,14 @@ class local_listener(StreamListener):
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう|中|ちゅう|してる))', txt)
+        goodNight = re.search(r'(寝る|ねる|おやすみ)', txt)
+        seeYou = re.search(r'((行|い)って(きます|くる))', txt)
         passage = re.search(r'(通過|つうか|ツウカ)(?!.*(おめ|した))', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
         notNicoFri = re.search(r'(にこふれ|ニコフレ|ﾆｺﾌﾚ)', txt)
         sad = re.search(r'((泣|な)いてる|しくしく|シクシク|ｼｸｼｸ|ぐすん|グスン|ｸﾞｽﾝ|ぶわっ|ブワッ|ﾌﾞﾜｯ)', txt)
+        noNow = re.search(r'(いまのなし|イマノナシ|ｲﾏﾉﾅｼ)', txt)
         nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
         writeDict = re.search(r'^:@[a-zA-Z0-9_]+:(さん|くん|君|殿|どの|ちゃん)?はこんな人[:：]', txt)
         writeMemo = re.search(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：]', txt)
@@ -98,7 +101,6 @@ class local_listener(StreamListener):
             memory.update('fav_rate', 1, status['account']['id'])
 
         # 投票型のトゥートだったら投票する（期限切れでないかつ投票してないこと）
-        # issue: #5
         if status['poll'] != None:
             if status['poll']['expired'] == False and not ('voted' in status['poll'] and status['poll']['voted'] == True):
                 # ここで投票する場所を抽選
@@ -113,6 +115,16 @@ class local_listener(StreamListener):
             # おかえりとか言ったら実行
             if YuChan.msg_hook('wel_back', 600, ":@{0}: {1}さん、おかえりなさいませっ！".format(status['account']['acct'], name), status, memory):
                 print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+
+        elif goodNight:
+            # おやすみですっ！
+            if YuChan.msg_hook('good_night', 600, ":@{0}: {1}さん、おやすみなさいっ！🌙".format(status['account']['acct'], name), status, memory):
+                print('おやすみっ！:@{0} < {1}'.format(status['account']['acct'], txt))
+
+        elif seeYou:
+            # いってらっしゃいなのですっ！
+            if YuChan.msg_hook('see_you', 600, ":@{0}: {1}さん、いってらっしゃいっ！🚪".format(status['account']['acct'], name), status, memory):
+                print('いってらっしゃいっ！:@{0} < {1}'.format(status['account']['acct'], txt))                
 
         elif passage:
             # 通過 とか言ったら阻止しちゃうよっ！
@@ -138,6 +150,11 @@ class local_listener(StreamListener):
             # よしよしっ
             if YuChan.msg_hook('yoshiyoshi', 180, "(´･ω･`)ヾ(･ω･｡)ﾖｼﾖｼ", status, memory):
                 print('よしよしっ：@{0} < {1}'.format(status['account']['acct'], txt))
+
+        elif noNow:
+            # いまのなしは封印ですっ！
+            if YuChan.msg_hook('no_now', 180, "いまのなしは封印ですっ！！(*`ω´*)", status, memory):
+                print('いまのなしは封印ですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
         elif nick:
             # ニックネームの設定
