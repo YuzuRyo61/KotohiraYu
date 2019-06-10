@@ -82,7 +82,7 @@ class local_listener(StreamListener):
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう|中|ちゅう|してる))', txt)
         goodNight = re.search(r'(寝る|ねる|おやすみ)', txt)
-        seeYou = re.search(r'((行|い)って(きます|くる))', txt)
+        seeYou = re.search(r'((行|い)って(きます|くる)|ノシ|ﾉｼ)', txt)
         passage = re.search(r'(通過|つうか|ツウカ)(?!.*(おめ|した))', txt)
         sinkiSagi = re.search(r'(新規|しんき)(です|だよ|なのじゃ)', txt)
         nullPoint = re.search(r'(ぬるぽ|ヌルポ|ﾇﾙﾎﾟ|[nN][uU][lL]{2}[pP][oO])', txt)
