@@ -1,0 +1,25 @@
+{% extends "BASE.html" %}
+
+{% block title %}Panic List | Yu-Console{% endblock %}
+
+{% block body %}
+<h1>Panic Log</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Date(Filename)</th>
+            <th scope="col">Download</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for panicList in panicLists %}
+        <tr>
+            <th scope="row">{{ loop.index }}</th>
+            <td><a href="/panic-log/{{ panicList }}">{{ panicList }}</a></td>
+            <td><a class="btn btn-primary" href="/panic-log/{{ panicList }}" download="PANIC-{{ panicList }}.TXT" role="button"><i class="fas fa-cloud-download-alt"></i></a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

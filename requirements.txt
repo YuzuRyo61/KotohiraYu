@@ -1,8 +1,6 @@
 asn1crypto==0.24.0
 beautifulsoup4==4.7.1
-blurhash==1.1.0
 bottle==0.12.16
-bs4==0.0.1
 certifi==2019.3.9
 cffi==1.12.2
 chardet==3.0.4
@@ -10,7 +8,9 @@ cryptography==2.6.1
 decorator==4.4.0
 http-ece==1.1.0
 idna==2.8
-Mastodon.py==1.4.2
+Jinja2==2.10.1
+MarkupSafe==1.1.1
+Mastodon.py==1.4.0
 pycparser==2.19
 python-dateutil==2.8.0
 python-magic==0.4.15
@@ -18,4 +18,5 @@ pytz==2019.1
 requests==2.21.0
 six==1.12.0
 soupsieve==1.9
+tinydb==3.13.0
 urllib3==1.24.2

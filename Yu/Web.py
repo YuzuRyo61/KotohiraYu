@@ -8,9 +8,12 @@ import traceback
 import json
 from bottle import route, run, auth_basic, abort, response, request
 from sqlite3 import OperationalError
+from jinja2 import Template, Environment, FileSystemLoader
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
+
+ENV = Environment(loader=FileSystemLoader('consoleTemplate'))
 
 def VERIFY(username, password):
     return username == config['web']['user'] and password == config['web']['pass']
@@ -18,37 +21,38 @@ def VERIFY(username, password):
 @route('/')
 @auth_basic(VERIFY)
 def index():
-    return """<!DOCTYPE html>
-    <html>
-      <head>
-        <title>Yu-Console</title>
-      </head>
-      <body>
-        <ul>
-          <li><a href="panic-log">PANIC LOG</a></li>
-        </ul>
-      </body>
-    </html>
-    """
+    return ENV.get_template('index.html').render()
 
 @route('/panic-log')
 @route('/panic-log/')
 @auth_basic(VERIFY)
 def list_panicLog():
     panicLogList = glob.glob("panic-log/PANIC-*.TXT")
-    output = "<!DOCTYPE html><html><head><title>PANICLOG</title></head><body><h1>PANICLOG</h1><ul>"
-    link = ""
+    link = []
     for l in panicLogList:
-        link = l.replace('panic-log/PANIC-', '').replace('.TXT', '')
-        output += f'<li><a href="/panic-log/{link}">{link}</a></li>'
-    output += '</ul></body></html>\n'
-    return output
+        link.append(l.replace('panic-log/PANIC-', '').replace('.TXT', ''))
+    link.sort()
+    return ENV.get_template('panicList.html').render({'panicLists': link})
 
 @route('/db')
 @route('/db/')
 @auth_basic(VERIFY)
 def list_table():
-    return "Underconstruction"
+    try:
+        conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
+        c = conn.cursor()
+        c.execute("select name from sqlite_master where type='table'")
+        tableLists = []
+        for tbl in c.fetchall():
+            tableLists.append(tbl[0])
+        tableLists.sort()
+    except:
+        traceback.print_exc()
+        abort(404, "TABLE NOT FOUND")
+    else:
+        return ENV.get_template('dbList.html').render({'tableLists': tableLists})
+    finally:
+        conn.close()
 
 @route('/db/<table:re:[a-z_]+>')
 @auth_basic(VERIFY)
@@ -56,12 +60,13 @@ def list_dbtable(table):
     try:
         conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
         c = conn.cursor()
-        output = f"<!DOCTYPE html><html><head><title>TABLE SHOW: {table}</title></head><body><h1>TABLE SHOW: {table}</h1><table>"
-        output += "<tr>"
+        tableColumns = []
+
         for tn in c.execute(f"PRAGMA table_info('{table}')"):
-            output += f"<th>{tn[1]}</th>"
-        output += "</tr>"
+            tableColumns.append(tn[1])
+
         operate = f"SELECT * FROM {table}"
+
         sort = request.query.get('sort')
         sort = "" if sort is None else sort
         order = request.query.get('order')
@@ -73,39 +78,18 @@ def list_dbtable(table):
                 operate += f" ASC"
             else:
                 operate += f" DESC"
+
+        tableBodies = []
         for tb in c.execute(operate):
-            output += f"<tr>"
+            tableBody = []
             for i in tb:
-                output += f"<td>{i}</td>"
-            output += f"</tr>"
-        output += "</table></body>"
-        return output
+                tableBody.append(i)
+            tableBodies.append(tableBody)
+
+        return ENV.get_template('tableShow.html').render({'tableName': table, 'tableColumns': tableColumns, 'tableBodies': tableBodies})
     except:
         traceback.print_exc()
         abort(404, "TABLE NOT FOUND")
-    finally:
-        conn.close()
-
-@route('/user-memos/<date:re:[0-9_+]+>')
-@auth_basic(VERIFY)
-def list_usermemos(date):
-    try:
-        conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
-        c = conn.cursor()
-        c.execute('SELECT * FROM user_memos WHERE memo_time = ?', (date, ))
-        memoRaw = c.fetchone()
-        if memoRaw == None:
-            abort(404, "This memo time was not found")
-        else:
-            memo = json.loads(memoRaw[2], encoding="utf-8")
-            output = f"<!DOCTYPE html><html><head><title>UESR MEMO SHOW: {date}</title></head><body><h1>UESR MEMO SHOW: {date}</h1><table><tr><th>User</th><th>Memo</th></tr>"
-            for me in memo:
-                output += f"<tr><td><a href=\"https://{config['instance']['address']}/@{me['from']}\">@{me['from']}</a></td><td>{me['body']}</td></tr>"
-            output += "</table></body>\n"
-            return output
-    except OperationalError:
-        traceback.print_exc()
-        abort(500, "INTERNAL SERVER ERROR")
     finally:
         conn.close()
 
