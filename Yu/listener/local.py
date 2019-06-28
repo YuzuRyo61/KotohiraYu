@@ -116,7 +116,7 @@ class local_listener(StreamListener):
                 
                 # NGワードを検知した場合は弾いて好感度下げ
                 for voteSection in voteOptions:
-                    if YuChan.ngWordHook(voteSection):
+                    if YuChan.ngWordHook(voteSection['title']):
                         print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
                         memory.update('fav_rate', -10, status['account']['id'])
                         time.sleep(0.5)
