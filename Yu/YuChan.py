@@ -219,7 +219,7 @@ class YuChan:
             return False
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         # 55分以降の場合は現在時刻から6分送り、次の時間へ持ち越せるようにする
-        if len(now.minute) >= 55:
+        if now.minute >= 55:
             now += datetime.timedelta(minutes=6)
         dt = now.strftime("%Y_%m%d_%H%z")
         memo = ktMemory.select('user_memos', dt)
