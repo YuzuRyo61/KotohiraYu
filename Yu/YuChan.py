@@ -20,6 +20,17 @@ mastodon = Mastodon(
     api_base_url=config['instance']['address']
 )
 
+# NGワードを予め読み込み（ファイルIOの負荷対策）
+NGWORDS = []
+
+with open('config/NGWORDS.txt', 'r') as nfs:
+    for ngw in nfs.readlines():
+        # NGワードを追加。コメントを外す
+        ngwWoC = re.sub('#.*', '', ngw).strip()
+        # 変換後、空白でない場合は追加
+        if ngwWoC != '':
+            NGWORDS.append(ngwWoC)
+
 class YuChan:
     @staticmethod
     def timeReport():
@@ -257,5 +268,17 @@ class YuChan:
 
     # 実装中
     @staticmethod
-    def update_userdict(targetUser, fromUser, body, replyTootID, ktMemory):
+    def userdict(targetUser, fromUser, body, replyTootID, ktMemory):
         pass
+
+    # NGワード検出機能
+    @staticmethod
+    def ngWordHook(txt):
+        # 予め読み込んだNGワードリストを使用
+        for ngword in NGWORDS:
+            # 正規表現も使えるようにしている
+            if re.search(ngword, txt):
+                # 見つかった場合はTrueを返す
+                return True
+        # for文回しきって見つからなかった場合はFalseを返す
+        return False
