@@ -62,10 +62,8 @@ class local_listener(StreamListener):
 
         # NGワードを検知した場合は弾いて好感度下げ
         if YuChan.ngWordHook(txt):
-            print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
+            print('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
             memory.update('fav_rate', -10, status['account']['id'])
-            time.sleep(0.5)
-            mastodon.toot(':@{}: 変なこと言っちゃいけませんっ！！(*`ω´*)'.format(status['account']['acct']))
             return
 
         # 名前
@@ -117,10 +115,8 @@ class local_listener(StreamListener):
                 # NGワードを検知した場合は弾いて好感度下げ
                 for voteSection in voteOptions:
                     if YuChan.ngWordHook(voteSection['title']):
-                        print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
+                        print('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
                         memory.update('fav_rate', -10, status['account']['id'])
-                        time.sleep(0.5)
-                        mastodon.toot('変なこと言っちゃいけませんっ！！(*`ω´*)')
                         return
                 
                 voteChoose = random.randint(0, len(voteOptions) - 1)
