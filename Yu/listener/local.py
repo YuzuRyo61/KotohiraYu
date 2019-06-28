@@ -60,6 +60,14 @@ class local_listener(StreamListener):
         else:
             newUser = False
 
+        # NGワードを検知した場合は弾いて好感度下げ
+        if YuChan.ngWordHook(txt):
+            print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
+            memory.update('fav_rate', -10, status['account']['id'])
+            time.sleep(0.5)
+            mastodon.toot(':@{}: 変なこと言っちゃいけませんっ！！(*`ω´*)'.format(status['account']['acct']))
+            return
+
         # 名前
         nameDic = memory.select('nickname', status['account']['id'])
         if len(nameDic) == 0:
@@ -105,6 +113,16 @@ class local_listener(StreamListener):
             if status['poll']['expired'] == False and not ('voted' in status['poll'] and status['poll']['voted'] == True):
                 # ここで投票する場所を抽選
                 voteOptions = status['poll']['options']
+                
+                # NGワードを検知した場合は弾いて好感度下げ
+                for voteSection in voteOptions:
+                    if YuChan.ngWordHook(voteSection):
+                        print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
+                        memory.update('fav_rate', -10, status['account']['id'])
+                        time.sleep(0.5)
+                        mastodon.toot('変なこと言っちゃいけませんっ！！(*`ω´*)')
+                        return
+                
                 voteChoose = random.randint(0, len(voteOptions) - 1)
                 mastodon.poll_vote(status['poll']['id'], voteChoose)
                 # 投票したものをトゥートする

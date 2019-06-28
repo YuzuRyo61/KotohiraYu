@@ -32,6 +32,14 @@ class user_listener(StreamListener):
             print('お手紙っ！：@{0} < {1}'.format(notification['account']['acct'], txt))
             mastodon.status_favourite(notification['status']['id'])
 
+            # NGワードを検知した場合は弾いて好感度下げ
+            if YuChan.ngWordHook(txt):
+                print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
+                memory.update('fav_rate', -10, status['account']['id'])
+                time.sleep(0.5)
+                mastodon.status_post('@{}\n変なこと言っちゃいけませんっ！！(*`ω´*)'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
+                return
+
             # 好感度を少し上げる
             memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
             memory.update('fav_rate', 1, notification['account']['id'])
