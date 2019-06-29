@@ -226,14 +226,14 @@ class YuChan:
         if len(memo) == 0:
             # データがない場合は新しく挿入
             memRaw = [{'from': fromUser, 'body': body}]
-            memJson = json.dumps(memRaw)
+            memJson = json.dumps(memRaw, ensure_ascii=False)
             ktMemory.insert('user_memos', dt, memJson)
         else:
             # データがある場合は読み込んで更新
             memJson = memo[0][2]
             memRaw = json.loads(memJson)
             memRaw.append({'from': fromUser, 'body': body})
-            memNewJson = json.dumps(memRaw)
+            memNewJson = json.dumps(memRaw, ensure_ascii=False)
             ktMemory.update('user_memos', memNewJson, dt)
 
     @staticmethod
