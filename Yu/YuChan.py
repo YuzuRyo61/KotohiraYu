@@ -139,6 +139,13 @@ class YuChan:
         name = re.sub(r'[：:@]+', '', name)
         # 改行は削除
         name = name.replace('\n', '')
+        # NGワードは弾きますっ！
+        if YuChan.ngWordHook(name):
+            print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(acct))
+            KtMemory.update('fav_rate', -10, ID_Inst)
+            time.sleep(0.5)
+            mastodon.status_post(f'@{acct}\n変なこと言っちゃいけませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
+            return
         # 30文字超えは弾きますっ！
         if len(name) > 30:
             print('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
