@@ -4,7 +4,7 @@ YuzuRyo61 Presents
 
 The mastodon bot!
 
-# Getting started
+## Getting started
 
 1. Python3の仮想環境を作成します
 
@@ -22,6 +22,16 @@ The mastodon bot!
 
 これだけですっ！
 
-# こちらで運用しています
+## こちらで運用しています
 
 [@Yu@best-friends.chat](https://best-friends.chat/@Yu)
+
+## 注意
+
+このスクリプトはWindowsで動作させることを想定していないため、うまく動作しません。
+
+動作させる際はLinux等をご利用ください。
+
+## License
+
+MIT License. See [LICENSE](LICENSE)

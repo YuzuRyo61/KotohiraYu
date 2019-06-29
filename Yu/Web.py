@@ -58,12 +58,16 @@ def list_table():
 @auth_basic(VERIFY)
 def list_dbtable(table):
     try:
+        LIMIT = 100
         conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
         c = conn.cursor()
         tableColumns = []
 
         for tn in c.execute(f"PRAGMA table_info('{table}')"):
             tableColumns.append(tn[1])
+        
+        for tc in c.execute(f"SELECT count() FROM {table}"):
+            TABLECOUNT = tc[0]
 
         operate = f"SELECT * FROM {table}"
 
@@ -71,13 +75,32 @@ def list_dbtable(table):
         sort = "" if sort is None else sort
         order = request.query.get('order')
         order = "" if order is None else order
+        page = request.query.get('page')
+        page = 0 if page is None else int(page)
+
         if sort != "":
             operate += f" ORDER BY {sort}"
+        
         if sort != "" and order != "":
             if order == "1":
                 operate += f" ASC"
             else:
                 operate += f" DESC"
+
+        offset = page * LIMIT
+        operate += f" LIMIT {LIMIT} OFFSET {offset}"
+        previousPage = page - 1
+        nextPage =  page + 1
+
+        if int(page) <= 0:
+            previousDisable = True
+        else:
+            previousDisable = False
+
+        if offset + 100 >= TABLECOUNT:
+            nextDisable = True
+        else:
+            nextDisable = False
 
         tableBodies = []
         for tb in c.execute(operate):
@@ -86,7 +109,16 @@ def list_dbtable(table):
                 tableBody.append(i)
             tableBodies.append(tableBody)
 
-        return ENV.get_template('tableShow.html').render({'tableName': table, 'tableColumns': tableColumns, 'tableBodies': tableBodies})
+        return ENV.get_template('tableShow.html').render({'tableName': table,
+                                                          'tableColumns': tableColumns,
+                                                          'tableBodies': tableBodies,
+                                                          'previousDisable': previousDisable,
+                                                          'nextDisable': nextDisable,
+                                                          'currentPage': page,
+                                                          'previousPage': previousPage,
+                                                          'nextPage': nextPage,
+                                                          'sort': sort,
+                                                          'order': order})
     except:
         traceback.print_exc()
         abort(404, "TABLE NOT FOUND")

@@ -2,22 +2,33 @@
 
 {% block body %}
 <h1>Table Show: {{ tableName }}</h1>
-<form class="form-inline" method="GET">
-    <label for="sortTargetTable">Sort Table: </label>
-    <select class="form-control" id="sortTargetTable" name="sort">
-        {% for tableColumn in tableColumns %}
-        <option>{{ tableColumn }}</option>
-        {% endfor %}
-    </select>
-    
-    <label for="order">Order: </label>
-    <select class="form-control" id="order" name="order">
-        <option value="1">ASC</option>
-        <option value="0">DESC</option>
-    </select>
-    
-    <button type="submit" class="btn btn-primary mb-2">Change</button>
-</form>
+<p>
+    <a class="btn btn-primary" data-toggle="collapse" href="#sortOption" role="button" aria-expanded="false" aria-controls="sortOption">
+        Sort Option
+    </a>
+</p>
+<div class="collapse" id="sortOption">
+    <div class="card card-body">
+        <form method="GET">
+            <label for="sortTargetTable">Sort Table: </label>
+            <select class="form-control" id="sortTargetTable" name="sort">
+                {% for tableColumn in tableColumns %}
+                <option {% if sort == tableColumn %}selected{% endif %}>{{ tableColumn }}</option>
+                {% endfor %}
+            </select>
+            
+            <label for="order">Order: </label>
+            <select class="form-control" id="order" name="order">
+                <option value="1" {% if order == '1' %}selected{% endif %}>ASC</option>
+                <option value="0" {% if order == '0' %}selected{% endif %}>DESC</option>
+            </select>
+            
+            <input type="hidden" name="page" value="{{ currentPage }}">
+            <br>
+            <button type="submit" class="btn btn-primary mb-2">Change</button>
+        </form>
+    </div>
+</div>
 <table class="table table-striped table-hover">
     <thead>
         <tr>
@@ -36,4 +47,26 @@
         {% endfor %}
     </tbody>
 </table>
+<nav aria-label="Page navigation example">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if previousDisable %}disabled{% endif %}">
+            <a class="page-link" {% if not previousDisable %}onclick="pagenate({{ previousPage }})" href="javascript:void()"{% endif %} tabindex="-1" aria-disabled="{{ previousDisable }}">Previous</a>
+        </li>
+        <li class="page-item {% if nextDisable %}disabled{% endif %}">
+            <a class="page-link" {% if not nextDisable %}onclick="pagenate({{ nextPage }})" href="javascript:void()"{% endif %} aria-disabled="{{ nextDisable }}">Next</a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    function pagenate(page) {
+        var pattern = /&?page=[0-9]+/;
+        var query = document.location.search;
+        var newPattern = query.replace(pattern, '');
+        newPattern += '&page=' + page;
+        document.location.search = newPattern;
+    }
+</script>
 {% endblock %}
