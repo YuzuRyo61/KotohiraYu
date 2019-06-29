@@ -6,7 +6,7 @@ import glob
 import sqlite3
 import traceback
 import json
-from bottle import route, run, auth_basic, abort, response, request
+from bottle import route, run, auth_basic, abort, response, request, redirect
 from sqlite3 import OperationalError
 from jinja2 import Template, Environment, FileSystemLoader
 
@@ -133,6 +133,15 @@ def show_panicLog(panicdate):
             txtRaw = panic.read()
         response.content_type = "text/plain"
         return txtRaw
+    else:
+        abort(404, "PANIC LOG NOT FOUND")
+
+@route('/panic-log/<panicdate:int>/delete')
+@auth_basic(VERIFY)
+def delete_panicLog(panicdate):
+    if os.path.isdir('panic-log') and os.path.isfile(f'panic-log/PANIC-{str(panicdate)}.TXT'):
+        os.remove(f'panic-log/PANIC-{str(panicdate)}.TXT')
+        redirect('/panic-log/')
     else:
         abort(404, "PANIC LOG NOT FOUND")
 

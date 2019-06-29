@@ -4,22 +4,37 @@
 
 {% block body %}
 <h1>Panic Log</h1>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Date(Filename)</th>
-            <th scope="col">Download</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for panicList in panicLists %}
-        <tr>
-            <th scope="row">{{ loop.index }}</th>
-            <td><a href="/panic-log/{{ panicList }}">{{ panicList }}</a></td>
-            <td><a class="btn btn-primary" href="/panic-log/{{ panicList }}" download="PANIC-{{ panicList }}.TXT" role="button"><i class="fas fa-cloud-download-alt"></i></a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Date(Filename)</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for panicList in panicLists %}
+            <tr>
+                <th scope="row">{{ loop.index }}</th>
+                <td><a href="/panic-log/{{ panicList }}">{{ panicList }}</a></td>
+                <td>
+                    <a class="btn btn-primary" href="/panic-log/{{ panicList }}" download="PANIC-{{ panicList }}.TXT" title="Download" role="button"><i class="fas fa-cloud-download-alt"></i></a>
+                    <a class="btn btn-danger" href="javascript:void()" onclick="deletePanicLogDialog({{ panicList }})" title="Delete" role="button"><i class="fas fa-trash"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    function deletePanicLogDialog(panicDate) {
+        if (window.confirm('Are you sure delete this file?:\n' + panicDate)) {
+            document.location.href = '/panic-log/' + panicDate + '/delete';
+        }
+    }
+</script>
 {% endblock %}
