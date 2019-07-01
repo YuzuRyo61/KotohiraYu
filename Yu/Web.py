@@ -133,7 +133,7 @@ def show_panicLog(panicdate):
             txtRaw = panic.read()
 
         if 'raw' in request.query.dict:
-            response.content_type = "text/plain"
+            response.content_type = "text/plain; charset=UTF-8"
             return txtRaw
         else:
             return ENV.get_template('showPanic.html').render({'LogBody': txtRaw, 'panicDate': panicdate})
