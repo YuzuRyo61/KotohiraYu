@@ -7,7 +7,8 @@ import time
 from sqlite3 import OperationalError
 
 import requests.exceptions
-from mastodon import Mastodon, MastodonNetworkError, StreamListener, MastodonServerError
+from mastodon import Mastodon, MastodonNetworkError, StreamListener
+from mastodon.Mastodon import MastodonServerError
 from pytz import timezone
 from Yu import KotohiraMemory, KotohiraUtil, YuChan
 from Yu.listener import user_listener, local_listener
