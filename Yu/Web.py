@@ -27,10 +27,10 @@ def index():
 @route('/panic-log/')
 @auth_basic(VERIFY)
 def list_panicLog():
-    panicLogList = glob.glob("panic-log/PANIC-*.TXT")
+    panicLogList = glob.glob("panic-log/PANIC-*.LOG")
     link = []
     for l in panicLogList:
-        link.append(l.replace('panic-log/PANIC-', '').replace('.TXT', ''))
+        link.append(l.replace('panic-log/PANIC-', '').replace('.LOG', ''))
     link.sort()
     return ENV.get_template('panicList.html').render({'panicLists': link})
 
@@ -128,19 +128,23 @@ def list_dbtable(table):
 @route('/panic-log/<panicdate:int>')
 @auth_basic(VERIFY)
 def show_panicLog(panicdate):
-    if os.path.isdir('panic-log') and os.path.isfile(f'panic-log/PANIC-{str(panicdate)}.TXT'):
-        with open(f'panic-log/PANIC-{str(panicdate)}.TXT', encoding="utf-8") as panic:
+    if os.path.isdir('panic-log') and os.path.isfile(f'panic-log/PANIC-{str(panicdate)}.LOG'):
+        with open(f'panic-log/PANIC-{str(panicdate)}.LOG', encoding="utf-8") as panic:
             txtRaw = panic.read()
-        response.content_type = "text/plain"
-        return txtRaw
+
+        if 'raw' in request.query.dict:
+            response.content_type = "text/plain"
+            return txtRaw
+        else:
+            return ENV.get_template('showPanic.html').render({'LogBody': txtRaw, 'panicDate': panicdate})
     else:
         abort(404, "PANIC LOG NOT FOUND")
 
 @route('/panic-log/<panicdate:int>/delete')
 @auth_basic(VERIFY)
 def delete_panicLog(panicdate):
-    if os.path.isdir('panic-log') and os.path.isfile(f'panic-log/PANIC-{str(panicdate)}.TXT'):
-        os.remove(f'panic-log/PANIC-{str(panicdate)}.TXT')
+    if os.path.isdir('panic-log') and os.path.isfile(f'panic-log/PANIC-{str(panicdate)}.LOG'):
+        os.remove(f'panic-log/PANIC-{str(panicdate)}.LOG')
         redirect('/panic-log/')
     else:
         abort(404, "PANIC LOG NOT FOUND")

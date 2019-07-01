@@ -20,7 +20,7 @@ class KotohiraUtil:
         nowFormat = now.strftime("%Y/%m/%d %H:%M:%S%z")
         nowFileFormat = now.strftime("%Y%m%d")
         os.makedirs('panic-log', exist_ok=True)
-        with open(f'panic-log/PANIC-{nowFileFormat}.TXT', 'a') as f:
+        with open(f'panic-log/PANIC-{nowFileFormat}.LOG', 'a', encoding="utf-8") as f:
             f.write('--- PANIC! {} ---\n'.format(nowFormat))
             traceback.print_exc(file=f)
             f.write('\n')

@@ -1,0 +1,24 @@
+{% extends "BASE.html" %}
+
+{% block title %}PanicLog: {{ panicDate }} | Yu-Console{% endblock %}
+
+{% block body %}
+<h1>Panic Show: {{ panicDate }}</h1>
+<a class="btn btn-secondary" href="/panic-log/{{ panicDate }}?raw" role="button"><i class="fas fa-eye"></i> View as Raw</a>
+<a class="btn btn-primary" href="/panic-log/{{ panicDate }}?raw" download="PANIC-{{ panicDate }}.TXT" role="button"><i class="fas fa-cloud-download-alt"></i> Download</a>
+<a class="btn btn-danger" href="javascript:void()" onclick="deletePanicLogDialog({{ panicDate }})" role="button"><i class="fas fa-trash"></i> Delete</a>
+<hr>
+<pre>
+{{ LogBody }}
+</pre>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+    function deletePanicLogDialog(panicDate) {
+        if (window.confirm('Are you sure delete this file?:\n' + panicDate)) {
+            document.location.href = '/panic-log/' + panicDate + '/delete';
+        }
+    }
+</script>
+{% endblock %}

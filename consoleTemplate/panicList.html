@@ -19,7 +19,7 @@
                 <th scope="row">{{ loop.index }}</th>
                 <td><a href="/panic-log/{{ panicList }}">{{ panicList }}</a></td>
                 <td>
-                    <a class="btn btn-primary" href="/panic-log/{{ panicList }}" download="PANIC-{{ panicList }}.TXT" title="Download" role="button"><i class="fas fa-cloud-download-alt"></i></a>
+                    <a class="btn btn-primary" href="/panic-log/{{ panicList }}?raw" download="PANIC-{{ panicList }}.TXT" title="Download" role="button"><i class="fas fa-cloud-download-alt"></i></a>
                     <a class="btn btn-danger" href="javascript:void()" onclick="deletePanicLogDialog({{ panicList }})" title="Delete" role="button"><i class="fas fa-trash"></i></a>
                 </td>
             </tr>

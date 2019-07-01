@@ -1,5 +1,7 @@
 {% extends "BASE.html" %}
 
+{% block title %}Table: {{ tableName }} | Yu-Console{% endblock %}
+
 {% block body %}
 <h1>Table Show: {{ tableName }}</h1>
 <p>
@@ -77,7 +79,11 @@
         var pattern = /&?page=[0-9]+/;
         var query = document.location.search;
         var newPattern = query.replace(pattern, '');
-        newPattern += '&page=' + page;
+        if (newPattern == '') {
+            newPattern += 'page=' + page;
+        } else {
+            newPattern += '&page=' + page;
+        }
         document.location.search = newPattern;
     }
 </script>
