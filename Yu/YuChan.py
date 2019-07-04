@@ -253,6 +253,10 @@ class YuChan:
         # データがない場合は何もしない
         if len(memo) != 0:
             memRaw = json.loads(memo[0][2])
+            if len(memRaw) == 0:
+                # JSONが空だったらトゥート中止
+                del memory
+                return
             # for文に入るための変数初期化
             tootList = []
             tootSep = 0
@@ -287,6 +291,7 @@ class YuChan:
         memo = memory.select('user_memos', dt)
         # メモがその時間にない場合は無視
         if len(memo) == 0:
+            del memory
             return False
         
         commitable = False
@@ -304,17 +309,13 @@ class YuChan:
 
         if commitable:
             # for文で回して差分がある場合はコミットしてTrueを返す
-            # ただし、その時間のメモがなくなった場合はメモを削除する
-            if len(memoStat) == 0:
-                memory.delete('user_memos', dt)
-            else:
-                memNewJson = json.dumps(memRaw, ensure_ascii=False)
-                memory.update('user_memos', memNewJson, dt)
-
+            memNewJson = json.dumps(memRaw, ensure_ascii=False)
+            memory.update('user_memos', memNewJson, dt)
             del memory
             return True
         else:
             # 差分がない場合はFalse
+            del memory
             return False
 
 
