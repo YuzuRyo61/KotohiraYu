@@ -304,8 +304,13 @@ class YuChan:
 
         if commitable:
             # for文で回して差分がある場合はコミットしてTrueを返す
-            memNewJson = json.dumps(memRaw, ensure_ascii=False)
-            memory.update('user_memos', memNewJson, dt)
+            # ただし、その時間のメモがなくなった場合はメモを削除する
+            if len(memoStat) == 0:
+                memory.delete('user_memos', dt)
+            else:
+                memNewJson = json.dumps(memRaw, ensure_ascii=False)
+                memory.update('user_memos', memNewJson, dt)
+
             del memory
             return True
         else:
