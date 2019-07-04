@@ -279,7 +279,7 @@ class YuChan:
     @staticmethod
     def cancel_memo(status_id):
         # トゥートが削除された時に実行
-        memory = KotohiraMemory(showLog=config['log'],getboolean('enable'))
+        memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         if now.minute >= 55:
             now += datetime.timedelta(minutes=6)
