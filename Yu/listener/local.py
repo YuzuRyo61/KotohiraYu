@@ -185,7 +185,7 @@ class local_listener(StreamListener):
             memoBody = re.sub(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：]', '', txt, 1)
             mastodon.status_reblog(status['id'])
             print('メモっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-            res = YuChan.write_memo(status['account']['acct'], memoBody, memory)
+            res = YuChan.write_memo(status['account']['acct'], memoBody, status['id'], memory)
             if res == False:
                 mastodon.status_post('@{}\n長いのでまとめられそうにありませんっ・・・'.format(status['account']['acct']), in_reply_to_id=status['id'])
 
@@ -216,3 +216,8 @@ class local_listener(StreamListener):
 
         # データベース切断
         del memory
+
+    def on_delete(self, status_id):
+        # メモのトゥートが削除されたらデータベースから削除する
+        if YuChan.cancel_memo(status_id):
+            print(f"メモを削除っ！: {str(status_id)}")

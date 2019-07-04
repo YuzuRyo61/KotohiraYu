@@ -219,7 +219,7 @@ class YuChan:
         return doIt
 
     @staticmethod
-    def write_memo(fromUser, body, ktMemory):
+    def write_memo(fromUser, body, statusId, ktMemory):
         # メモを書き込むっ！30文字以内であることが条件っ！
         if len(body) > 30:
             # 30文字オーバーの場合は弾く
@@ -232,14 +232,14 @@ class YuChan:
         memo = ktMemory.select('user_memos', dt)
         if len(memo) == 0:
             # データがない場合は新しく挿入
-            memRaw = [{'from': fromUser, 'body': body}]
+            memRaw = [{'from': fromUser, 'body': body, 'id': int(statusId)}]
             memJson = json.dumps(memRaw, ensure_ascii=False)
             ktMemory.insert('user_memos', dt, memJson)
         else:
             # データがある場合は読み込んで更新
             memJson = memo[0][2]
             memRaw = json.loads(memJson)
-            memRaw.append({'from': fromUser, 'body': body})
+            memRaw.append({'from': fromUser, 'body': body, 'id': int(statusId)})
             memNewJson = json.dumps(memRaw, ensure_ascii=False)
             ktMemory.update('user_memos', memNewJson, dt)
 
@@ -275,6 +275,43 @@ class YuChan:
         
         # クリーンアップ
         del memory
+    
+    @staticmethod
+    def cancel_memo(status_id):
+        # トゥートが削除された時に実行
+        memory = KotohiraMemory(showLog=config['log'],getboolean('enable'))
+        now = datetime.datetime.now(timezone('Asia/Tokyo'))
+        if now.minute >= 55:
+            now += datetime.timedelta(minutes=6)
+        dt = now.strftime("%Y_%m%d_%H%z")
+        memo = memory.select('user_memos', dt)
+        # メモがその時間にない場合は無視
+        if len(memo) == 0:
+            return False
+        
+        commitable = False
+
+        memRaw = json.loads(memo[0][2])
+        for memoStat in memRaw:
+            # 旧規格でない場合もあるのでそれを踏まえた対策分岐
+            if 'id' in memoStat:
+                if int(status_id) == memoStat['id']:
+                    # IDが合致した場合は削除し、コミットするようにする
+                    # IDは重複することはないので、一度合致したらfor文を抜ける
+                    memRaw.remove(memoStat)
+                    commitable = True
+                    break
+
+        if commitable:
+            # for文で回して差分がある場合はコミットしてTrueを返す
+            memNewJson = json.dumps(memRaw, ensure_ascii=False)
+            memory.update('user_memos', memNewJson, dt)
+            del memory
+            return True
+        else:
+            # 差分がない場合はFalse
+            return False
+
 
     # 実装中
     @staticmethod
