@@ -74,8 +74,8 @@ class KotohiraMemory:
         if os.path.isfile(f"sql/{table}/insert.sql"):
             with open(f"sql/{table}/insert.sql") as sqltxt:
                 sql = sqltxt.read()
-                self.cursor.execute(sql, args)
-                self.__log(f"Insert: {table} => {args}")
+            self.cursor.execute(sql, args)
+            self.__log(f"Insert: {table} => {args}")
         else:
             raise Exception(f"Insert SQL file was not found: {table}")
 
@@ -84,9 +84,9 @@ class KotohiraMemory:
         if os.path.isfile(f"sql/{table}/select.sql"):
             with open(f"sql/{table}/select.sql") as sqltxt:
                 sql = sqltxt.read()
-                self.cursor.execute(sql, args)
-                self.__log(f"Select: {table} => {args}")
-                return self.cursor.fetchall()
+            self.cursor.execute(sql, args)
+            self.__log(f"Select: {table} => {args}")
+            return self.cursor.fetchall()
         else:
             raise Exception(f"Select SQL file was not found: {table}")
 
@@ -95,8 +95,8 @@ class KotohiraMemory:
         if os.path.isfile(f"sql/{table}/update.sql"):
             with open(f"sql/{table}/update.sql") as sqltxt:
                 sql = sqltxt.read()
-                self.cursor.execute(sql, args)
-                self.__log(f"Update: {table} => {args}")
+            self.cursor.execute(sql, args)
+            self.__log(f"Update: {table} => {args}")
         else:
             raise Exception(f"Update SQL file was not found: {table}")
 
@@ -105,7 +105,7 @@ class KotohiraMemory:
         if os.path.isfile(f"sql/{table}/delete.sql"):
             with open(f"sql/{table}/delete.sql") as sqltxt:
                 sql = sqltxt.read()
-                self.cursor.execute(sql, args)
-                self.__log(f"Delete: {table} => {args}")
+            self.cursor.execute(sql, args)
+            self.__log(f"Delete: {table} => {args}")
         else:
             raise Exception(f"Delete SQL file was not found: {table}")
