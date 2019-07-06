@@ -207,7 +207,7 @@ class YuChan:
                 ktMemory.update('nickname', name, targetID_Inst)
 
             print('他人のニックネーム変更っ！：{0} => {1} => {2}'.format(fromAcct, targetAcct, name))
-            mastodon.status_post(f':@{fromAcct}:@{fromAcct}\nわかりましたっ！:@{targetAcct}:@{targetAcct}さんのことを今度から\n「{name}」と呼びますねっ！\n#ユウちゃんのあだ名変更日記', in_reply_to_id=reply_id, visibility=visibility)
+            mastodon.status_post(f':@{fromAcct}: @{fromAcct}\nわかりましたっ！ :@{targetAcct}: @{targetAcct} さんのことを今度から\n「{name}」と呼びますねっ！\n#ユウちゃんのあだ名変更日記', in_reply_to_id=reply_id, visibility=visibility)
             return True
 
     @staticmethod
