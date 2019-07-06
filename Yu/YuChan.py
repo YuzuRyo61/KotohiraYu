@@ -10,7 +10,6 @@ from pytz import timezone
 from mastodon import Mastodon
 
 from Yu.Memory import KotohiraMemory
-from Yu.Timer import Timer
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
@@ -169,6 +168,47 @@ class YuChan:
         else:
             print('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(acct))
             mastodon.status_post(f'@{acct}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
+
+    @staticmethod
+    def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility, ktMemory):
+        # ユーザーはユウちゃんにフォローされていることが前提条件
+        Relation = mastodon.account_relationships(fromID_Inst)
+        if Relation['following'] == False:
+            print('フォローしていませんっ！：{}'.format(fromAcct))
+            mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
+            return
+        
+        txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?:@([a-zA-Z0-9_]+):の(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
+        
+        targetAcct = txtSearch.group(2)
+        name = txtSearch.group(4)
+
+        # NGワードは弾きますっ！
+        if YuChan.ngWordHook(name):
+            print('NGワードはいけませんっ！！(*`ω´*): @{0}'.format(fromAcct))
+            KtMemory.update('fav_rate', -10, fromID_Inst)
+            time.sleep(0.5)
+            mastodon.status_post(f'@{fromAcct}\n変なこと言っちゃいけませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
+            return
+
+        dbres = ktMemory.custom('SELECT * FROM `known_users` WHERE acct = ?', targetAcct)
+        isKnown = dbres.fetchall()
+
+        if len(isKnown) == 0:
+            print('知らないユーザーさんですっ・・・：{}'.format(targetAcct))
+            mastodon.status_post(f'@{fromAcct}\nユウちゃんその人知りませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
+            return
+        else:
+            targetID_Inst = int(isKnown[0][1])
+            targetUserInfo = ktMemory.select('nickname', targetID_Inst)
+            if len(targetUserInfo) == 0:
+                ktMemory.insert('nickname', targetID_Inst, name)
+            else:
+                ktMemory.update('nickname', name, targetID_Inst)
+
+            print('他人のニックネーム変更っ！：{0} => {1} => {2}'.format(fromAcct, targetAcct, name))
+            mastodon.status_post(f':@{fromAcct}:@{fromAcct}\nわかりましたっ！:@{targetAcct}:@{targetAcct}さんのことを今度から\n「{name}」と呼びますねっ！\n#ユウちゃんのあだ名変更日記', in_reply_to_id=reply_id, visibility=visibility)
+            return True
 
     @staticmethod
     def msg_hook(tableName, coolDown, sendFormat, status, ktMemory):

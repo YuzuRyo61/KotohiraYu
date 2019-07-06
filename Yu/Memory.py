@@ -109,3 +109,9 @@ class KotohiraMemory:
             self.__log(f"Delete: {table} => {args}")
         else:
             raise Exception(f"Delete SQL file was not found: {table}")
+
+    def custom(self, sql, *args):
+        # SQLファイルで定義していないものをカスタムで実行する
+        res = self.cursor.execute(sql, args)
+        self.__log(f"Custom: {sql} <= {args}")
+        return res
