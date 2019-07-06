@@ -174,7 +174,7 @@ class YuChan:
         # ユーザーはユウちゃんにフォローされていることが前提条件
         Relation = mastodon.account_relationships(fromID_Inst)[0]
         if Relation['following'] == False:
-            print('フォローしていませんっ！：{}'.format(fromAcct))
+            print('フォローしていませんっ！：@{}'.format(fromAcct))
             mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
             return
         
@@ -195,7 +195,7 @@ class YuChan:
         isKnown = dbres.fetchall()
 
         if len(isKnown) == 0:
-            print('知らないユーザーさんですっ・・・：{}'.format(targetAcct))
+            print('知らないユーザーさんですっ・・・：@{}'.format(targetAcct))
             mastodon.status_post(f'@{fromAcct}\nユウちゃんその人知りませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
             return
         else:
