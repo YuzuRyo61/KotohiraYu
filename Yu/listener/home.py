@@ -38,6 +38,7 @@ class user_listener(StreamListener):
                 memory.update('fav_rate', -10, status['account']['id'])
                 time.sleep(0.5)
                 mastodon.status_post('@{}\n変なこと言っちゃいけませんっ！！(*`ω´*)'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
+                YuChan.unfollow_attempt(status['account']['id'])
                 return
 
             # 好感度を少し上げる
@@ -60,7 +61,7 @@ class user_listener(StreamListener):
                 if reqRela['following'] == False:
                     if reqRela['followed_by'] == True: # フォローされていること
                         reqMem = memory.select('fav_rate', notification['account']['id'])[0]
-                        if int(reqMem[2]) >= 250: # 250以上だったら合格
+                        if int(reqMem[2]) >= int(config['follow']['condition_rate']): # 設定で決めた好感度レート以上だったら合格
                             print('フォローっ！：@{}'.format(notification['account']['acct']))
                             mastodon.account_follow(notification['account']['id'])
                             mastodon.status_post('@{}\nフォローしましたっ！これからもよろしくねっ！'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])

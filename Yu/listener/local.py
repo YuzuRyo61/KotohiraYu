@@ -64,6 +64,7 @@ class local_listener(StreamListener):
         if YuChan.ngWordHook(txt):
             print('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
             memory.update('fav_rate', -10, status['account']['id'])
+            YuChan.unfollow_attempt(status['account']['id'])
             return
 
         # 名前

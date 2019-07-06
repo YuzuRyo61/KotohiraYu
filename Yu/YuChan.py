@@ -375,3 +375,20 @@ class YuChan:
                 return True
         # for文回しきって見つからなかった場合はFalseを返す
         return False
+
+    # 一定の好感度レートが下がってしまうとフォローが外れちゃいますっ・・・。
+    @staticmethod
+    def unfollow_attempt(targetID_Inst):
+        # ただし、設定で入力したユーザーIDはフォローを外しませんっ！
+        excludeUsersID = list(map(int, config['follow']['exclude'].split()))
+        if targetID_Inst in excludeUsersID:
+            return
+
+        memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+        target = memory.select('fav_rate', targetID_Inst)[0]
+        relation = mastodon.account_relationships(targetID_Inst)[0]
+        if relation['following'] == True and int(target[2]) < int(config['follow']['condition_rate']):
+            print('ゴメンねっ・・・。: {}'.format(str(targetID_Inst)))
+            mastodon.account_unfollow(targetID_Inst)
+
+        del memory
