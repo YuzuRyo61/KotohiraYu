@@ -178,7 +178,7 @@ class YuChan:
             mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
             return
         
-        txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?:@([a-zA-Z0-9_]+):の(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
+        txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?:@([a-zA-Z0-9_]+):\sの(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
         
         targetAcct = txtSearch.group(2)
         name = txtSearch.group(4)
