@@ -86,6 +86,8 @@ class local_listener(StreamListener):
 
         # 正規表現チェック
         calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
+        otherNick = re.search(r':@([a-zA-Z0-9_]+):の(あだ名|あだな|ニックネーム)[:：は]\s?(.+)', txt)
+        nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
         iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう|中|ちゅう|してる))', txt)
         goodNight = re.search(r'寝(ます|る|マス)([よかぞね]?|[...。うぅー~!・]+)$|^寝(ます|る|よ)[...。うぅー~!・]*$|寝(ます|る|マス)(.*)[ぽお]や[ユすしー]|(ユウ|ﾕｳ|ゆう|ことひら|コトヒラ|ｺﾄﾋﾗ)(ちゃん)?(.*)[ぽお]や[ユすしー]', txt)
         seeYou = re.search(r'((行|い)って(きます|くる)|ノシ|ﾉｼ)', txt)
@@ -95,7 +97,6 @@ class local_listener(StreamListener):
         notNicoFri = re.search(r'(にこふれ|ニコフレ|ﾆｺﾌﾚ)', txt)
         sad = re.search(r'((泣|な)いてる|しくしく|シクシク|ｼｸｼｸ|ぐすん|グスン|ｸﾞｽﾝ|ぶわっ|ブワッ|ﾌﾞﾜｯ)', txt)
         noNow = re.search(r'(いまのなし|イマノナシ|ｲﾏﾉﾅｼ)', txt)
-        nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
         writeDict = re.search(r'^:@[a-zA-Z0-9_]+:(さん|くん|君|殿|どの|ちゃん)?はこんな人[:：]', txt)
         writeMemo = re.search(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：]', txt)
         
@@ -125,7 +126,15 @@ class local_listener(StreamListener):
                 print('投票っ！：@{0} => {1}'.format(status['account']['acct'], status['poll']['options'][voteChoose]['title']))
                 mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']))
 
-        if iBack:
+        elif otherNick:
+            # 他人のニックネームの設定
+            YuChan.set_otherNickname(txt, status['id'], status['account']['id'], status['account']['acct'], status['visibility'], memory)
+
+        elif nick:
+            # ニックネームの設定
+            YuChan.set_nickname(txt, status['id'], status['account']['id'], status['account']['acct'], status['visibility'], memory)
+
+        elif iBack:
             # おかえりとか言ったら実行
             if YuChan.msg_hook('wel_back', 600, ":@{0}: {1}さん、おかえりなさいませっ！".format(status['account']['acct'], name), status, memory):
                 print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
@@ -169,10 +178,6 @@ class local_listener(StreamListener):
             # いまのなしは封印ですっ！
             if YuChan.msg_hook('no_now', 180, "いまのなしは封印ですっ！！(*`ω´*)", status, memory):
                 print('いまのなしは封印ですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-
-        elif nick:
-            # ニックネームの設定
-            YuChan.set_nickname(txt, status['id'], status['account']['id'], status['account']['acct'], status['visibility'], memory)
 
         elif writeDict:
             # 辞書登録っ

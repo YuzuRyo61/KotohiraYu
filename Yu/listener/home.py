@@ -47,8 +47,9 @@ class user_listener(StreamListener):
             # 正規表現とか
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)?', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
-            nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
             deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
+            otherNick = re.search(r':@([a-zA-Z0-9_]+):の(あだ名|あだな|ニックネーム)[:：は]\s?(.+)', txt)
+            nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
             rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
             isPing = re.search(r'[pP][iI][nN][gG]', txt)
 
@@ -82,6 +83,10 @@ class user_listener(StreamListener):
             # ニックネームの削除
             elif deleteNick:
                 YuChan.del_nickname(notification['status']['id'], notification['account']['id'], notification['account']['acct'], notification['status']['visibility'], memory)
+
+            # 他人のニックネームの設定
+            elif otherNick:
+                YuChan.set_otherNickname(txt, notification['status']['id'], notification['account']['id'], notification['account']['acct'], notification['status']['visibility'], memory)
 
             # ニックネームの設定
             elif nick:
