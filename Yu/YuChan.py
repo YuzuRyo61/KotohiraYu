@@ -172,7 +172,7 @@ class YuChan:
     @staticmethod
     def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility, ktMemory):
         # ユーザーはユウちゃんにフォローされていることが前提条件
-        Relation = mastodon.account_relationships(fromID_Inst)
+        Relation = mastodon.account_relationships(fromID_Inst)[0]
         if Relation['following'] == False:
             print('フォローしていませんっ！：{}'.format(fromAcct))
             mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
