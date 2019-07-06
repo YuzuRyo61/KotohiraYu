@@ -159,6 +159,16 @@ class YuChan:
         mastodon.status_post(f'@{acct}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=reply_id, visibility=visibility)
     
     @staticmethod
+    def show_nickname(reply_id, ID_Inst, acct, visibility, ktMemory):
+        isexistname = ktMemory.select('nickname', ID_Inst)
+        print('ニックネーム照会っ！：@{}'.format(acct))
+        if len(isexistname) != 0:
+            name = isexistname[0][2]
+            mastodon.status_post(f'@{acct}\nユウちゃんは「{name}」と呼んでいますっ！', in_reply_to_id=reply_id, visibility=visibility)
+        else:
+            mastodon.status_post(f'@{acct}\nまだあだ名はありませんっ！', in_reply_to_id=reply_id, visibility=visibility)            
+
+    @staticmethod
     def del_nickname(reply_id, ID_Inst, acct, visibility, ktMemory):
         isexistname = ktMemory.select('nickname', ID_Inst)
         if len(isexistname) != 0:

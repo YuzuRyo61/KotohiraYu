@@ -48,6 +48,7 @@ class user_listener(StreamListener):
             # 正規表現とか
             followReq = re.search(r'(フォロー|[Ff]ollow|ふぉろー)(して|.?頼(む|みたい|もう)|.?たの(む|みたい|もう)|お願い|おねがい)?', txt)
             fortune = re.search(r'(占|うらな)(って|い)', txt)
+            showNick = re.search(r'(ぼく|ボク|僕|わたし|ワタシ|私|俺|おれ|オレ)の(ニックネーム|あだな|あだ名)', txt)
             deleteNick = re.search(r'(ニックネーム|あだ名)を?(消して|削除|けして|さくじょ)', txt)
             otherNick = re.search(r':@([a-zA-Z0-9_]+):の\s(あだ名|あだな|ニックネーム)[:：は]\s?(.+)', txt)
             nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
@@ -80,6 +81,10 @@ class user_listener(StreamListener):
                 YuChan.fortune(notification['status']['id'], notification['account']['acct'], notification['status']['visibility'])
                 # 更に４つ加算
                 memory.update('fav_rate', 4, notification['account']['id'])
+
+            # ニックネームの照会
+            elif showNick:
+                YuChan.show_nickname(notification['status']['id'], notification['account']['id'], notification['account']['acct'], notification['status']['visibility'], memory)
 
             # ニックネームの削除
             elif deleteNick:
