@@ -206,16 +206,19 @@ class local_listener(StreamListener):
             shouldGreet = now >= greetableTime
             # 3時間以上更新がなかった場合は挨拶する
             if shouldGreet:
+                # 名前に語尾がない場合は付け足す
+                if not re.search(r'(さん|ちゃん|どの|殿|くん|君|様|さま)$', name):
+                    name += "さん"
                 time.sleep(0.5)
                 if now.hour < 12 and now.hour >= 5:
                     print("おはようございますっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                    mastodon.toot(""":@{1}: {0}さん、おはようございますっ！🌄""".format(name, status['account']['acct']))
+                    mastodon.toot(""":@{1}: {0}、おはようございますっ！🌄""".format(name, status['account']['acct']))
                 if now.hour >= 12 and now.hour < 17:
                     print("こんにちはっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                    mastodon.toot(""":@{1}: {0}さん、こんにちはっ！☀""".format(name, status['account']['acct']))
+                    mastodon.toot(""":@{1}: {0}、こんにちはっ！☀""".format(name, status['account']['acct']))
                 if now.hour >= 17 and now.hour < 5:
                     print("こんばんはっ！：@{0} < {1}".format(status['account']['acct'], txt))
-                    mastodon.toot(""":@{1}: {0}さん、こんばんはっ！🌙""".format(name, status['account']['acct']))
+                    mastodon.toot(""":@{1}: {0}、こんばんはっ！🌙""".format(name, status['account']['acct']))
 
             # 最終更新を変更
             memory.update('updated_users', dt, status['account']['id'])
