@@ -207,7 +207,7 @@ class local_listener(StreamListener):
             # 3時間以上更新がなかった場合は挨拶する
             if shouldGreet:
                 # 名前に語尾がない場合は付け足す
-                if not re.search(r'(さん|ちゃん|どの|殿|くん|君|様|さま)$', name):
+                if not re.search(r'(さん|ちゃん|どの|殿|くん|君|様|さま|教授|たん|きゅん)$', name):
                     name += "さん"
                 time.sleep(0.5)
                 if now.hour < 12 and now.hour >= 5:
