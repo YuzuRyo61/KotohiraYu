@@ -10,7 +10,7 @@
     </a>
 </p>
 <div class="collapse" id="sortOption">
-    <div class="card card-body">
+    <div class="card card-body" style="margin-bottom: 5px;">
         <form method="GET">
             <label for="sortTargetTable">Sort Table: </label>
             <select class="form-control" id="sortTargetTable" name="sort">
@@ -45,6 +45,7 @@
     <table class="table table-striped table-hover">
         <thead>
             <tr>
+                <th scope="col">Entry</th>
                 {% for tableColumn in tableColumns %}
                 <th scope="col">{{ tableColumn }}</th>
                 {% endfor %}
@@ -53,6 +54,7 @@
         <tbody>
             {% for tableBody in tableBodies %}
             <tr>
+                <td>{{ index.loop }}</td>
                 {% for tableValue in tableBody %}
                 <td>{{ tableValue }}</td>
                 {% endfor %}
