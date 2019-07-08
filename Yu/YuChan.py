@@ -30,6 +30,9 @@ with open('config/NGWORDS.txt', 'r') as nfs:
         if ngwWoC != '':
             NGWORDS.append(ngwWoC)
 
+# フォロー解除例外ユーザーのプレリロード
+EXCLUDEUSERSID = list(map(int, config['follow']['exclude'].split()))
+
 class YuChan:
     @staticmethod
     def timeReport():
@@ -390,8 +393,7 @@ class YuChan:
     @staticmethod
     def unfollow_attempt(targetID_Inst):
         # ただし、設定で入力したユーザーIDはフォローを外しませんっ！
-        excludeUsersID = list(map(int, config['follow']['exclude'].split()))
-        if targetID_Inst in excludeUsersID:
+        if targetID_Inst in EXCLUDEUSERSID:
             return
 
         memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
