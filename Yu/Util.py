@@ -12,6 +12,11 @@ import requests
 config = configparser.ConfigParser()
 config.read('config/config.ini')
 
+mastodon = Mastodon(
+    access_token='config/accesstoken.txt',
+    api_base_url=config['instance']['address']
+)
+
 class KotohiraUtil:
     @staticmethod
     def PANIC():
@@ -35,6 +40,12 @@ class KotohiraUtil:
                 print("[FATAL] LINE NOTIFY ACCESS FAILED")
             else:
                 print("LINET NOTIFY SENT")
+        
+        # パニックした時にトゥートできるか試しますっ！できなくてもエラーを出さないようにしますっ！
+        try:
+            mastodon.toot("ユウちゃんパニックですぅ・・・！٩(ŏ﹏ŏ、)۶")
+        except:
+            pass
 
     @staticmethod
     def h2t(txt):
