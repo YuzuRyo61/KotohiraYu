@@ -9,6 +9,8 @@ from time import sleep
 import configparser
 import requests
 
+from mastodon import Mastodon
+
 config = configparser.ConfigParser()
 config.read('config/config.ini')
 
