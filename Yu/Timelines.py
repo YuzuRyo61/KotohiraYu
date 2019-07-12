@@ -7,8 +7,8 @@ import time
 from sqlite3 import OperationalError
 
 import requests.exceptions
-from mastodon import Mastodon, MastodonNetworkError, StreamListener
-from mastodon.Mastodon import MastodonServerError
+from mastodon import Mastodon, StreamListener
+from mastodon.Mastodon import MastodonNetworkError, MastodonServerError
 from pytz import timezone
 from Yu import KotohiraMemory, KotohiraUtil, YuChan
 from Yu.listener import user_listener, local_listener
@@ -30,15 +30,12 @@ def local():
     try:
         mastodon.stream_local(local_listener(), timeout=20)
     except OperationalError:
+        KotohiraUtil.PANIC(dbPanic=True)
         print('＊データベースにアクセスできないか、エラーが起きたようですっ。３０秒後にやり直しますっ！')
         time.sleep(30)
         local()
-    except (requests.exceptions.ReadTimeout, MastodonNetworkError):
+    except (requests.exceptions.ReadTimeout, MastodonNetworkError, MastodonServerError):
         print('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
-        time.sleep(60)
-        local()
-    except MastodonServerError:
-        print('＊サーバー側でエラーが起きたみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         local()
     except:
@@ -58,12 +55,8 @@ def home():
         print('＊データベースにアクセスできないか、エラーが起きたようですっ。３０秒後にやり直しますっ！')
         time.sleep(30)
         home()
-    except (requests.exceptions.ReadTimeout, MastodonNetworkError):
+    except (requests.exceptions.ReadTimeout, MastodonNetworkError, MastodonServerError):
         print('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
-        time.sleep(60)
-        home()
-    except MastodonServerError:
-        print('＊サーバー側でエラーが起きたみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         home()
     except:
