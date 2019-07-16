@@ -163,7 +163,7 @@ class local_listener(StreamListener):
             
             elif nullPoint:
                 # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
-                if YuChan.msg_hook('null_point', 180, "ｶﾞｯ", status, memory):
+                if YuChan.msg_hook('null_point', 180, ":gaxtsu:", status, memory):
                     print('がっ：@{0} < {1}'.format(status['account']['acct'], txt))
 
             elif notNicoFri:
