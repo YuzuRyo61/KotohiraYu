@@ -21,7 +21,7 @@ mastodon = Mastodon(
 
 class KotohiraUtil:
     @staticmethod
-    def PANIC():
+    def PANIC(dbPanic=False):
         # raiseされたら実行する。別途スクリプトで例外処理する必要がある
         now = datetime.datetime.now(timezone('Asia/Tokyo'))
         nowFormat = now.strftime("%Y/%m/%d %H:%M:%S%z")
@@ -32,7 +32,7 @@ class KotohiraUtil:
             traceback.print_exc(file=f)
             f.write('\n')
         print("＊ユウちゃんパニックですぅ・・・！\n{}".format(traceback.format_exc()))
-        if config['linenotify'].getboolean('enable') == True:
+        if config['linenotify'].getboolean('enable') == True and dbPanic == False:
             headers = {"Authorization": "Bearer " + config['linenotify']['token']}
             payload = {"message": "\n＊ユウちゃんがパニックになりました。\nパニック時刻: \n" + nowFormat + "\n詳細はログを確認してくださいっ"}
             if config['web'].getboolean('enable'):
@@ -44,10 +44,11 @@ class KotohiraUtil:
                 print("LINET NOTIFY SENT")
         
         # パニックした時にトゥートできるか試しますっ！できなくてもエラーを出さないようにしますっ！
-        try:
-            mastodon.toot("ユウちゃんパニックですぅ・・・！٩(ŏ﹏ŏ、)۶")
-        except:
-            pass
+        if dbPanic == False:
+            try:
+                mastodon.toot("ユウちゃんパニックですぅ・・・！٩(ŏ﹏ŏ、)۶")
+            except:
+                pass
 
     @staticmethod
     def h2t(txt):
