@@ -34,7 +34,7 @@ class local_listener(StreamListener):
             txt = KotohiraUtil.h2t(status['content'])
 
             # 自分宛てのメンションはここのリスナーでは無視する（ユーザー絵文字の場合は例外）
-            isMeMention = re.search('(?!.*(:))@{}(?!.*(:))'.format(config['user']['me']), txt)
+            isMeMention = re.search('(?!.*:)@({}+)(?!.*:)'.format(config['user']['me']), txt)
             if isMeMention:
                 return
             
@@ -83,8 +83,7 @@ class local_listener(StreamListener):
             else:
                 # ニックネームが設定されている場合はそちらを優先
                 name = nameDic[0][2]
-            # ユーザー絵文字や半角@を除去（こうするしかなかった）
-            name = re.sub(r'[:]?@\w*[:]?', '', name)
+            name = re.sub(r'(?!.*:)@([a-zA-Z0-9_]+)(?!.*:)', '', name)
 
             # 正規表現チェック
             calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
@@ -225,7 +224,8 @@ class local_listener(StreamListener):
                 memory.update('updated_users', dt, status['account']['id'])
 
         except Exception as e:
-            raise e # Timelines.pyの方へエラーを送出させる
+            # Timelines.pyの方へエラーを送出させる
+            raise e
         finally: # 必ず実行
             try:
                 del memory # データベースロック防止策、コミットする
