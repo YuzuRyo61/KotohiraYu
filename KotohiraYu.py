@@ -16,6 +16,7 @@ import threading
 import sys
 import os
 import configparser
+from sqlite3 import OperationalError
 
 from mastodon import Mastodon
 
@@ -52,6 +53,9 @@ def main():
     except KeyboardInterrupt:
         # 動作する気はしない
         sys.exit()
+    except OperationalError:
+        print("DATABASE ACCESS ERROR")
+        sys.exit(2)
     except:
         KotohiraUtil.PANIC()
 
