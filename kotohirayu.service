@@ -1,0 +1,19 @@
+; Systemd向けの設定ファイルです。コピーして使用してください
+[Unit]
+Description=Kotohira Yu-Chan Mastodon Bot Service
+After=network.target
+
+; ExecStartやWorkingDirectoryは設置場所に応じて変更
+; UserやGroupも、実行権や書き込みなど問題がないユーザーやグループを指定
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/yu/KotohiraYu/KotohiraYu.py
+Restart=on-failure
+WorkingDirectory=/home/yu/KotohiraYu
+User=yu
+Group=yu
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
