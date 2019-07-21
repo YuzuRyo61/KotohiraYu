@@ -85,6 +85,10 @@ class local_listener(StreamListener):
                 name = nameDic[0][2]
             name = re.sub(r'(?!.*:)@([a-zA-Z0-9_]+)(?!.*:)', '', name)
 
+            # 名前に語尾がない場合は付け足す
+            if re.search(r'(さん|ちゃん|どの|殿|くん|君|様|さま|教授|たん|きゅん)$', name) == None:
+                name += "さん"
+
             # 正規表現チェック
             calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
             otherNick = re.search(r':@([a-zA-Z0-9_]+):\sの(あだ名|あだな|ニックネーム)[:：は]\s?(.+)', txt)
@@ -111,7 +115,6 @@ class local_listener(StreamListener):
             # 投票型のトゥートだったら投票する（期限切れでないかつ投票してないこと）
             if status['poll'] != None:
                 if status['poll']['expired'] == False and not ('voted' in status['poll'] and status['poll']['voted'] == True):
-                    # ここで投票する場所を抽選
                     voteOptions = status['poll']['options']
                     
                     # NGワードを検知した場合は弾いて好感度下げ
@@ -119,8 +122,10 @@ class local_listener(StreamListener):
                         if YuChan.ngWordHook(voteSection['title']):
                             print('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
                             memory.update('fav_rate', -10, status['account']['id'])
+                            del memory
                             return
                     
+                    # ここで投票する場所を抽選
                     voteChoose = random.randint(0, len(voteOptions) - 1)
                     mastodon.poll_vote(status['poll']['id'], voteChoose)
                     # 投票したものをトゥートする
@@ -137,17 +142,17 @@ class local_listener(StreamListener):
 
             elif iBack:
                 # おかえりとか言ったら実行
-                if YuChan.msg_hook('wel_back', 600, ":@{0}: {1}さん、おかえりなさいませっ！".format(status['account']['acct'], name), status, memory):
+                if YuChan.msg_hook('wel_back', 600, ":@{0}: {1}、おかえりなさいませっ！".format(status['account']['acct'], name), status, memory):
                     print('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
             elif goodNight:
                 # おやすみですっ！
-                if YuChan.msg_hook('good_night', 600, ":@{0}: {1}さん、おやすみなさいっ！🌙".format(status['account']['acct'], name), status, memory):
+                if YuChan.msg_hook('good_night', 600, ":@{0}: {1}、おやすみなさいっ！🌙".format(status['account']['acct'], name), status, memory):
                     print('おやすみっ！:@{0} < {1}'.format(status['account']['acct'], txt))
 
             elif seeYou:
                 # いってらっしゃいなのですっ！
-                if YuChan.msg_hook('see_you', 600, ":@{0}: {1}さん、いってらっしゃいっ！🚪".format(status['account']['acct'], name), status, memory):
+                if YuChan.msg_hook('see_you', 600, ":@{0}: {1}、いってらっしゃいっ！🚪".format(status['account']['acct'], name), status, memory):
                     print('いってらっしゃいっ！:@{0} < {1}'.format(status['account']['acct'], txt))                
 
             elif passage:
@@ -206,9 +211,6 @@ class local_listener(StreamListener):
                 shouldGreet = now >= greetableTime
                 # 3時間以上更新がなかった場合は挨拶する
                 if shouldGreet:
-                    # 名前に語尾がない場合は付け足す
-                    if re.search(r'(さん|ちゃん|どの|殿|くん|君|様|さま|教授|たん|きゅん)$', name) == None:
-                        name += "さん"
                     time.sleep(0.5)
                     if now.hour < 12 and now.hour >= 5:
                         print("おはようございますっ！：@{0} < {1}".format(status['account']['acct'], txt))
