@@ -54,6 +54,7 @@ class user_listener(StreamListener):
                 nick = re.search(r'(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
                 rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
                 isPing = re.search(r'[pP][iI][nN][gG]', txt)
+                love = re.search(r'(すき|好き|しゅき|ちゅき)', txt)
 
                 # メンションでフォローリクエストされたとき
                 if followReq:
@@ -104,6 +105,18 @@ class user_listener(StreamListener):
                 elif isPing:
                     print('PINGっ！：@{}'.format(notification['account']['acct']))
                     mastodon.status_post('@{}\nPONG!'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
+
+                elif love:
+                    reqMem = memory.select('fav_rate', notification['account']['id'])[0]
+                    if int(reqMem[2]) >= int(config['follow']['condition_rate']):
+                        print('❤：@{}'.format(notification['account']['acct']))
+                        mastodon.status_post('@{}\nユウちゃんも好きですっ！❤'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
+                    elif int(reqMem[2]) < 0:
+                        print('...: @{}'.format(notification['account']['acct']))
+                        mastodon.status_post('@{}\nあっち行ってくださいっ！！(*`ω´*)'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
+                    else:
+                        print('//：@{}'.format(notification['account']['acct']))
+                        mastodon.status_post('@{}\nは、恥ずかしいですっ・・・//'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
             
             elif notifyType == 'favourite':
                 # ふぁぼられ
