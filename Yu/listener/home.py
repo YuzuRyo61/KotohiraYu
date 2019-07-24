@@ -113,7 +113,6 @@ class user_listener(StreamListener):
                         mastodon.status_post('@{}\nユウちゃんも好きですっ！❤'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
                     elif int(reqMem[2]) < 0:
                         print('...: @{}'.format(notification['account']['acct']))
-                        mastodon.status_post('@{}\nあっち行ってくださいっ！！(*`ω´*)'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
                     else:
                         print('//：@{}'.format(notification['account']['acct']))
                         mastodon.status_post('@{}\nは、恥ずかしいですっ・・・//'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
