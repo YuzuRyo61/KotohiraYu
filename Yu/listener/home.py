@@ -16,6 +16,49 @@ mastodon = Mastodon(
 
 # ホームタイムラインのリスナー(主に通知リスナー)
 class user_listener(StreamListener):
+    def on_update(self, status):
+        try:
+            # 公開範囲が「公開」であればここのリスナーでは無視する
+            if status['visibility'] == 'public':
+                return
+
+            # Botアカウントは応答しないようにする
+            if status['account']['bot'] == True:
+                return
+
+            # 自分のトゥートは無視
+            if config['user']['me'] == status['account']['acct']:
+                return
+
+            # トゥート内のHTMLタグを除去
+            txt = KotohiraUtil.h2t(status['content'])
+
+            # 自分宛てのメンションはここのリスナーでは無視する（ユーザー絵文字の場合は例外）
+            isMeMention = re.search('(?!.*:)@({}+)(?!.*:)'.format(config['user']['me']), txt)
+            if isMeMention:
+                return
+            
+            # データベース初期化
+            memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+
+            calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
+
+            # ユウちゃん etc... とか呼ばれたらふぁぼる
+            if calledYuChan:
+                print('呼ばれたっ！：@{0} < {1}'.format(status['account']['acct'], txt))
+                mastodon.status_favourite(status['id'])
+                # 好感度ちょいアップ
+                memory.update('fav_rate', 1, status['account']['id'])
+
+        except Exception as e:
+            # Timelines.pyの方へエラーを送出させる
+            raise e
+        finally: # 必ず実行
+            try:
+                del memory # データベースロック防止策、コミットする
+            except NameError: # 定義されていなくてもエラーを出さない
+                pass
+
     def on_notification(self, notification):
         try:
             # bot属性のアカウントの場合は無視する
