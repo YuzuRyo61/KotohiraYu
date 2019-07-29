@@ -29,11 +29,9 @@ def local():
     print('Initializing feature: local')
     try:
         mastodon.stream_local(local_listener(), timeout=20)
-    except OperationalError:
-        KotohiraUtil.PANIC(dbPanic=True)
-        print('＊データベースにアクセスできないか、エラーが起きたようですっ。３０秒後にやり直しますっ！')
-        time.sleep(30)
-        local()
+    except OperationalError as exc:
+        print('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
+        raise exc
     except (requests.exceptions.ReadTimeout, MastodonNetworkError, MastodonServerError):
         print('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
@@ -51,10 +49,9 @@ def home():
         res = mastodon.account_verify_credentials()
         print('Fetched account: @{}'.format(res.acct))
         mastodon.stream_user(user_listener(), timeout=20)
-    except OperationalError:
-        print('＊データベースにアクセスできないか、エラーが起きたようですっ。３０秒後にやり直しますっ！')
-        time.sleep(30)
-        home()
+    except OperationalError as exc:
+        print('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
+        raise OperationalError from exc
     except (requests.exceptions.ReadTimeout, MastodonNetworkError, MastodonServerError):
         print('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
