@@ -64,7 +64,7 @@ class local_listener(StreamListener):
             # NGワードを検知した場合は弾いて好感度下げ
             if YuChan.ngWordHook(txt):
                 print('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
-                memory.update('fav_rate', -10, status['account']['id'])
+                memory.update('fav_rate', -5, status['account']['id'])
                 YuChan.unfollow_attempt(status['account']['id'])
                 return
 
@@ -121,7 +121,7 @@ class local_listener(StreamListener):
                     for voteSection in voteOptions:
                         if YuChan.ngWordHook(voteSection['title']):
                             print('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
-                            memory.update('fav_rate', -10, status['account']['id'])
+                            memory.update('fav_rate', -5, status['account']['id'])
                             del memory
                             return
                     

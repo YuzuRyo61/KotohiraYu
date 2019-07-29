@@ -79,7 +79,7 @@ class user_listener(StreamListener):
                 # NGワードを検知した場合は弾いて好感度下げ
                 if YuChan.ngWordHook(txt):
                     print('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(notification['account']['acct']))
-                    memory.update('fav_rate', -10, notification['account']['id'])
+                    memory.update('fav_rate', -5, notification['account']['id'])
                     time.sleep(0.5)
                     mastodon.status_post('@{}\n変なこと言っちゃいけませんっ！！(*`ω´*)'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
                     YuChan.unfollow_attempt(notification['account']['id'])
