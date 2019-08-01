@@ -319,8 +319,8 @@ class YuChan:
                 tootList.append( ":@{0}: {1}\n".format(i['from'], i['body']))
             # トゥート可能な文面にする
             for i in tootList:
-                # 内容の文字数が450を超える場合はセパレート
-                if (len(tootBody[tootSep])) > 450:
+                # 内容の文字数が435を超える場合はセパレート
+                if (len(tootBody[tootSep])) > 435:
                     tootBody.append('')
                     tootSep += 1
                 tootBody[tootSep] += i
@@ -328,7 +328,7 @@ class YuChan:
             sepCount = 0
             for t in tootBody:
                 tootCwTemplate = "{0}時のメモのまとめですっ！({1}/{2})".format(now.hour, sepCount + 1, tootSep + 1)
-                mastodon.status_post(t, spoiler_text=tootCwTemplate)
+                mastodon.status_post(t + "\n#ユウちゃんのまとめメモ", spoiler_text=tootCwTemplate)
         
         # クリーンアップ
         del memory
