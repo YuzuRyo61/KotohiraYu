@@ -21,6 +21,10 @@ class user_listener(StreamListener):
             # 公開範囲が「公開」であればここのリスナーでは無視する
             if status['visibility'] == 'public':
                 return
+            
+            # 連合アカウントである場合(@が含まれている)は無視する
+            if status['account']['acct'].find('@') != -1:
+                return
 
             # Botアカウントは応答しないようにする
             if status['account']['bot'] == True:
@@ -64,6 +68,11 @@ class user_listener(StreamListener):
             # bot属性のアカウントの場合は無視する
             if notification['account']['bot'] == True:
                 return
+
+            # 連合アカウントである場合(@が含まれている)は無視する
+            if status['account']['acct'].find('@') != -1:
+                return
+
             # 代入してちょっと見栄え良く
             notifyType = notification['type']
             if notifyType == 'mention':
