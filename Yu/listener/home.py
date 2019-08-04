@@ -70,7 +70,7 @@ class user_listener(StreamListener):
                 return
 
             # 連合アカウントである場合(@が含まれている)は無視する
-            if status['account']['acct'].find('@') != -1:
+            if notification['account']['acct'].find('@') != -1:
                 return
 
             # 代入してちょっと見栄え良く
