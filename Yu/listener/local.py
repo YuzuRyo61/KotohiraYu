@@ -91,8 +91,8 @@ class local_listener(StreamListener):
 
             # 正規表現チェック
             calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
-            otherNick = re.search(r':@([a-zA-Z0-9_]+):\sの(あだ名|あだな|ニックネーム)[:：は]\s?(.+)', txt)
-            nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]\s?', txt)
+            otherNick = re.search(r'^:@([a-zA-Z0-9_]+):\sの(あだ名|あだな|ニックネーム)[:：は]\s?(.+)', txt)
+            nick = re.search(r'^(あだ(名|な)|ニックネーム)[:：は]\s?(.+)', txt)
             iBack = re.search(r'(帰宅|ただいま|帰った|帰還)(?!.*(する|します|しちゃう|しよう|中|ちゅう|してる))', txt)
             goodNight = re.search(r'寝(ます|る|マス)([よかぞね]?|[...。うぅー~!・]+)$|^寝(ます|る|よ)[...。うぅー~!・]*$|寝(ます|る|マス)(.*)[ぽお]や[ユすしー]|(ユウ|ﾕｳ|ゆう|ことひら|コトヒラ|ｺﾄﾋﾗ)(ちゃん)?(.*)[ぽお]や[ユすしー]', txt)
             seeYou = re.search(r'((行|い)って(きます|くる)|ノシ|ﾉｼ)', txt)

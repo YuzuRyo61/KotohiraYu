@@ -134,11 +134,10 @@ class YuChan:
     @staticmethod
     def set_nickname(txt, reply_id, ID_Inst, acct, visibility, ktMemory):
         # txtはHTMLタグ除去を施したもの、reply_idにリプライのIDをつける
-        userInfo = ktMemory.select('nickname', ID_Inst)
         # 定義プレフィックス削除
-        name = re.sub(r'^(@[a-zA-Z0-9_]+(\s|\n)?)?(あだ(名|な)|ニックネーム)[:：は]\s?', '', txt, 1)
-        # @(半角)を含むもの、コロンは除去
-        name = re.sub(r'[：:@]+', '', name)
+        txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
+        # 上記の正規表現のグループから代入
+        name = txtSearch.group(3)
         # 改行は削除
         name = name.replace('\n', '')
         # 30文字超えは弾きますっ！
@@ -146,6 +145,9 @@ class YuChan:
             print('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
             mastodon.status_post(f'@{acct}\n長すぎて覚えられませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
             return
+
+        userInfo = ktMemory.select('nickname', ID_Inst)
+
         if len(userInfo) == 0:
             ktMemory.insert('nickname', ID_Inst, name)
         else:
