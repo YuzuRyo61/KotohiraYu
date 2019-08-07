@@ -134,7 +134,6 @@ class YuChan:
     @staticmethod
     def set_nickname(txt, reply_id, ID_Inst, acct, visibility, ktMemory):
         # txtはHTMLタグ除去を施したもの、reply_idにリプライのIDをつける
-        # 定義プレフィックス削除
         txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
         # 上記の正規表現のグループから代入
         name = txtSearch.group(3)
