@@ -82,7 +82,7 @@ class user_listener(StreamListener):
                 txt = KotohiraUtil.h2t(notification['status']['content'])
 
                 # 口頭のメンションを除去
-                txt = re.sub('^(@[a-zA-Z0-9_]+)?', '', txt)
+                txt = re.sub('^(@[a-zA-Z0-9_]+)?(\s|\n)*', '', txt)
 
                 # とりあえずふぁぼる
                 print('お手紙っ！：@{0} < {1}'.format(notification['account']['acct'], txt))
