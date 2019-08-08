@@ -103,7 +103,7 @@ class local_listener(StreamListener):
             sad = re.search(r'((泣|な)いてる|しくしく|シクシク|ｼｸｼｸ|ぐすん|グスン|ｸﾞｽﾝ|ぶわっ|ブワッ|ﾌﾞﾜｯ)', txt)
             noNow = re.search(r'(いまのなし|イマノナシ|ｲﾏﾉﾅｼ)', txt)
             writeDict = re.search(r'^:@[a-zA-Z0-9_]+:(さん|くん|君|殿|どの|ちゃん)?はこんな人[:：]', txt)
-            writeMemo = re.search(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：]', txt)
+            writeMemo = re.search(r'^(メモ|めも|[Mm][Ee][Mm][Oo])[:：](.+)', txt)
             
             # ユウちゃん etc... とか呼ばれたらふぁぼる
             if calledYuChan:
