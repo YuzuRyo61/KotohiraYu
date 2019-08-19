@@ -78,6 +78,13 @@ class user_listener(StreamListener):
             if notifyType == 'mention':
                 # 返信とか
 
+                memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+
+                # 知っているユーザーであるか
+                # 知らないユーザーの場合はここで弾く
+                if len(memory.select('fav_rate', notification['account']['id'])) == 0:
+                    return
+
                 # テキスト化
                 txt = KotohiraUtil.h2t(notification['status']['content'])
 
@@ -98,7 +105,6 @@ class user_listener(StreamListener):
                     return
 
                 # 好感度を少し上げる
-                memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
                 memory.update('fav_rate', 1, notification['account']['id'])
 
                 # 正規表現とか
