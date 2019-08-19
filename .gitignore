@@ -112,3 +112,6 @@ tmp/
 
 # Editor
 .vscode/
+
+# usermemos
+USERMEMOS.json

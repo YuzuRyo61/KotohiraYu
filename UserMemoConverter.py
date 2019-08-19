@@ -9,7 +9,6 @@ import configparser
 import os
 import sqlite3
 import json
-from Yu import KotohiraMemory
 
 if __name__ == "__main__":
     config = configparser.ConfigParser()
