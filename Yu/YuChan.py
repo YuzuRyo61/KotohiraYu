@@ -315,6 +315,7 @@ class YuChan:
             for t in tootBody:
                 tootCwTemplate = "{0}時のメモのまとめですっ！({1}/{2})".format(now.hour, sepCount + 1, tootSep + 1)
                 mastodon.status_post(t + "\n#ユウちゃんのまとめメモ", spoiler_text=tootCwTemplate)
+                sepCount += 1
         
         # クリーンアップ
         del memory
