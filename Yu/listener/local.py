@@ -222,6 +222,8 @@ class local_listener(StreamListener):
                         print("こんばんはっ！：@{0} < {1}".format(status['account']['acct'], txt))
                         mastodon.toot(""":@{1}: {0}、こんばんはっ！🌙""".format(name, status['account']['acct']))
 
+                YuChan.drill_count(status['account']['acct'], name, status['account']['statuses_count'])
+
                 # 最終更新を変更
                 memory.update('updated_users', dt, status['account']['id'])
 

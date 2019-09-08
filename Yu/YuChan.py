@@ -391,3 +391,19 @@ class YuChan:
             mastodon.account_unfollow(targetID_Inst)
 
         del memory
+
+    @staticmethod
+    def drill_count(targetID, name, statCount):
+        if statCount <= 10000: # トゥート数が10,000以下の場合は1,000トゥート単位で処理しますっ！
+            if statCount % 1000 == 0:
+                tootable =  True
+            else:
+                tootable = False
+        else:
+            if statCount % 10000 == 0:
+                tootable = True
+            else:
+                tootable = False
+
+        if tootable:
+            mastodon.toot(f"@{targetID}\n:@{targetID}: {name}、{statCount}トゥート達成おめでとうございますっ！🎉")
