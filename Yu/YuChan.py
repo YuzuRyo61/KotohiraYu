@@ -406,4 +406,4 @@ class YuChan:
                 tootable = False
 
         if tootable:
-            mastodon.toot(f"@{targetID}\n:@{targetID}: {name}、{statCount}トゥート達成おめでとうございますっ！🎉")
+            mastodon.toot(f"@{targetID}\n:@{targetID}: {name}、{statCount:,}トゥート達成おめでとうございますっ！🎉")
