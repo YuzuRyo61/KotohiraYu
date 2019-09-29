@@ -9,9 +9,15 @@ import json
 from bottle import route, run, auth_basic, abort, response, request, redirect
 from sqlite3 import OperationalError
 from jinja2 import Template, Environment, FileSystemLoader
+from mastodon import Mastodon
 
 config = configparser.ConfigParser()
 config.read('config/config.ini')
+
+mastodon = Mastodon(
+    access_token='config/accesstoken.txt',
+    api_base_url=config['instance']['address']
+)
 
 ENV = Environment(loader=FileSystemLoader('consoleTemplate'))
 
@@ -148,6 +154,36 @@ def delete_panicLog(panicdate):
         redirect('/panic-log/')
     else:
         abort(404, "PANIC LOG NOT FOUND")
+
+@route('/status')
+@auth_basic(VERIFY)
+def show_stat():
+    conn = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
+    c = conn.cursor()
+
+    for tc in c.execute(f"SELECT count() FROM known_users"):
+        KNOWNCOUNT = tc[0]
+
+    conn.close()
+
+    mymst = mastodon.account_verify_credentials()
+
+    return ENV.get_template('status.html').render({
+        "statusList": [
+            {
+                "title": "Known users count",
+                "value": KNOWNCOUNT
+            },
+            {
+                "title": "Account",
+                "value": "@" + mymst['acct'] + f"@{config['instance']['address']}"
+            },
+            {
+                "title": "Toot count",
+                "value": f"{mymst['statuses_count']:,}"
+            }
+        ]
+    })
 
 def WEBRUN():
     run(port=7878)
