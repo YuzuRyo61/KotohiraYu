@@ -138,7 +138,7 @@ def show_panicLog(panicdate):
         with open(f'panic-log/PANIC-{str(panicdate)}.LOG', encoding="utf-8") as panic:
             txtRaw = panic.read()
 
-        if 'raw' in request.query.dict:
+        if 'raw' in request.query.dict: # pylint: disable=no-member
             response.content_type = "text/plain; charset=UTF-8"
             return txtRaw
         else:
@@ -168,6 +168,8 @@ def show_stat():
 
     mymst = mastodon.account_verify_credentials()
 
+    dbSize = os.path.getsize('Yu_{}.db'.format(config['instance']['address']))
+
     return ENV.get_template('status.html').render({
         "statusList": [
             {
@@ -181,6 +183,10 @@ def show_stat():
             {
                 "title": "Toot count",
                 "value": f"{mymst['statuses_count']:,}"
+            },
+            {
+                "title": "Database Size (byte)",
+                "value": f"{dbSize:,}"
             }
         ]
     })
