@@ -305,8 +305,8 @@ class YuChan:
                 tootList.append( ":@{0}: {1}\n".format(i['from'], i['body']))
             # トゥート可能な文面にする
             for i, body in enumerate(tootList):
-                # 内容が15件超える場合はセパレート
-                if i % 15 == 0:
+                # 内容が15件超える場合はセパレート（enumerateで0の場合は例外）
+                if not i == 0 and i % 15 == 0:
                     tootBody.append('')
                     tootSep += 1
                 tootBody[tootSep] += body
