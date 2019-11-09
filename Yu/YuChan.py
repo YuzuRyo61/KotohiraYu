@@ -304,12 +304,12 @@ class YuChan:
             for i in memRaw:
                 tootList.append( ":@{0}: {1}\n".format(i['from'], i['body']))
             # トゥート可能な文面にする
-            for i in tootList:
-                # 内容の文字数が435を超える場合はセパレート
-                if (len(tootBody[tootSep])) > 435:
+            for i, body in enumerate(tootList):
+                # 内容が15件超える場合はセパレート
+                if i % 15 == 0:
                     tootBody.append('')
                     tootSep += 1
-                tootBody[tootSep] += i
+                tootBody[tootSep] += body
             # まとめる
             sepCount = 0
             for t in tootBody:
