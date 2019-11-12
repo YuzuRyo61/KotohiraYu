@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import configparser
 import re
+import time
 
 from mastodon import Mastodon, StreamListener
 
