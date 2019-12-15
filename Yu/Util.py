@@ -10,6 +10,7 @@ import requests
 from mastodon import Mastodon
 
 from Yu.config import config
+from Yu import log
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',
@@ -26,7 +27,7 @@ def PANIC(dbPanic=False):
         f.write('--- PANIC! {} ---\n'.format(nowFormat))
         traceback.print_exc(file=f)
         f.write('\n')
-    print("＊ユウちゃんパニックですぅ・・・！\n{}".format(traceback.format_exc()))
+    log.logErr("＊ユウちゃんパニックですぅ・・・！\n{}".format(traceback.format_exc()))
     if config['linenotify']['enable'] == True and dbPanic == False:
         headers = {"Authorization": "Bearer " + config['linenotify']['token']}
         payload = {"message": "\n＊ユウちゃんがパニックになりました。\nパニック時刻: \n" + nowFormat + "\n詳細はログを確認してくださいっ"}
@@ -34,9 +35,9 @@ def PANIC(dbPanic=False):
             payload['message'] += "\n" + config['web']['base'] + "/panic-log/" + nowFileFormat
         req = requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
         if req.status_code != 200:
-            print("[FATAL] LINE NOTIFY ACCESS FAILED")
+            log.logErr("[FATAL] LINE NOTIFY ACCESS FAILED")
         else:
-            print("LINET NOTIFY SENT")
+            log.logInfo("LINET NOTIFY SENT")
     
     # パニックした時にトゥートできるか試しますっ！できなくてもエラーを出さないようにしますっ！
     if dbPanic == False:
@@ -50,7 +51,7 @@ def h2t(txt):
 
 def schedule(func, doTimeList):
     # 指定した時間帯に実施する関数。設定時間は24時間表記で設定する
-    print(f"Setting feature: {func.__name__} at {doTimeList}")
+    log.logInfo(f"Setting feature: {func.__name__} at {doTimeList}")
     try:
         while True:
             now = datetime.datetime.now(timezone('Asia/Tokyo'))
@@ -60,13 +61,13 @@ def schedule(func, doTimeList):
                 if len(time.split(":")) == 2:
                     h, m = time.split(":")
                     if (h == nowH or h == '**' or h == '*') and m == nowM:
-                        print(f"指定した時間になったので実行っ！：{func}")
+                        log.logInfo(f"指定した時間になったので実行っ！：{func}")
                         func()
                         sleep(60)
                 else:
                     sleep(10)
     except:
         PANIC()
-        print('五秒待って読み込みし直しますねっ！')
+        log.logWarn('五秒待って読み込みし直しますねっ！')
         sleep(5)
         schedule(func, doTimeList)

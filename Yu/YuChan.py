@@ -9,6 +9,7 @@ from mastodon import Mastodon
 
 from Yu.Memory import KotohiraMemory
 from Yu.config import config
+from Yu import log
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',
@@ -44,7 +45,7 @@ def timeReport():
 def fortune(mentionId, acctId, visibility):
     # 乱数作成
     rnd = random.randrange(5)
-    print(f"占いっ！：@{acctId} => {rnd}")
+    log.logInfo(f"占いっ！：@{acctId} => {rnd}")
     time.sleep(0.5)
     if rnd == 0:
         mastodon.status_post(f'@{acctId}\n🎉 大吉ですっ！', in_reply_to_id=mentionId, visibility=visibility)
@@ -87,7 +88,7 @@ def rsp(txt, notification):
     challengerChoose = None
 
     if rock:
-        print("じゃんけんっ！：@{0} => ✊ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
+        log.logInfo("じゃんけんっ！：@{0} => ✊ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
         challengerChoose = "✊"
         if yuOttChoose == 0:
             isChallengerWin = None
@@ -96,7 +97,7 @@ def rsp(txt, notification):
         elif yuOttChoose == 2:
             isChallengerWin = False
     elif scissors:
-        print("じゃんけんっ！：@{0} => ✌ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
+        log.logInfo("じゃんけんっ！：@{0} => ✌ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
         challengerChoose = "✌"
         if yuOttChoose == 0:
             isChallengerWin = False
@@ -105,7 +106,7 @@ def rsp(txt, notification):
         elif yuOttChoose == 2:
             isChallengerWin = True
     elif papers:
-        print("じゃんけんっ！：@{0} => ✋ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
+        log.logInfo("じゃんけんっ！：@{0} => ✋ vs {1}".format(notification['account']['acct'], yuOttChooseEmoji))
         challengerChoose = "✋"
         if yuOttChoose == 0:
             isChallengerWin = True
@@ -131,7 +132,7 @@ def set_nickname(txt, reply_id, ID_Inst, acct, visibility, ktMemory):
     name = name.replace('\n', '')
     # 30文字超えは弾きますっ！
     if len(name) > 30:
-        print('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
+        log.logInfo('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
         mastodon.status_post(f'@{acct}\n長すぎて覚えられませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
         return
 
@@ -142,12 +143,12 @@ def set_nickname(txt, reply_id, ID_Inst, acct, visibility, ktMemory):
     else:
         ktMemory.update('nickname', name, ID_Inst)
     # 変更通知
-    print('ニックネーム変更っ！：@{0} => {1}'.format(acct, name))
+    log.logInfo('ニックネーム変更っ！：@{0} => {1}'.format(acct, name))
     mastodon.status_post(f'@{acct}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=reply_id, visibility=visibility)
 
 def show_nickname(reply_id, ID_Inst, acct, visibility, ktMemory):
     isexistname = ktMemory.select('nickname', ID_Inst)
-    print('ニックネーム照会っ！：@{}'.format(acct))
+    log.logInfo('ニックネーム照会っ！：@{}'.format(acct))
     if len(isexistname) != 0:
         name = isexistname[0][2]
         mastodon.status_post(f'@{acct}\nユウちゃんは「{name}」と呼んでいますっ！', in_reply_to_id=reply_id, visibility=visibility)
@@ -158,17 +159,17 @@ def del_nickname(reply_id, ID_Inst, acct, visibility, ktMemory):
     isexistname = ktMemory.select('nickname', ID_Inst)
     if len(isexistname) != 0:
         ktMemory.delete('nickname', ID_Inst)
-        print('ニックネーム削除っ！：@{}'.format(acct))
+        log.logInfo('ニックネーム削除っ！：@{}'.format(acct))
         mastodon.status_post(f'@{acct}\nわかりましたっ！今度から普通に呼ばせていただきますっ！', in_reply_to_id=reply_id, visibility=visibility)
     else:
-        print('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(acct))
+        log.logInfo('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(acct))
         mastodon.status_post(f'@{acct}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
 
 def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility, ktMemory):
     # ユーザーはユウちゃんにフォローされていることが前提条件
     Relation = mastodon.account_relationships(fromID_Inst)[0]
     if Relation['following'] == False:
-        print('フォローしていませんっ！：@{}'.format(fromAcct))
+        log.logInfo('フォローしていませんっ！：@{}'.format(fromAcct))
         mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
         return
     
@@ -181,7 +182,7 @@ def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility, ktMemory
     isKnown = dbres.fetchall()
 
     if len(isKnown) == 0:
-        print('知らないユーザーさんですっ・・・：@{}'.format(targetAcct))
+        log.logInfo('知らないユーザーさんですっ・・・：@{}'.format(targetAcct))
         mastodon.status_post(f'@{fromAcct}\nユウちゃんその人知りませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
         return
     else:
@@ -192,7 +193,7 @@ def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility, ktMemory
         else:
             ktMemory.update('nickname', name, targetID_Inst)
 
-        print('他人のニックネーム変更っ！：{0} => {1} => {2}'.format(fromAcct, targetAcct, name))
+        log.logInfo('他人のニックネーム変更っ！：{0} => {1} => {2}'.format(fromAcct, targetAcct, name))
         mastodon.status_post(f':@{fromAcct}: @{fromAcct}\nわかりましたっ！ :@{targetAcct}: @{targetAcct} さんのことを今度から\n「{name}」と呼びますねっ！\n#ユウちゃんのあだ名変更日記')
         return True
 
@@ -368,7 +369,7 @@ def unfollow_attempt(targetID_Inst):
     target = memory.select('fav_rate', targetID_Inst)[0]
     relation = mastodon.account_relationships(targetID_Inst)[0]
     if relation['following'] == True and int(target[2]) < int(config['follow']['condition_rate']):
-        print('ゴメンねっ・・・。: {}'.format(str(targetID_Inst)))
+        log.logInfo('ゴメンねっ・・・。: {}'.format(str(targetID_Inst)))
         mastodon.account_unfollow(targetID_Inst)
 
     del memory

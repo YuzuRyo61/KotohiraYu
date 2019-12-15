@@ -12,6 +12,7 @@ from Yu import Util
 from Yu.Timelines import local, home
 from Yu.Web import WEBRUN
 from .config import config
+from . import log
 
 def i18n_Setup():
     __I18NLOCALEDIR = os.path.abspath(
@@ -30,4 +31,4 @@ def i18n_Setup():
     TRANSLATER.install()
 
 i18n_Setup()
-__all__ = ['YuChan', 'Util', 'KotohiraMemory', 'local', 'home', 'WEBRUN']
+__all__ = ['YuChan', 'Util', 'KotohiraMemory', 'local', 'home', 'WEBRUN', 'log']

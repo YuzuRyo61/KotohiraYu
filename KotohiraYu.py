@@ -18,7 +18,7 @@ from sqlite3 import OperationalError
 
 from mastodon import Mastodon
 
-from Yu import YuChan, KotohiraMemory, local, home, WEBRUN
+from Yu import YuChan, KotohiraMemory, local, home, WEBRUN, log
 from Yu import Util as KotohiraUtil
 from Yu.config import config
 
@@ -46,12 +46,12 @@ def main():
         # スレッド開始
         for ft in features:
             ft.start()
-        print("ALL SYSTEMS READY!")
+        log.logInfo("ALL SYSTEMS READY!")
     except KeyboardInterrupt:
         # 動作する気はしない
         sys.exit()
     except OperationalError:
-        print("DATABASE ACCESS ERROR")
+        log.logCritical("DATABASE ACCESS ERROR")
         sys.exit(2)
     except:
         KotohiraUtil.PANIC()
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         # config.tomlにあるIDと実際に取り寄せたIDが一致しない場合は弾く
         res = mastodon.account_verify_credentials()
         if config['user']['me'] != res.acct:
-            print('＊設定したアカウントIDと一致しませんっ！！')
+            log.logCritical('＊設定したアカウントIDと一致しませんっ！！')
             sys.exit(1)
 
         # 問題なさそうであれば起動
@@ -73,5 +73,5 @@ if __name__ == '__main__':
 
         main()
     else:
-        print('＊設定ファイルやアクセストークンがありませんっ！！')
+        log.logCritical('＊設定ファイルやアクセストークンがありませんっ！！')
         sys.exit(1)

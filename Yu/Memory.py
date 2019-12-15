@@ -3,6 +3,7 @@ import glob
 import os
 
 from .config import config
+from . import log
 
 class KotohiraMemory:
     def __init__(self, showLog=False):
@@ -63,7 +64,7 @@ class KotohiraMemory:
     def __log(self, message):
         # ログ表示用。ただしクラス初期化時にログ表示をするように設定する必要がある or (クラス変数).showLog をTrueに変更すればログ表示可
         if self.showLog:
-            print(f"[DATABASE] {message}")
+            log.logInfo(f"[DB] {message}")
 
     def insert(self, table, *args):
         # SQLファイルに沿ってデータ挿入（指定したテーブルのフォルダ内のinsert.sqlファイル）
