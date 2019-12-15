@@ -1,7 +1,7 @@
 import logging
 
 logger = logging.getLogger(__name__)
-lgfmt = logging.Formatter("%(asctime)s | %(filename)s #%(funcName)s | %(levelname)s | %(message)s")
+lgfmt = logging.Formatter("%(asctime)s | %(processName)s(%(process)d) / %(threadName)s(%(thread)d) | %(levelname)s | %(message)s")
 handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
 handler.setFormatter(lgfmt)
