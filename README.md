@@ -14,7 +14,7 @@ The mastodon bot!
 
    ```pip3 install -r requirements.txt```
 
-3. config.iniを設定する
+3. config.tomlを設定する
 
 4. accesstoken.txtにアクセストークンを入れる
 

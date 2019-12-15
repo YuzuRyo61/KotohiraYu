@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import configparser
 import datetime
 import random
@@ -8,10 +7,8 @@ import time
 from mastodon import Mastodon, StreamListener
 from pytz import timezone
 
-from Yu import KotohiraMemory, KotohiraUtil, YuChan
-
-config = configparser.ConfigParser()
-config.read('config/config.ini')
+from Yu import KotohiraMemory, YuChan, Util as KotohiraUtil
+from Yu.config import config
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',
@@ -39,7 +36,7 @@ class local_listener(StreamListener):
                 return
             
             # データベース初期化
-            memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+            memory = KotohiraMemory(showLog=config['log']['enable'])
 
             # ユウちゃんが知ってるユーザーか調べる
             # 知らない場合はユウちゃんは記憶しますっ！

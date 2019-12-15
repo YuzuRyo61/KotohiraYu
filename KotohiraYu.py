@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 Kotohira Yu
 
@@ -20,10 +18,9 @@ from sqlite3 import OperationalError
 
 from mastodon import Mastodon
 
-from Yu import YuChan, KotohiraUtil, KotohiraMemory, local, home, WEBRUN
-
-config = configparser.ConfigParser()
-config.read('config/config.ini')
+from Yu import YuChan, KotohiraMemory, local, home, WEBRUN
+from Yu import Util as KotohiraUtil
+from Yu.config import config
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',
@@ -42,7 +39,7 @@ def main():
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.meow_time, ['22:22'])) )
     # ウェブコンソール（不要な場合はconfigファイルで）
     # ポート番号は 7878 でListenされます
-    if config['web'].getboolean('enable'):
+    if config['web']['enable']:
         features.append( threading.Thread(target=WEBRUN) )
 
     try:
@@ -61,8 +58,8 @@ def main():
 
 if __name__ == '__main__':
     # 設定ファイルがあるかチェック。ない場合は弾く
-    if os.path.isfile('config/config.ini') and os.path.isfile('config/accesstoken.txt'):
-        # config.iniにあるIDと実際に取り寄せたIDが一致しない場合は弾く
+    if os.path.isfile('config/config.toml') and os.path.isfile('config/accesstoken.txt'):
+        # config.tomlにあるIDと実際に取り寄せたIDが一致しない場合は弾く
         res = mastodon.account_verify_credentials()
         if config['user']['me'] != res.acct:
             print('＊設定したアカウントIDと一致しませんっ！！')
@@ -71,7 +68,7 @@ if __name__ == '__main__':
         # 問題なさそうであれば起動
 
         # データベース初期化
-        km = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+        km = KotohiraMemory(showLog=config['log']['enable'])
         del km
 
         main()

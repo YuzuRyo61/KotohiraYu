@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import configparser
 import glob
@@ -11,8 +9,7 @@ from sqlite3 import OperationalError
 from jinja2 import Template, Environment, FileSystemLoader
 from mastodon import Mastodon
 
-config = configparser.ConfigParser()
-config.read('config/config.ini')
+from Yu.config import config
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',

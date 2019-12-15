@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import configparser
 import datetime
 import random
@@ -10,15 +9,9 @@ import requests.exceptions
 from mastodon import Mastodon, StreamListener
 from mastodon.Mastodon import MastodonNetworkError, MastodonServerError
 from pytz import timezone
-from Yu import KotohiraMemory, KotohiraUtil, YuChan
+from Yu import KotohiraMemory, Util as KotohiraUtil, YuChan
 from Yu.listener import user_listener, local_listener
-
-# デバッグ用！
-# import pprint as pp
-
-
-config = configparser.ConfigParser()
-config.read('config/config.ini')
+from Yu.config import config
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',

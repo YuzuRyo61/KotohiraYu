@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-
-import configparser
 import sqlite3
 import glob
 import os
 
-config = configparser.ConfigParser()
-config.read('config/config.ini')
+from .config import config
 
 class KotohiraMemory:
     def __init__(self, showLog=False):

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 Database Migration tool
 """
@@ -10,9 +8,7 @@ if __name__ == "__main__":
     import configparser
     import os
     from Yu import KotohiraMemory
-
-    config = configparser.ConfigParser()
-    config.read('config/config.ini')
+    from Yu.config import config
 
     memory = KotohiraMemory(showLog=True)
 

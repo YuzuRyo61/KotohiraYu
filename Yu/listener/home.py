@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
 import configparser
 import re
 import time
 
 from mastodon import Mastodon, StreamListener
 
-from Yu import KotohiraMemory, KotohiraUtil, YuChan
-
-config = configparser.ConfigParser()
-config.read('config/config.ini')
+from Yu import KotohiraMemory, YuChan
+from Yu import Util as KotohiraUtil
+from Yu.config import config
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',
@@ -44,7 +42,7 @@ class user_listener(StreamListener):
                 return
             
             # データベース初期化
-            memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+            memory = KotohiraMemory(showLog=config['log']['enable'])
 
             calledYuChan = re.search(r'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|ゆう|ゆぅ|ユウ|ユゥ|ﾕｳ|ﾕｩ|:@' + config['user']['me'] + ':)', txt)
 
@@ -79,7 +77,7 @@ class user_listener(StreamListener):
             if notifyType == 'mention':
                 # 返信とか
 
-                memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+                memory = KotohiraMemory(showLog=config['log']['enable'])
 
                 # 知っているユーザーであるか
                 # 知らないユーザーの場合はここで弾く
@@ -188,7 +186,7 @@ class user_listener(StreamListener):
                 # ふぁぼられ
                 print('ふぁぼられたっ！：@{0}'.format(notification['account']['acct']))
                 # ふぁぼ連対策
-                memory = KotohiraMemory(showLog=config['log'].getboolean('enable'))
+                memory = KotohiraMemory(showLog=config['log']['enable'])
                 favInfo = memory.select('recent_favo', notification['account']['id'])
                 if len(favInfo) == 0:
                     # データがない場合は追加して好感度アップ

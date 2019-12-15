@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 いままでのユーザーメモをエクスポートするスクリプト
 """
@@ -12,8 +10,7 @@ import sqlite3
 import json
 
 if __name__ == "__main__":
-    config = configparser.ConfigParser()
-    config.read('config/config.ini')
+    from Yu.config import config
     print('Selected DB: Yu_{}.db'.format(config['instance']['address']))
     if os.path.isfile('Yu_{}.db'.format(config['instance']['address'])):
         CONNECT = sqlite3.connect('Yu_{}.db'.format(config['instance']['address']))
