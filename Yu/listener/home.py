@@ -48,7 +48,10 @@ class user_listener(StreamListener):
             # ユウちゃん etc... とか呼ばれたらふぁぼる
             if calledYuChan:
                 log.logInfo('呼ばれたっ！：@{0} < {1}'.format(status['account']['acct'], txt))
-                mastodon.status_favourite(status['id'])
+                if not status['favourited']:
+                    mastodon.status_favourite(status['id'])
+                else:
+                    log.logWarn('ふぁぼってましたっ！')
                 # 好感度ちょいアップ
                 memory.update('fav_rate', 1, status['account']['id'])
 
