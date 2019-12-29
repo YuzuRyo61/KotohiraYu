@@ -241,7 +241,8 @@ class local_listener(StreamListener):
         except Exception as e: # 上と同じ
             raise e
         finally:
-            try:
-                del memory
-            except NameError:
-                pass
+            # try:
+            #     del memory
+            # except NameError:
+            #     pass
+            pass

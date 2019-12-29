@@ -1,16 +1,16 @@
-import datetime
-from pytz import timezone
-from bs4 import BeautifulSoup
-import traceback
-import os
-from time import sleep
 import configparser
+import datetime
+import os
+import traceback
+from time import sleep
+
 import requests
-
+from bs4 import BeautifulSoup
 from mastodon import Mastodon
+from pytz import timezone
 
-from Yu.config import config
 from Yu import log
+from Yu.config import config
 
 mastodon = Mastodon(
     access_token='config/accesstoken.txt',

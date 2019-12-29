@@ -388,3 +388,12 @@ def drill_count(targetID, name, statCount):
 
     if tootable:
         mastodon.toot(f"@{targetID}\n:@{targetID}: {name}、{statCount:,}トゥート達成おめでとうございますっ！🎉")
+
+# あなたとユウちゃんのこと教えますっ！
+def about_you(targetID_Inst, mentionId, visibility):
+    memory = KotohiraMemory(showLog=config['log']['enable'])
+    target = memory.select('known_users', int(targetID_Inst))[0]
+    known_at = datetime.datetime.strptime(target[3], "%Y-%m-%d %H:%M:%S%z")
+    known_at_str = known_at.strftime("%Y月%m月%d日 %H:%M:%S")
+
+    mastodon.status_post(f'@{target[2]}\n ユウちゃんは{known_at_str}にあなたのことを覚えて、{target[0]}番目に知りましたっ！', in_reply_to_id=mentionId, visibility=visibility)

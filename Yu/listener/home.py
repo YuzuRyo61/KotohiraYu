@@ -118,6 +118,7 @@ class user_listener(StreamListener):
                 rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
                 isPing = re.search(r'[pP][iI][nN][gG]', txt)
                 love = re.search(r'(すき|好き|しゅき|ちゅき)', txt)
+                aboutYou = re.search(r'(ぼく|ボク|僕|わたし|ワタシ|私|俺|おれ|オレ|うち|わし|あたし|あたい)の事', txt)
 
                 # メンションでフォローリクエストされたとき
                 if followReq:
@@ -183,6 +184,10 @@ class user_listener(StreamListener):
                     else:
                         log.logInfo('//：@{}'.format(notification['account']['acct']))
                         mastodon.status_post('@{}\nは、恥ずかしいですっ・・・//'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
+
+                elif aboutYou:
+                    log.logInfo("@{}の事、教えますっ！".format(notification['account']['acct']))
+                    YuChan.about_you(notification['account']['id'], notification['status']['id'], notification['status']['visibility'])
             
             elif notifyType == 'favourite':
                 # ふぁぼられ
