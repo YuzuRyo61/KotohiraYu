@@ -171,7 +171,7 @@ def show_stat():
         "statusList": [
             {
                 "title": "Known users count",
-                "value": KNOWNCOUNT
+                "value": "{:,}".format(KNOWNCOUNT)
             },
             {
                 "title": "Account",
