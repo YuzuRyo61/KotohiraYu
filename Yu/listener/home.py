@@ -118,7 +118,7 @@ class user_listener(StreamListener):
                 rspOtt = re.search(r'じゃんけん\s?(グー|✊|👊|チョキ|✌|パー|✋)', txt)
                 isPing = re.search(r'[pP][iI][nN][gG]', txt)
                 love = re.search(r'(すき|好き|しゅき|ちゅき)', txt)
-                aboutYou = re.search(r'(ぼく|ボク|僕|わたし|ワタシ|私|俺|おれ|オレ|うち|わし|あたし|あたい)の事', txt)
+                aboutYou = re.search(r'(ぼく|ボク|僕|わたし|ワタシ|私|俺|おれ|オレ|うち|わし|あたし|あたい)の(事|こと)', txt)
 
                 # メンションでフォローリクエストされたとき
                 if followReq:
