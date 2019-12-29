@@ -397,3 +397,5 @@ def about_you(targetID_Inst, mentionId, visibility):
     known_at_str = known_at.strftime("%Y月%m月%d日 %H:%M:%S")
 
     mastodon.status_post(f'@{target[2]}\n ユウちゃんは{known_at_str}にあなたのことを覚えて、{target[0]}番目に知りましたっ！', in_reply_to_id=mentionId, visibility=visibility)
+
+    del memory
