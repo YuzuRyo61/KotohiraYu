@@ -52,7 +52,3 @@ The mastodon bot!
 ## License
 
 MIT License. See [LICENSE](LICENSE)
-
-## Special Thanks
-
-Social preview(and official production account header image): [@elfin@best-friends.chat](https://best-friends.chat/@elfin)
