@@ -1,5 +1,6 @@
 [instance]
 address = "best-friends.chat"
+access_token = "replace_something"
 
 [user]
 me = "Yu"

@@ -6,17 +6,13 @@ import time
 from sqlite3 import OperationalError
 
 import requests.exceptions
-from mastodon import Mastodon, StreamListener
+from mastodon import StreamListener
 from mastodon.Mastodon import MastodonNetworkError, MastodonServerError
 from pytz import timezone
 from Yu import KotohiraMemory, Util as KotohiraUtil, YuChan, log
 from Yu.listener import user_listener, local_listener
 from Yu.config import config
-
-mastodon = Mastodon(
-    access_token='config/accesstoken.txt',
-    api_base_url=config['instance']['address']
-)
+from Yu.mastodon import mastodon
 
 def local():
     log.logInfo('Initializing feature: local')

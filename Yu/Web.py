@@ -7,14 +7,9 @@ import json
 from bottle import route, run, auth_basic, abort, response, request, redirect
 from sqlite3 import OperationalError
 from jinja2 import Template, Environment, FileSystemLoader
-from mastodon import Mastodon
 
 from Yu.config import config
-
-mastodon = Mastodon(
-    access_token='config/accesstoken.txt',
-    api_base_url=config['instance']['address']
-)
+from Yu.mastodon import mastodon
 
 ENV = Environment(loader=FileSystemLoader('consoleTemplate'))
 

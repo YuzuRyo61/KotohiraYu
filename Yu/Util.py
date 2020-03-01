@@ -6,16 +6,11 @@ from time import sleep
 
 import requests
 from bs4 import BeautifulSoup
-from mastodon import Mastodon
 from pytz import timezone
 
 from Yu import log
 from Yu.config import config
-
-mastodon = Mastodon(
-    access_token='config/accesstoken.txt',
-    api_base_url=config['instance']['address']
-)
+from Yu.mastodon import mastodon
 
 def PANIC(dbPanic=False):
     # raiseされたら実行する。別途スクリプトで例外処理する必要がある

@@ -4,16 +4,12 @@ import random
 import re
 import time
 
-from mastodon import Mastodon, StreamListener
+from mastodon import StreamListener
 from pytz import timezone
 
 from Yu import KotohiraMemory, YuChan, Util as KotohiraUtil, log
 from Yu.config import config
-
-mastodon = Mastodon(
-    access_token='config/accesstoken.txt',
-    api_base_url=config['instance']['address']
-)
+from Yu.mastodon import mastodon
 
 # ローカルタイムラインのリスナー
 class local_listener(StreamListener):

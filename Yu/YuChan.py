@@ -5,16 +5,11 @@ import re
 import json
 import time
 from pytz import timezone
-from mastodon import Mastodon
 
 from Yu.Memory import KotohiraMemory
 from Yu.config import config
 from Yu import log
-
-mastodon = Mastodon(
-    access_token='config/accesstoken.txt',
-    api_base_url=config['instance']['address']
-)
+from Yu.mastodon import mastodon
 
 # NGワードを予め読み込み（ファイルIOの負荷対策）
 NGWORDS = []

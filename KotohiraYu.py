@@ -16,16 +16,10 @@ import os
 import configparser
 from sqlite3 import OperationalError
 
-from mastodon import Mastodon
-
 from Yu import YuChan, KotohiraMemory, local, home, WEBRUN, log
 from Yu import Util as KotohiraUtil
 from Yu.config import config
-
-mastodon = Mastodon(
-    access_token='config/accesstoken.txt',
-    api_base_url=config['instance']['address']
-)
+from Yu.mastodon import mastodon
 
 def main():
     # スレッド化するための初期化

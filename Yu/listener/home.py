@@ -2,15 +2,11 @@ import configparser
 import re
 import time
 
-from mastodon import Mastodon, StreamListener
+from mastodon import StreamListener
 
 from Yu import KotohiraMemory, YuChan, log, Util as KotohiraUtil
 from Yu.config import config
-
-mastodon = Mastodon(
-    access_token='config/accesstoken.txt',
-    api_base_url=config['instance']['address']
-)
+from Yu.mastodon import mastodon
 
 # ホームタイムラインのリスナー(主に通知リスナー)
 class user_listener(StreamListener):
@@ -90,7 +86,7 @@ class user_listener(StreamListener):
                 txt = KotohiraUtil.h2t(notification['status']['content'])
 
                 # 口頭のメンションを除去
-                txt = re.sub('^(@[a-zA-Z0-9_]+)?(\s|\n)*', '', txt)
+                txt = re.sub(r'^(@[a-zA-Z0-9_]+)?(\s|\n)*', '', txt)
 
                 # とりあえずふぁぼる
                 log.logInfo('お手紙っ！：@{0} < {1}'.format(notification['account']['acct'], txt))
