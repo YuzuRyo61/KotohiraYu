@@ -7,8 +7,11 @@
 
 import configparser
 import os
+import sys
 import sqlite3
 import json
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 if __name__ == "__main__":
     from Yu.config import config

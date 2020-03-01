@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pylint = "*"
 
 [packages]
 beautifulsoup4 = "*"
@@ -17,3 +18,7 @@ Jinja2 = "*"
 
 [requires]
 python_version = "3.7"
+
+[scripts]
+memoconvert = "python patchScripts/UserMemoConverter.py"
+memoexport = "python patchScripts/UserMemoExport.py"
