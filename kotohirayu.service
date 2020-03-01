@@ -7,9 +7,9 @@ After=network.target
 ; UserやGroupも、実行権や書き込みなど問題がないユーザーやグループを指定
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/yu/KotohiraYu/KotohiraYu.py
+ExecStart=/usr/bin/python3 /path/to/KotohiraYu.py
 Restart=on-failure
-WorkingDirectory=/home/yu/KotohiraYu
+WorkingDirectory=/path/to
 User=yu
 Group=yu
 StandardOutput=syslog
