@@ -52,7 +52,7 @@ def main():
 
 if __name__ == '__main__':
     # 設定ファイルがあるかチェック。ない場合は弾く
-    if os.path.isfile('config/config.toml') and os.path.isfile('config/accesstoken.txt'):
+    if os.path.isfile('config/config.toml'):
         # config.tomlにあるIDと実際に取り寄せたIDが一致しない場合は弾く
         res = mastodon.account_verify_credentials()
         if config['user']['me'] != res.acct:
