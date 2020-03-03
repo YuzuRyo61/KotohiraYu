@@ -14,11 +14,12 @@ requests = "*"
 six = "*"
 toml = "*"
 Jinja2 = "*"
-"Mastodon.py" = "==1.5.0"
+"Mastodon.py" = "*"
 
 [requires]
 python_version = "3.7"
 
 [scripts]
+start = "python KotohiraYu.py"
 memoconvert = "python patchScripts/UserMemoConverter.py"
 memoexport = "python patchScripts/UserMemoExport.py"
