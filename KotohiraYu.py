@@ -16,10 +16,11 @@ import os
 import configparser
 from sqlite3 import OperationalError
 
-from Yu import YuChan, local, home, WEBRUN, log
+from Yu import YuChan, local, home, log
 from Yu import Util as KotohiraUtil
 from Yu.config import config
 from Yu.mastodon import mastodon
+from Yu.database import DATABASE
 
 def main():
     # スレッド化するための初期化
@@ -31,18 +32,18 @@ def main():
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.timeReport,['**:00'])) )
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.toot_memo, ['**:55'])) )
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.meow_time, ['22:22'])) )
-    # ウェブコンソール（不要な場合はconfigファイルで）
-    # ポート番号は 7878 でListenされます
-    if config['web']['enable']:
-        features.append( threading.Thread(target=WEBRUN) )
 
     try:
         # スレッド開始
         for ft in features:
+            ft.setDaemon(True)
             ft.start()
         log.logInfo("ALL SYSTEMS READY!")
+        while True:
+            input()
     except KeyboardInterrupt:
-        # 動作する気はしない
+        if not DATABASE.is_closed():
+            DATABASE.close()
         sys.exit()
     except OperationalError:
         log.logCritical("DATABASE ACCESS ERROR")
