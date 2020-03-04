@@ -170,7 +170,7 @@ def show_nickname(reply_id, ID_Inst, acct, visibility):
 def del_nickname(reply_id, ID_Inst, acct, visibility):
     try:
         with DATABASE.transaction():
-            user = known_users.get_or_none(known_users.ID_Inst == ID_Inst)
+            user = known_users.get(known_users.ID_Inst == ID_Inst)
             delNickname = nickname.get_or_none(nickname.ID_Inst == user)
             if not delNickname == None:
                 delNickname.delete_instance()
