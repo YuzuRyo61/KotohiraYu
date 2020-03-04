@@ -2,6 +2,14 @@
 address = "best-friends.chat"
 access_token = "replace_something"
 
+[database]
+mode = "postgresql"
+name = "kotohirayu"
+user = "kotohirayu"
+pass = "password"
+host = "localhost"
+port = 5432
+
 [user]
 me = "Yu"
 god = "YuzuRyo61"

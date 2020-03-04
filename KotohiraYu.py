@@ -16,7 +16,7 @@ import os
 import configparser
 from sqlite3 import OperationalError
 
-from Yu import YuChan, KotohiraMemory, local, home, WEBRUN, log
+from Yu import YuChan, local, home, WEBRUN, log
 from Yu import Util as KotohiraUtil
 from Yu.config import config
 from Yu.mastodon import mastodon
@@ -60,11 +60,6 @@ if __name__ == '__main__':
             sys.exit(1)
 
         # 問題なさそうであれば起動
-
-        # データベース初期化
-        km = KotohiraMemory(showLog=config['log']['enable'])
-        del km
-
         main()
     else:
         log.logCritical('＊設定ファイルやアクセストークンがありませんっ！！')

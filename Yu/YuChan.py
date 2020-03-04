@@ -6,15 +6,15 @@ import json
 import time
 from pytz import timezone
 
-from Yu.Memory import KotohiraMemory
 from Yu.config import config
 from Yu import log
 from Yu.mastodon import mastodon
+from Yu.database import DATABASE
+from Yu.models import nickname, known_users, word_trigger, user_memos, fav_rate
 
 # NGワードを予め読み込み（ファイルIOの負荷対策）
-NGWORDS = []
-
 with open('config/NGWORDS.txt', mode='r', encoding='utf-8_sig') as nfs:
+    NGWORDS = []
     for ngw in nfs.readlines():
         # NGワードを追加。コメントを外す
         ngwWoC = re.sub('#.*', '', ngw).strip()
@@ -118,229 +118,250 @@ def rsp(txt, notification):
     elif isChallengerWin == False:
         mastodon.status_post('@{0}\nあなた：{1}\nユウちゃん：{2}\n👏 ユウちゃんの勝ちですっ！'.format(notification['account']['acct'], challengerChoose, yuOttChooseEmoji), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])
 
-def set_nickname(txt, reply_id, ID_Inst, acct, visibility, ktMemory):
-    # txtはHTMLタグ除去を施したもの、reply_idにリプライのIDをつける
-    txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
-    # 上記の正規表現のグループから代入
-    name = txtSearch.group(3)
-    # 改行は削除
-    name = name.replace('\n', '')
-    # 30文字超えは弾きますっ！
-    if len(name) > 30:
-        log.logInfo('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
-        mastodon.status_post(f'@{acct}\n長すぎて覚えられませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
-        return
+def set_nickname(name, reply_id, ID_Inst, acct, visibility):
+    try:
+        with DATABASE.transaction():
+            # reply_idにリプライのIDをつける
+            # 改行は削除
+            name = name.replace('\n', '')
+            # 32文字超えは弾きますっ！
+            if len(name) > 32:
+                log.logInfo('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
+                mastodon.status_post(f'@{acct}\n長すぎて覚えられませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
+                return
 
-    userInfo = ktMemory.select('nickname', ID_Inst)
+            user = known_users.get(known_users.ID_Inst == ID_Inst)
+            userInfo = nickname.select().where(nickname.ID_Inst == user).count()
 
-    if len(userInfo) == 0:
-        ktMemory.insert('nickname', ID_Inst, name)
+            if userInfo == 0:
+                nickname.create(ID_Inst=user, nickname=name)
+            else:
+                updateNickname = nickname.get(nickname.ID_Inst == user)
+                updateNickname = name
+                updateNickname.save()
+            # 変更通知
+            log.logInfo('ニックネーム変更っ！：@{0} => {1}'.format(acct, name))
+            mastodon.status_post(f'@{acct}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=reply_id, visibility=visibility)
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
     else:
-        ktMemory.update('nickname', name, ID_Inst)
-    # 変更通知
-    log.logInfo('ニックネーム変更っ！：@{0} => {1}'.format(acct, name))
-    mastodon.status_post(f'@{acct}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=reply_id, visibility=visibility)
+        DATABASE.commit()
 
-def show_nickname(reply_id, ID_Inst, acct, visibility, ktMemory):
-    isexistname = ktMemory.select('nickname', ID_Inst)
-    log.logInfo('ニックネーム照会っ！：@{}'.format(acct))
-    if len(isexistname) != 0:
-        name = isexistname[0][2]
-        mastodon.status_post(f'@{acct}\nユウちゃんは「{name}」と呼んでいますっ！', in_reply_to_id=reply_id, visibility=visibility)
+def show_nickname(reply_id, ID_Inst, acct, visibility):
+    try:
+        with DATABASE.transaction():
+            user = known_users.get(known_users.ID_Inst == ID_Inst)
+            showNickname = nickname.get_or_none(nickname.ID_Inst == user)
+            if not showNickname == None:
+                name = showNickname.nickname
+                mastodon.status_post(f'@{acct}\nユウちゃんは「{name}」と呼んでいますっ！', in_reply_to_id=reply_id, visibility=visibility)
+            else:
+                mastodon.status_post(f'@{acct}\nまだあだ名はありませんっ！', in_reply_to_id=reply_id, visibility=visibility)            
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
     else:
-        mastodon.status_post(f'@{acct}\nまだあだ名はありませんっ！', in_reply_to_id=reply_id, visibility=visibility)            
+        DATABASE.commit()
 
-def del_nickname(reply_id, ID_Inst, acct, visibility, ktMemory):
-    isexistname = ktMemory.select('nickname', ID_Inst)
-    if len(isexistname) != 0:
-        ktMemory.delete('nickname', ID_Inst)
-        log.logInfo('ニックネーム削除っ！：@{}'.format(acct))
-        mastodon.status_post(f'@{acct}\nわかりましたっ！今度から普通に呼ばせていただきますっ！', in_reply_to_id=reply_id, visibility=visibility)
+def del_nickname(reply_id, ID_Inst, acct, visibility):
+    try:
+        with DATABASE.transaction():
+            user = known_users.get_or_none(known_users.ID_Inst == ID_Inst)
+            delNickname = nickname.get_or_none(nickname.ID_Inst == user)
+            if not delNickname == None:
+                delNickname.delete_instance()
+                log.logInfo('ニックネーム削除っ！：@{}'.format(acct))
+                mastodon.status_post(f'@{acct}\nわかりましたっ！今度から普通に呼ばせていただきますっ！', in_reply_to_id=reply_id, visibility=visibility)
+            else:
+                log.logInfo('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(acct))
+                mastodon.status_post(f'@{acct}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
     else:
-        log.logInfo('ニックネームを登録した覚えがないよぉ・・・：@{}'.format(acct))
-        mastodon.status_post(f'@{acct}\nあれれ、ニックネームを登録した覚えがありませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
+        DATABASE.commit()
 
-def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility, ktMemory):
-    # ユーザーはユウちゃんにフォローされていることが前提条件
-    Relation = mastodon.account_relationships(fromID_Inst)[0]
-    if Relation['following'] == False:
-        log.logInfo('フォローしていませんっ！：@{}'.format(fromAcct))
-        mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
-        return
-    
-    txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?:@([a-zA-Z0-9_]+):\sの(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
-    
-    targetAcct = txtSearch.group(2)
-    name = txtSearch.group(4)
+def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility):
+    try:
+        with DATABASE.transaction():
+            txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?:@([a-zA-Z0-9_]+):\sの(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
+            
+            targetAcct = txtSearch.group(2)
+            name = txtSearch.group(4)
 
-    dbres = ktMemory.custom('SELECT * FROM `known_users` WHERE acct = ?', targetAcct)
-    isKnown = dbres.fetchall()
+            target = known_users.select().where(known_users.acct == targetAcct)
 
-    if len(isKnown) == 0:
-        log.logInfo('知らないユーザーさんですっ・・・：@{}'.format(targetAcct))
-        mastodon.status_post(f'@{fromAcct}\nユウちゃんその人知りませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
-        return
+            # 変更先のニックネームと変更を指示したユーザーが同じ場合は、自分のニックネームを変更する関数へ引き渡し
+            if target.ID_Inst == fromID_Inst:
+                set_nickname(name, reply_id, fromID_Inst, fromAcct, visibility)
+                return
+
+            # ユーザーはユウちゃんにフォローされていることが前提条件
+            Relation = mastodon.account_relationships(fromID_Inst)[0]
+            if Relation['following'] == False:
+                log.logInfo('フォローしていませんっ！：@{}'.format(fromAcct))
+                mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
+                return
+
+            if target == 0:
+                log.logInfo('知らないユーザーさんですっ・・・：@{}'.format(targetAcct))
+                mastodon.status_post(f'@{fromAcct}\nユウちゃんその人知りませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
+                return
+            else:
+                targetID_Inst = target.ID_Inst
+                targetUserInfo = nickname.select().where(nickname.ID_Inst == target)
+                if targetUserInfo == 0:
+                    nickname.create(ID_Inst=targetID_Inst, nickname=name)
+                else:
+                    updateNickname = nickname.get(nickname.ID_Inst == targetID_Inst)
+                    updateNickname.nickname = name
+                    updateNickname.create()
+
+                log.logInfo('他人のニックネーム変更っ！：{0} => {1} : {2}'.format(fromAcct, targetAcct, name))
+                mastodon.status_post(f':@{fromAcct}: @{fromAcct}\nわかりましたっ！ :@{targetAcct}: @{targetAcct} さんのことを今度から\n「{name}」と呼びますねっ！\n#ユウちゃんのあだ名変更日記')
+                return True
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
     else:
-        targetID_Inst = int(isKnown[0][1])
-        targetUserInfo = ktMemory.select('nickname', targetID_Inst)
-        if len(targetUserInfo) == 0:
-            ktMemory.insert('nickname', targetID_Inst, name)
-        else:
-            ktMemory.update('nickname', name, targetID_Inst)
+        DATABASE.commit()
 
-        log.logInfo('他人のニックネーム変更っ！：{0} => {1} => {2}'.format(fromAcct, targetAcct, name))
-        mastodon.status_post(f':@{fromAcct}: @{fromAcct}\nわかりましたっ！ :@{targetAcct}: @{targetAcct} さんのことを今度から\n「{name}」と呼びますねっ！\n#ユウちゃんのあだ名変更日記')
-        return True
+def msg_hook(triggerName, coolDown, sendFormat, status):
+    try:
+        with DATABASE.transaction():
+            # タイムラインで正規表現にかかった場合に実行
+            # status(生の情報)とKotohiraMemoryクラス情報を受け流す必要がある
+            now = datetime.datetime.now()
+            
+            trigger = word_trigger.get_or_none(word_trigger.trigger_name == triggerName)
+            if trigger == None:
+                trigger = word_trigger.create(trigger_name=triggerName)
+                doIt = True
+            else:
+                # 前回の実行から指定秒数までクールダウンしたかを確認して実行するか決める
+                if now >= (trigger.date + datetime.timedelta(seconds=coolDown)):
+                    doIt = True
+                else:
+                    doIt = False
 
-def msg_hook(tableName, coolDown, sendFormat, status, ktMemory):
-    # タイムラインで正規表現にかかった場合に実行
-    # status(生の情報)とKotohiraMemoryクラス情報を受け流す必要がある
-    userInfo = ktMemory.select(tableName, status['account']['id'])
-    now = datetime.datetime.now(timezone('Asia/Tokyo'))
-    dt = now.strftime("%Y-%m-%d %H:%M:%S%z")
-    if len(userInfo) == 0:
-        # データがない場合はデータ挿入して実行
-        ktMemory.insert(tableName, status['account']['id'], dt)
-        doIt = True
+            # 実行可能な状態であれば実行
+            if doIt:
+                time.sleep(0.5)
+                mastodon.toot(sendFormat)
+                trigger.date = now
+                trigger.save()
+            
+            return doIt
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
     else:
-        didWBAt = userInfo[0][2]
-        didWBAtRaw = datetime.datetime.strptime(didWBAt, '%Y-%m-%d %H:%M:%S%z')
-        dateDiff = now >= (didWBAtRaw + datetime.timedelta(seconds=coolDown))
+        DATABASE.commit()
 
-        # 前回の実行から指定秒数までクールダウンしたかを確認して実行するか決める
-        if dateDiff == True:
-            doIt = True
-        else:
-            doIt = False
-
-    globalDate = ktMemory.select('latest_ran', tableName)
-    # 現在時刻から1分先がグローバルクールダウンタイム
-    globalDeltaRaw = now + datetime.timedelta(minutes=1)
-    globalDelta = globalDeltaRaw.strftime("%Y-%m-%d %H:%M:%S%z")
-    if len(globalDate) == 0:
-        # テーブル名が見つからなかった場合は挿入して実行
-        ktMemory.insert('latest_ran', tableName, globalDelta)
-        globalCoolDowned = True
+def write_memo(fromUser, body, statusId):
+    try:
+        with DATABASE.transaction():
+            # メモを書き込むっ！50文字以内であることが条件っ！
+            body.strip()
+            if len(body) > 50:
+                # 50文字オーバーの場合は弾く
+                return False
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            # 55分以降の場合は現在時刻から6分送り、次の時間へ持ち越せるようにする
+            if now.minute >= 55:
+                now += datetime.timedelta(minutes=6)
+            
+            memoTime = now.strftime("%Y_%m%d_%H%z")
+            memo, _ = user_memos.get_or_create(memo_time=memoTime)
+            memRaw = json.loads(memo.body)
+            memRaw.append({'from': fromUser, 'body': body, 'id': int(statusId)})
+            memo.body = json.dumps(memRaw, ensure_ascii=False)
+            memo.save()
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
     else:
-        # 差異を検証する
-        globalCooldownRaw = datetime.datetime.strptime(globalDate[0][2], "%Y-%m-%d %H:%M:%S%z")
-        globalCooldownDiff = now >= globalCooldownRaw
-        if globalCooldownDiff: # 60秒以上であればグローバルクールダウン済み
-            globalCoolDowned = True
-        else:
-            globalCoolDowned = False
-
-    # 実行可能な状態であるかつ、グローバルクールダウンが終わったかを確認し、実行
-    if doIt and globalCoolDowned == True:
-        time.sleep(0.5)
-        mastodon.toot(sendFormat)
-        ktMemory.update(tableName, dt, status['account']['id'])
-        ktMemory.update('latest_ran', globalDelta, tableName)
-    
-    return doIt
-
-
-def write_memo(fromUser, body, statusId, ktMemory):
-    # メモを書き込むっ！30文字以内であることが条件っ！
-    if len(body) > 30:
-        # 30文字オーバーの場合は弾く
-        return False
-    now = datetime.datetime.now(timezone('Asia/Tokyo'))
-    # 55分以降の場合は現在時刻から6分送り、次の時間へ持ち越せるようにする
-    if now.minute >= 55:
-        now += datetime.timedelta(minutes=6)
-    dt = now.strftime("%Y_%m%d_%H%z")
-    memo = ktMemory.select('user_memos', dt)
-    if len(memo) == 0:
-        # データがない場合は新しく挿入
-        memRaw = [{'from': fromUser, 'body': body, 'id': int(statusId)}]
-        memJson = json.dumps(memRaw, ensure_ascii=False)
-        ktMemory.insert('user_memos', dt, memJson)
-    else:
-        # データがある場合は読み込んで更新
-        memJson = memo[0][2]
-        memRaw = json.loads(memJson)
-        memRaw.append({'from': fromUser, 'body': body, 'id': int(statusId)})
-        memNewJson = json.dumps(memRaw, ensure_ascii=False)
-        ktMemory.update('user_memos', memNewJson, dt)
+        DATABASE.commit()
 
 def toot_memo():
-    # その時間帯に集められたメモを集約して投稿っ！
-    memory = KotohiraMemory(showLog=config['log']['enable'])
-    now = datetime.datetime.now(timezone('Asia/Tokyo'))
-    dt = now.strftime("%Y_%m%d_%H%z")
-    memo = memory.select('user_memos', dt)
-    # データがない場合は何もしない
-    if len(memo) != 0:
-        memRaw = json.loads(memo[0][2])
-        if len(memRaw) == 0:
-            # JSONが空だったらトゥート中止
-            del memory
-            return
-        # for文に入るための変数初期化
-        tootList = []
-        tootSep = 0
-        tootBody = ['']
-        # 一度トゥート文型化してリストに挿入
-        for i in memRaw:
-            tootList.append( ":@{0}: {1}\n".format(i['from'], i['body']))
-        # トゥート可能な文面にする
-        for i, body in enumerate(tootList):
-            # 内容が15件超える場合はセパレート（enumerateで0の場合は例外）
-            if not i == 0 and i % 15 == 0:
-                tootBody.append('')
-                tootSep += 1
-            tootBody[tootSep] += body
-        # まとめる
-        sepCount = 0
-        for t in tootBody:
-            tootCwTemplate = "{0}時のメモのまとめですっ！({1}/{2})".format(now.hour, sepCount + 1, tootSep + 1)
-            mastodon.status_post(t + "\n#ユウちゃんのまとめメモ", spoiler_text=tootCwTemplate)
-            sepCount += 1
-    
-    # クリーンアップ
-    del memory
+    try:
+        with DATABASE.transaction():
+            # その時間帯に集められたメモを集約して投稿っ！
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            memo = user_memos.get_or_none(user_memos.memo_time == now.strftime("%Y_%m%d_%H%z"))
+            # データがない場合は何もしない
+            if memo != None:
+                memRaw = json.loads(memo.body)
+                if len(memRaw) == 0:
+                    # JSONが空だったらトゥート中止
+                    return
+                # for文に入るための変数初期化
+                tootList = []
+                tootSep = 0
+                tootBody = ['']
+                # 一度トゥート文型化してリストに挿入
+                for i in memRaw:
+                    tootList.append( ":@{0}: {1}\n".format(i['from'], i['body']))
+                # トゥート可能な文面にする
+                for i, body in enumerate(tootList):
+                    # 内容が5件超える場合はセパレート（enumerateで0の場合は例外）
+                    if not i == 0 and i % 5 == 0:
+                        tootBody.append('')
+                        tootSep += 1
+                    tootBody[tootSep] += body
+                # まとめる
+                sepCount = 0
+                for t in tootBody:
+                    tootCwTemplate = "{0}時のメモのまとめですっ！({1}/{2})".format(now.hour, sepCount + 1, tootSep + 1)
+                    mastodon.status_post(t + "\n#ユウちゃんのまとめメモ", spoiler_text=tootCwTemplate)
+                    sepCount += 1
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
+    else:
+        DATABASE.commit()
 
 def cancel_memo(status_id):
-    # トゥートが削除された時に実行
-    memory = KotohiraMemory(showLog=config['log']['enable'])
-    now = datetime.datetime.now(timezone('Asia/Tokyo'))
-    if now.minute >= 55:
-        now += datetime.timedelta(minutes=6)
-    dt = now.strftime("%Y_%m%d_%H%z")
-    memo = memory.select('user_memos', dt)
-    # メモがその時間にない場合は無視
-    if len(memo) == 0:
-        del memory
-        return False
-    
-    commitable = False
+    try:
+        with DATABASE.transaction():
+            # トゥートが削除された時に実行
+            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            if now.minute >= 55:
+                now += datetime.timedelta(minutes=6)
+            memo = user_memos.get_or_none(user_memos.memo_time == now.strftime("%Y_%m%d_%H%z"))
+            # メモがその時間にない場合は無視
+            if memo == None:
+                return False
+            
+            commitable = False
 
-    memRaw = json.loads(memo[0][2])
-    for memoStat in memRaw:
-        # 旧規格でない場合もあるのでそれを踏まえた対策分岐
-        if 'id' in memoStat:
-            if int(status_id) == memoStat['id']:
-                # IDが合致した場合は削除し、コミットするようにする
-                # IDは重複することはないので、一度合致したらfor文を抜ける
-                memRaw.remove(memoStat)
-                commitable = True
-                break
+            memRaw = json.loads(memo.body)
+            for memoStat in memRaw:
+                if int(status_id) == memoStat.get('id'):
+                    # IDが合致した場合は削除し、コミットするようにする
+                    # IDは重複することはないので、一度合致したらfor文を抜ける
+                    memRaw.remove(memoStat)
+                    commitable = True
+                    break
 
-    if commitable:
-        # for文で回して差分がある場合はコミットしてTrueを返す
-        memNewJson = json.dumps(memRaw, ensure_ascii=False)
-        memory.update('user_memos', memNewJson, dt)
-        del memory
-        return True
+            if commitable:
+                # for文で回して差分がある場合はコミットしてTrueを返す
+                memo.body = json.dumps(memRaw, ensure_ascii=False)
+                memo.save()
+                return True
+            else:
+                # 差分がない場合はFalse
+                return False
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
     else:
-        # 差分がない場合はFalse
-        del memory
-        return False
+        DATABASE.commit()
 
 # 実装中
 
-def userdict(targetUser, fromUser, body, replyTootID, ktMemory):
+def userdict(targetUser, fromUser, body, replyTootID):
     pass
 
 # NGワード検出機能
@@ -359,15 +380,19 @@ def unfollow_attempt(targetID_Inst):
     # ただし、設定で入力したユーザーIDはフォローを外しませんっ！
     if targetID_Inst in EXCLUDEUSERSID:
         return
-
-    memory = KotohiraMemory(showLog=config['log']['enable'])
-    target = memory.select('fav_rate', targetID_Inst)[0]
-    relation = mastodon.account_relationships(targetID_Inst)[0]
-    if relation['following'] == True and int(target[2]) < int(config['follow']['condition_rate']):
-        log.logInfo('ゴメンねっ・・・。: {}'.format(str(targetID_Inst)))
-        mastodon.account_unfollow(targetID_Inst)
-
-    del memory
+    try:
+        with DATABASE.transaction():
+            user = known_users.get(known_users.ID_Inst == targetID_Inst)
+            target = fav_rate.get(fav_rate.ID_Inst == user)
+            relation = mastodon.account_relationships(targetID_Inst)[0]
+            if relation['following'] == True and int(target.rate) < int(config['follow']['condition_rate']):
+                log.logInfo('ゴメンねっ・・・。: {}'.format(str(targetID_Inst)))
+                mastodon.account_unfollow(targetID_Inst)
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
+    else:
+        DATABASE.commit()
 
 def drill_count(targetID, name, statCount):
     if statCount <= 10000: # トゥート数が10,000以下の場合は1,000トゥート単位で処理しますっ！
@@ -386,11 +411,14 @@ def drill_count(targetID, name, statCount):
 
 # あなたとユウちゃんのこと教えますっ！
 def about_you(targetID_Inst, mentionId, visibility):
-    memory = KotohiraMemory(showLog=config['log']['enable'])
-    target = memory.select('known_users', int(targetID_Inst))[0]
-    known_at = datetime.datetime.strptime(target[3], "%Y-%m-%d %H:%M:%S%z")
-    known_at_str = known_at.strftime("%Y月%m月%d日 %H:%M:%S")
+    try:
+        with DATABASE.transaction():
+            target = known_users.get(known_users.ID_Inst == targetID_Inst)
+            known_at_str = target.known_at.strftime("%Y月%m月%d日 %H:%M:%S")
 
-    mastodon.status_post(f'@{target[2]}\n ユウちゃんは{known_at_str}にあなたのことを覚えて、{target[0]}番目に知りましたっ！', in_reply_to_id=mentionId, visibility=visibility)
-
-    del memory
+            mastodon.status_post(f'@{target.acct}\n ユウちゃんは{known_at_str}にあなたのことを覚えて、{target.ID}番目に知りましたっ！', in_reply_to_id=mentionId, visibility=visibility)
+    except Exception as e:
+        DATABASE.rollback()
+        raise e
+    else:
+        DATABASE.commit()
