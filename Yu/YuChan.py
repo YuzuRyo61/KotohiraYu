@@ -13,14 +13,17 @@ from Yu.database import DATABASE
 from Yu.models import nickname, known_users, word_trigger, user_memos, fav_rate
 
 # NGワードを予め読み込み（ファイルIOの負荷対策）
-with open('config/NGWORDS.txt', mode='r', encoding='utf-8_sig') as nfs:
+if config['features']['ngword']:
+    with open('config/NGWORDS.txt', mode='r', encoding='utf-8_sig') as nfs:
+        NGWORDS = []
+        for ngw in nfs.readlines():
+            # NGワードを追加。コメントを外す
+            ngwWoC = re.sub('#.*', '', ngw).strip()
+            # 変換後、空白でない場合は追加
+            if ngwWoC != '':
+                NGWORDS.append(ngwWoC)
+else:
     NGWORDS = []
-    for ngw in nfs.readlines():
-        # NGワードを追加。コメントを外す
-        ngwWoC = re.sub('#.*', '', ngw).strip()
-        # 変換後、空白でない場合は追加
-        if ngwWoC != '':
-            NGWORDS.append(ngwWoC)
 
 # フォロー解除例外ユーザーのプレリロード
 EXCLUDEUSERSID = config['follow']['exclude']
@@ -366,14 +369,18 @@ def userdict(targetUser, fromUser, body, replyTootID):
 
 # NGワード検出機能
 def ngWordHook(txt):
-    # 予め読み込んだNGワードリストを使用
-    for ngword in NGWORDS:
-        # 正規表現も使えるようにしている
-        if re.search(ngword, txt):
-            # 見つかった場合はTrueを返す
-            return True
-    # for文回しきって見つからなかった場合はFalseを返す
-    return False
+    # 設定で無効化されている場合はFalseを返す
+    if config['features']['ngword']:
+        # 予め読み込んだNGワードリストを使用
+        for ngword in NGWORDS:
+            # 正規表現も使えるようにしている
+            if re.search(ngword, txt):
+                # 見つかった場合はTrueを返す
+                return True
+        # for文回しきって見つからなかった場合はFalseを返す
+        return False
+    else:
+        return False
 
 # 一定の好感度レートが下がってしまうとフォローが外れちゃいますっ・・・。
 def unfollow_attempt(targetID_Inst):
