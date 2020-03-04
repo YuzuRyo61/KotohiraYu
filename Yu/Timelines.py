@@ -9,7 +9,7 @@ import requests.exceptions
 from mastodon import StreamListener
 from mastodon.Mastodon import MastodonNetworkError, MastodonServerError
 from pytz import timezone
-from Yu import KotohiraMemory, Util as KotohiraUtil, YuChan, log
+from Yu import Util as KotohiraUtil, YuChan, log
 from Yu.listener import user_listener, local_listener
 from Yu.config import config
 from Yu.mastodon import mastodon

@@ -7,7 +7,6 @@ import os
 import gettext
 
 from Yu import YuChan
-from Yu.Memory import KotohiraMemory
 from Yu import Util
 from Yu.Timelines import local, home
 from Yu.Web import WEBRUN
@@ -31,4 +30,4 @@ def i18n_Setup():
     TRANSLATER.install()
 
 i18n_Setup()
-__all__ = ['YuChan', 'Util', 'KotohiraMemory', 'local', 'home', 'WEBRUN', 'log']
+__all__ = ['YuChan', 'Util', 'local', 'home', 'WEBRUN', 'log']

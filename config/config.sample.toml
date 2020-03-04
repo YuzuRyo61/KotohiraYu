@@ -2,6 +2,14 @@
 address = "best-friends.chat"
 access_token = "replace_something"
 
+[database]
+mode = "postgresql"
+name = "kotohirayu"
+user = "kotohirayu"
+pass = "password"
+host = "localhost"
+port = 5432
+
 [user]
 me = "Yu"
 god = "YuzuRyo61"
@@ -13,15 +21,12 @@ enable = true
 condition_rate = 200
 exclude = [1136, 1, 2, 4]
 
+[features]
+ngword = true
+
 [i18n]
 lang = "ja_JP"
 
 [linenotify]
 enable = false
 token = "replace_something"
-
-[web]
-enable = true
-base = "https://yu-console.example.com"
-user = "username"
-pass = "password"

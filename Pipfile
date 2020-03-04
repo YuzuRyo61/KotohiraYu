@@ -15,6 +15,9 @@ six = "*"
 toml = "*"
 Jinja2 = "*"
 "Mastodon.py" = "*"
+peewee = "*"
+peewee-migrations = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.7"
