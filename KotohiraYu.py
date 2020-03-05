@@ -14,7 +14,6 @@ import threading
 import sys
 import os
 import configparser
-from sqlite3 import OperationalError
 
 from Yu import YuChan, local, home, log
 from Yu import Util as KotohiraUtil
@@ -39,15 +38,12 @@ def main():
             ft.setDaemon(True)
             ft.start()
         log.logInfo("ALL SYSTEMS READY!")
-        while True:
-            input()
+        for ft in features:
+            ft.join()
     except KeyboardInterrupt:
         if not DATABASE.is_closed():
             DATABASE.close()
         sys.exit()
-    except OperationalError:
-        log.logCritical("DATABASE ACCESS ERROR")
-        sys.exit(2)
     except:
         KotohiraUtil.PANIC()
 
