@@ -26,8 +26,6 @@ def PANIC(dbPanic=False):
     if config['linenotify']['enable'] == True and dbPanic == False:
         headers = {"Authorization": "Bearer " + config['linenotify']['token']}
         payload = {"message": "\n＊ユウちゃんがパニックになりました。\nパニック時刻: \n" + nowFormat + "\n詳細はログを確認してくださいっ"}
-        if config['web']['enable']:
-            payload['message'] += "\n" + config['web']['base'] + "/panic-log/" + nowFileFormat
         req = requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
         if req.status_code != 200:
             log.logErr("[FATAL] LINE NOTIFY ACCESS FAILED")
