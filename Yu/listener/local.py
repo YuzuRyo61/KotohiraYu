@@ -183,7 +183,7 @@ class local_listener(StreamListener):
                     if YuChan.msg_hook('no_now', 180, "いまのなしは封印ですっ！！(*`ω´*)", status):
                         log.logInfo('いまのなしは封印ですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
-                elif writeDict:
+                if writeDict:
                     # 辞書登録っ
                     # (実装中)
                     # YuChan.update_userdict()
