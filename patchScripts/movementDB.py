@@ -14,7 +14,7 @@ if __name__ == "__main__":
     try:
         from Yu.database import DATABASE
         from Yu.config import config
-        from Yu.models import known_users, fav_rate, nickname, user_memos
+        from Yu.models import known_users, fav_rate, nickname, user_memos, updated_users
         if not os.path.isfile(f"Yu_{config['instance']['address']}.db"):
             print("データベースファイルが見つかりません。Version 4.0以降から使用する場合はこのツールを使用する必要はありません。")
             sys.exit(1)
@@ -29,6 +29,7 @@ if __name__ == "__main__":
     また、データベースのバックアップを保存することを推奨します。
     データが移行されるテーブルは以下の通りです：
     ・known_users
+    ・updated_users
     ・fav_rate
     ・nickname
     ・user_memos
@@ -46,6 +47,13 @@ if __name__ == "__main__":
             parsedDate = datetime.datetime.strptime(userData[3], "%Y-%m-%d %H:%M:%S%z")
             print(f"{userData[1]} | {userData[2]} | {parsedDate}")
             known_users.create(ID_Inst=userData[1], acct=userData[2], known_at=parsedDate)
+
+        # updated_users
+        print("=== updated_users ===")
+        for userUpdate in CURSOR.execute('SELECT * FROM `updated_users`').fetchall():
+            user = known_users.get_or_none(known_users.ID_Inst == userUpdate[1])
+            print(f"{userUpdate[1]} | {userUpdate[2]}")
+            updated_users.create(ID_Inst=user, date=userUpdate[2])
         
         # fav_rate
         print("=== fav_rate ===")
