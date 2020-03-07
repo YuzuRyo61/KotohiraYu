@@ -125,8 +125,11 @@ def set_nickname(name, reply_id, ID_Inst, acct, visibility):
     try:
         with DATABASE.transaction():
             # reply_idにリプライのIDをつける
-            # 改行は削除
+            # 改行とか逆さまになるUnicodeは削除
             name = name.replace('\n', '')
+            name = name.encode('unicode-escape')
+            name.replace(b"\\u202e", b'')
+            name = name.decode('unicode-escape')
             # 32文字超えは弾きますっ！
             if len(name) > 32:
                 log.logInfo('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
@@ -192,7 +195,16 @@ def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility):
             targetAcct = txtSearch.group(2)
             name = txtSearch.group(4)
 
+            name = name.encode('unicode-escape')
+            name.replace(b"\\u202e", b'')
+            name = name.decode('unicode-escape')
+
             target = known_users.get_or_none(known_users.acct == targetAcct)
+
+            # 32文字超えは弾きますっ！
+            if len(name) > 32:
+                mastodon.status_post(f'@{fromAcct}\n長すぎて覚えられませんっ！！(*`ω´*)', in_reply_to_id=reply_id, visibility=visibility)
+                return
 
             # 変更先のニックネームと変更を指示したユーザーが同じ場合は、自分のニックネームを変更する関数へ引き渡し
             if target != None and target.ID_Inst == fromID_Inst:
