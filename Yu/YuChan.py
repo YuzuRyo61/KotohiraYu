@@ -134,14 +134,13 @@ def set_nickname(name, reply_id, ID_Inst, acct, visibility):
                 return
 
             user = known_users.get(known_users.ID_Inst == ID_Inst)
-            userInfo = nickname.select().where(nickname.ID_Inst == user).count()
+            userNick = nickname.get_or_none(nickname.ID_Inst == user)
 
-            if userInfo == 0:
+            if userNick == None:
                 nickname.create(ID_Inst=user, nickname=name)
             else:
-                updateNickname = nickname.get(nickname.ID_Inst == user)
-                updateNickname.nickname = name
-                updateNickname.save()
+                userNick.nickname = name
+                userNick.save()
             # 変更通知
             log.logInfo('ニックネーム変更っ！：@{0} => {1}'.format(acct, name))
             mastodon.status_post(f'@{acct}\nわかりましたっ！今度から\n「{name}」と呼びますねっ！', in_reply_to_id=reply_id, visibility=visibility)
