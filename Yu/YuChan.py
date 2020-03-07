@@ -140,7 +140,7 @@ def set_nickname(name, reply_id, ID_Inst, acct, visibility):
                 nickname.create(ID_Inst=user, nickname=name)
             else:
                 updateNickname = nickname.get(nickname.ID_Inst == user)
-                updateNickname = name
+                updateNickname.nickname = name
                 updateNickname.save()
             # 変更通知
             log.logInfo('ニックネーム変更っ！：@{0} => {1}'.format(acct, name))
