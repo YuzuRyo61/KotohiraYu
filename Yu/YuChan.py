@@ -192,16 +192,16 @@ def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility):
             targetAcct = txtSearch.group(2)
             name = txtSearch.group(4)
 
-            target = known_users.select().where(known_users.acct == targetAcct)
+            target = known_users.get_or_none(known_users.acct == targetAcct)
 
             # 変更先のニックネームと変更を指示したユーザーが同じ場合は、自分のニックネームを変更する関数へ引き渡し
-            if target.ID_Inst == fromID_Inst:
+            if target != None and target.ID_Inst == fromID_Inst:
                 set_nickname(name, reply_id, fromID_Inst, fromAcct, visibility)
                 return
 
             # ユーザーはユウちゃんにフォローされていることが前提条件
-            Relation = mastodon.account_relationships(fromID_Inst)[0]
-            if Relation['following'] == False:
+            relation = mastodon.account_relationships(fromID_Inst)[0]
+            if relation['following'] == False:
                 log.logInfo('フォローしていませんっ！：@{}'.format(fromAcct))
                 mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
                 return
