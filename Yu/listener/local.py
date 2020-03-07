@@ -135,7 +135,8 @@ class local_listener(StreamListener):
 
                 elif nick:
                     # ニックネームの設定
-                    newNickname = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
+                    newNicknameParse = re.search(r"^(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
+                    newNickname = newNicknameParse.group(2)
                     YuChan.set_nickname(newNickname, status['id'], status['account']['id'], status['account']['acct'], status['visibility'])
 
                 elif iBack:
