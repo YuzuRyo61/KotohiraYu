@@ -206,19 +206,17 @@ def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility):
                 mastodon.status_post(f'@{fromAcct}\n他の人の名前を変えるのはユウちゃんと仲良くなってからですっ！', in_reply_to_id=reply_id, visibility=visibility)
                 return
 
-            if target == 0:
+            if target == None:
                 log.logInfo('知らないユーザーさんですっ・・・：@{}'.format(targetAcct))
                 mastodon.status_post(f'@{fromAcct}\nユウちゃんその人知りませんっ・・・。', in_reply_to_id=reply_id, visibility=visibility)
                 return
             else:
-                targetID_Inst = target.ID_Inst
-                targetUserInfo = nickname.select().where(nickname.ID_Inst == target)
-                if targetUserInfo == 0:
-                    nickname.create(ID_Inst=targetID_Inst, nickname=name)
+                targetUserNick = nickname.get_or_none(nickname.ID_Inst == target)
+                if targetUserNick == None:
+                    nickname.create(ID_Inst=target, nickname=name)
                 else:
-                    updateNickname = nickname.get(nickname.ID_Inst == targetID_Inst)
-                    updateNickname.nickname = name
-                    updateNickname.create()
+                    targetUserNick.nickname = name
+                    targetUserNick.save()
 
                 log.logInfo('他人のニックネーム変更っ！：{0} => {1} : {2}'.format(fromAcct, targetAcct, name))
                 mastodon.status_post(f':@{fromAcct}: @{fromAcct}\nわかりましたっ！ :@{targetAcct}: @{targetAcct} さんのことを今度から\n「{name}」と呼びますねっ！\n#ユウちゃんのあだ名変更日記')
@@ -229,11 +227,10 @@ def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility):
     else:
         DATABASE.commit()
 
-def msg_hook(triggerName, coolDown, sendFormat, status):
+def msg_hook(triggerName, coolDown, sendFormat):
     try:
         with DATABASE.transaction():
             # タイムラインで正規表現にかかった場合に実行
-            # status(生の情報)とKotohiraMemoryクラス情報を受け流す必要がある
             now = datetime.datetime.now()
             
             trigger = word_trigger.get_or_none(word_trigger.trigger_name == triggerName)

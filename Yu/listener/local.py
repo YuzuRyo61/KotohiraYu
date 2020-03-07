@@ -141,47 +141,47 @@ class local_listener(StreamListener):
 
                 elif iBack:
                     # おかえりとか言ったら実行
-                    if YuChan.msg_hook('wel_back', 600, ":@{0}: {1}、おかえりなさいませっ！".format(status['account']['acct'], name), status):
+                    if YuChan.msg_hook('wel_back', 600, ":@{0}: {1}、おかえりなさいませっ！".format(status['account']['acct'], name)):
                         log.logInfo('おかえりっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
                 elif goodNight:
                     # おやすみですっ！
-                    if YuChan.msg_hook('good_night', 600, ":@{0}: {1}、おやすみなさいっ！🌙".format(status['account']['acct'], name), status):
+                    if YuChan.msg_hook('good_night', 600, ":@{0}: {1}、おやすみなさいっ！🌙".format(status['account']['acct'], name)):
                         log.logInfo('おやすみっ！:@{0} < {1}'.format(status['account']['acct'], txt))
 
                 elif seeYou:
                     # いってらっしゃいなのですっ！
-                    if YuChan.msg_hook('see_you', 600, ":@{0}: {1}、いってらっしゃいっ！🚪".format(status['account']['acct'], name), status):
+                    if YuChan.msg_hook('see_you', 600, ":@{0}: {1}、いってらっしゃいっ！🚪".format(status['account']['acct'], name)):
                         log.logInfo('いってらっしゃいっ！:@{0} < {1}'.format(status['account']['acct'], txt))                
 
                 elif passage:
                     # 通過 とか言ったら阻止しちゃうよっ！
-                    if YuChan.msg_hook('passage', 300, "阻止っ！！(*`ω´*)", status):
+                    if YuChan.msg_hook('passage', 300, "阻止っ！！(*`ω´*)"):
                         log.logInfo('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
                 elif sinkiSagi and status['account']['statuses_count'] > 10:
                     # 新規詐欺見破りっ！
-                    if YuChan.msg_hook('sin_sagi', 10800, "新規詐欺はいけませんっ！！(*`ω´*)", status):
+                    if YuChan.msg_hook('sin_sagi', 10800, "新規詐欺はいけませんっ！！(*`ω´*)"):
                         log.logInfo('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
                 
                 elif nullPoint:
                     # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
-                    if YuChan.msg_hook('null_point', 180, ":gaxtsu:", status):
+                    if YuChan.msg_hook('null_point', 180, ":gaxtsu:"):
                         log.logInfo('がっ：@{0} < {1}'.format(status['account']['acct'], txt))
 
                 elif notNicoFri:
                     # ニコフレじゃないよっ！
-                    if YuChan.msg_hook('not_nikofure', 10800, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)", status):
+                    if YuChan.msg_hook('not_nikofure', 10800, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)"):
                         log.logInfo('ベスフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
                 elif sad:
                     # よしよしっ
-                    if YuChan.msg_hook('yoshiyoshi', 180, "(´･ω･`)ヾ(･ω･｡)ﾖｼﾖｼ", status):
+                    if YuChan.msg_hook('yoshiyoshi', 180, "(´･ω･`)ヾ(･ω･｡)ﾖｼﾖｼ"):
                         log.logInfo('よしよしっ：@{0} < {1}'.format(status['account']['acct'], txt))
 
                 elif noNow:
                     # いまのなしは封印ですっ！
-                    if YuChan.msg_hook('no_now', 180, "いまのなしは封印ですっ！！(*`ω´*)", status):
+                    if YuChan.msg_hook('no_now', 180, "いまのなしは封印ですっ！！(*`ω´*)"):
                         log.logInfo('いまのなしは封印ですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
                 if writeDict:
