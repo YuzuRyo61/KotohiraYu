@@ -130,6 +130,7 @@ def set_nickname(name, reply_id, ID_Inst, acct, visibility):
             name = name.encode('unicode-escape')
             name.replace(b"\\u202e", b'')
             name = name.decode('unicode-escape')
+            name = name.strip()
             # 32文字超えは弾きますっ！
             if len(name) > 32:
                 log.logInfo('ニックネームが長いっ！：@{0} => {1}'.format(acct, name))
@@ -190,14 +191,15 @@ def del_nickname(reply_id, ID_Inst, acct, visibility):
 def set_otherNickname(txt, reply_id, fromID_Inst, fromAcct, visibility):
     try:
         with DATABASE.transaction():
-            txtSearch = re.search(r"^(@[a-zA-Z0-9_]+\s|\n+)?:@([a-zA-Z0-9_]+):\sの(あだ名|あだな|ニックネーム)[:：は]\s?(.+)", txt)
+            txtSearch = re.search(r"^(@[a-zA-Z0-9_]+(\s|\n)+)?:@([a-zA-Z0-9_]+):\s+の(あだ名|あだな|ニックネーム)[:：は]\s*(.+)", txt)
             
-            targetAcct = txtSearch.group(2)
-            name = txtSearch.group(4)
+            targetAcct = txtSearch.group(3)
+            name = txtSearch.group(5)
 
             name = name.encode('unicode-escape')
             name.replace(b"\\u202e", b'')
             name = name.decode('unicode-escape')
+            name = name.strip()
 
             target = known_users.get_or_none(known_users.acct == targetAcct)
 
