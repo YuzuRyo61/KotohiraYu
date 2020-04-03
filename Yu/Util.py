@@ -66,8 +66,9 @@ def schedule(func, doTimeList):
         schedule(func, doTimeList)
 
 def isVoteOptout(tags):
-    for tag in tags:
-        if tag['name'] == config['features']['optoutHashtag']:
-            return True
-    
+    if config['features']['voteOptout']:
+        for tag in tags:
+            if tag['name'] == config['features']['voteOptoutTag']:
+                return True
+        
     return False

@@ -23,8 +23,8 @@ exclude = [1136, 1, 2, 4]
 
 [features]
 ngword = true
-optout = true
-optoutHashtag = "ユウちゃん見送り投票"
+voteOptout = true
+voteOptoutTag = "ユウちゃん見送り投票"
 
 [i18n]
 lang = "ja_JP"
