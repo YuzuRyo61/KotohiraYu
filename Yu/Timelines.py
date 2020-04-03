@@ -1,4 +1,4 @@
-import configparser
+import sys
 import datetime
 import random
 import re
@@ -26,7 +26,7 @@ def local():
         time.sleep(60)
         local()
     except:
-        KotohiraUtil.PANIC()
+        KotohiraUtil.PANIC(sys.exc_info())
         log.logErr('ローカルタイムラインを十秒待って読み込みし直しますねっ！')
         time.sleep(10)
         local()
@@ -46,7 +46,7 @@ def home():
         time.sleep(60)
         home()
     except:
-        KotohiraUtil.PANIC()
+        KotohiraUtil.PANIC(sys.exc_info())
         log.logErr('ホームタイムラインを十秒待って読み込みし直しますねっ！')
         time.sleep(10)
         home()

@@ -45,7 +45,7 @@ def main():
             DATABASE.close()
         sys.exit()
     except:
-        KotohiraUtil.PANIC()
+        KotohiraUtil.PANIC(sys.exc_info())
 
 if __name__ == '__main__':
     # 設定ファイルがあるかチェック。ない場合は弾く
