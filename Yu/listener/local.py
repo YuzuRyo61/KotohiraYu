@@ -127,7 +127,7 @@ class local_listener(StreamListener):
                                 return
                         
                         # 設定で指定されたハッシュタグが含まれていない場合は投票をする
-                        if not KotohiraUtil.isVoteOptout(status['tag']):
+                        if not KotohiraUtil.isVoteOptout(status['tags']):
                             # ここで投票する場所を抽選
                             voteChoose = random.randint(0, len(voteOptions) - 1)
                             mastodon.poll_vote(status['poll']['id'], voteChoose)
