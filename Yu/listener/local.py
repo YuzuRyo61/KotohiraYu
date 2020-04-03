@@ -27,7 +27,11 @@ class local_listener(StreamListener):
                     return
 
                 # トゥート内のHTMLタグを除去
+                spoiler_text = KotohiraUtil.h2t(status['spoiler_text'])
                 txt = KotohiraUtil.h2t(status['content'])
+
+                # CWのテキストを上部につけるように
+                txt = spoiler_text + "\n\n" + txt
 
                 # 自分宛てのメンションはここのリスナーでは無視する（ユーザー絵文字の場合は例外）
                 isMeMention = re.search('(?!.*:)@({}+)(?!.*:)'.format(config['user']['me']), txt)
@@ -122,12 +126,14 @@ class local_listener(StreamListener):
                                 hooked.save()
                                 return
                         
-                        # ここで投票する場所を抽選
-                        voteChoose = random.randint(0, len(voteOptions) - 1)
-                        mastodon.poll_vote(status['poll']['id'], voteChoose)
-                        # 投票したものをトゥートする
-                        log.logInfo('投票っ！：@{0} => {1}'.format(status['account']['acct'], status['poll']['options'][voteChoose]['title']))
-                        mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']))
+                        # 設定で指定されたハッシュタグが含まれていない場合は投票をする
+                        if not KotohiraUtil.isVoteOptout(status['tag']):
+                            # ここで投票する場所を抽選
+                            voteChoose = random.randint(0, len(voteOptions) - 1)
+                            mastodon.poll_vote(status['poll']['id'], voteChoose)
+                            # 投票したものをトゥートする
+                            log.logInfo('投票っ！：@{0} => {1}'.format(status['account']['acct'], status['poll']['options'][voteChoose]['title']))
+                            mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']))
 
                 elif otherNick:
                     # 他人のニックネームの設定
@@ -238,9 +244,3 @@ class local_listener(StreamListener):
                 log.logInfo(f"メモを削除っ！: {str(status_id)}")
         except Exception as e: # 上と同じ
             raise e
-        finally:
-            # try:
-            #     del memory
-            # except NameError:
-            #     pass
-            pass

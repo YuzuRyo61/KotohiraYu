@@ -64,3 +64,10 @@ def schedule(func, doTimeList):
         log.logWarn('五秒待って読み込みし直しますねっ！')
         sleep(5)
         schedule(func, doTimeList)
+
+def isVoteOptout(tags):
+    for tag in tags:
+        if tag['name'] == config['features']['optoutHashtag']:
+            return True
+    
+    return False
