@@ -27,12 +27,12 @@ class local_listener(StreamListener):
                     return
 
                 # トゥート内のHTMLタグを除去
-                spoiler_text = KotohiraUtil.h2t(status['spoiler_text'])
                 txt = KotohiraUtil.h2t(status['content'])
 
-                # CWのテキストを上部につけるように。stripで前後の余白を削除
-                txt = spoiler_text + "\n\n" + txt
-                txt.strip()
+                # CWのテキストが空っぽでなければ付け足す
+                if status['spoiler_text'] != '':
+                    txt = status['spoiler_text'] + "\n\n" + txt
+                    txt.strip()
 
                 # 自分宛てのメンションはここのリスナーでは無視する（ユーザー絵文字の場合は例外）
                 isMeMention = re.search('(?!.*:)@({}+)(?!.*:)'.format(config['user']['me']), txt)
