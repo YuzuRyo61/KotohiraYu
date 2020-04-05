@@ -25,8 +25,8 @@ def PANIC(exc_info):
         f.write('\n')
     log.logErr("＊ユウちゃんパニックですぅ・・・！\n{}".format(traceback.format_exc()))
     if config['linenotify']['enable'] == True:
-        headers = {"Authorization": "Bearer " + config['linenotify']['token']}
-        payload = {"message": f"\n＊ユウちゃんがパニックになりました。\nパニック時刻: \n{nowFormat}\nエラーメッセージ:\n{traceback.format_exc(*exc_info)[-1]}"}
+        headers = {"Authorization": f"Bearer {config['linenotify']['token']}"}
+        payload = {"message": f"\n＊ユウちゃんがパニックになりました。\nパニック時刻: \n{nowFormat}\nエラーメッセージ:\n{traceback.format_exception(*exc_info)[-1]}"}
         req = requests.post("https://notify-api.line.me/api/notify", headers=headers, params=payload)
         if req.status_code != 200:
             log.logErr("[FATAL] LINE NOTIFY ACCESS FAILED")
