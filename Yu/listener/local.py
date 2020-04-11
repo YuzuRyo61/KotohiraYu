@@ -176,7 +176,7 @@ class local_listener(StreamListener):
                     created_a1d = status['account']['created_at'] + datetime.timedelta(days=1)
                     if status['account']['statuses_count'] > 10 and created_a1d < now_utc:
                         # 新規詐欺見破りっ！
-                        if YuChan.msg_hook('sin_sagi', 10800, "新規詐欺はいけませんっ！！(*`ω´*)"):
+                        if YuChan.msg_hook('sin_sagi', 600, "新規詐欺はいけませんっ！！(*`ω´*)"):
                             log.logInfo('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
                 
                 elif nullPoint:
@@ -186,7 +186,7 @@ class local_listener(StreamListener):
 
                 elif notNicoFri:
                     # ニコフレじゃないよっ！
-                    if YuChan.msg_hook('not_nikofure', 10800, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)"):
+                    if YuChan.msg_hook('not_nikofure', 600, "ここはニコフレじゃないですっ！！ベスフレですっ！(*`ω´*)"):
                         log.logInfo('ベスフレですっ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
                 elif sad:
