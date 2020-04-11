@@ -61,7 +61,7 @@ class local_listener(StreamListener):
                 if YuChan.ngWordHook(txt):
                     log.logInfo('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
                     hooked = fav_rate.get(fav_rate.ID_Inst == user)
-                    hooked.rate -= 5
+                    hooked.rate -= config['follow']['down_step']
                     hooked.save()
                     YuChan.unfollow_attempt(status['account']['id'])
                     return
@@ -87,6 +87,9 @@ class local_listener(StreamListener):
                 # 名前に語尾がない場合は付け足す
                 if re.search(r'(さん|ちゃん|どの|殿|くん|君|様|さま|教授|たん|きゅん)$', name) == None:
                     name += "さん"
+
+                # 最終更新を変更
+                now = datetime.datetime.now()
 
                 # 正規表現チェック
                 calledYuChan = re.search(f'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|:@{config["user"]["me"]}:|((ゆう|ユウ|ユゥ|ﾕｳ|ﾕｩ)(ちゃん|チャン|ﾁｬﾝ|くん|クン|君|ｸﾝ))|ユウ)', txt)
@@ -123,7 +126,7 @@ class local_listener(StreamListener):
                             if YuChan.ngWordHook(voteSection['title']):
                                 log.logInfo('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(status['account']['acct']))
                                 hooked = fav_rate.get(fav_rate.ID_Inst == user)
-                                hooked.rate -= 5
+                                hooked.rate -= config['follow']['down_step']
                                 hooked.save()
                                 return
                         
@@ -206,8 +209,6 @@ class local_listener(StreamListener):
                     if res == False:
                         mastodon.status_post('@{}\n長いのでまとめられそうにありませんっ・・・'.format(status['account']['acct']), in_reply_to_id=status['id'])
 
-                # 最終更新を変更
-                now = datetime.datetime.now()
                 # ２重更新防策
                 if not newUser:
                     updated_at = updated_users.get(updated_users.ID_Inst == user)

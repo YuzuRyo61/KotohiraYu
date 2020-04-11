@@ -95,7 +95,7 @@ class user_listener(StreamListener):
                     if YuChan.ngWordHook(txt):
                         log.logInfo('変なことを言ってはいけませんっ！！(*`ω´*): @{0}'.format(notification['account']['acct']))
                         hooked = fav_rate.get(fav_rate.ID_Inst == user)
-                        hooked.rate -= 5
+                        hooked.rate -= config['follow']['down_step']
                         hooked.save()
                         time.sleep(0.5)
                         mastodon.status_post('@{}\n変なこと言っちゃいけませんっ！！(*`ω´*)'.format(notification['account']['acct']), in_reply_to_id=notification['status']['id'], visibility=notification['status']['visibility'])

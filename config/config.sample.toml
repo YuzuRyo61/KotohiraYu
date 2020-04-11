@@ -20,6 +20,7 @@ enable = true
 [follow]
 condition_rate = 200
 exclude = [1136, 1, 2, 4]
+down_step = 3
 
 [features]
 ngword = true
