@@ -5,7 +5,7 @@ import re
 import time
 
 from mastodon import StreamListener
-from pytz import timezone
+from pytz import timezone, utc
 
 from Yu import YuChan, Util as KotohiraUtil, log
 from Yu.config import config
@@ -169,10 +169,15 @@ class local_listener(StreamListener):
                     if YuChan.msg_hook('passage', 300, "阻止っ！！(*`ω´*)"):
                         log.logInfo('阻止っ！：@{0} < {1}'.format(status['account']['acct'], txt))
 
-                elif sinkiSagi and status['account']['statuses_count'] > 10:
-                    # 新規詐欺見破りっ！
-                    if YuChan.msg_hook('sin_sagi', 10800, "新規詐欺はいけませんっ！！(*`ω´*)"):
-                        log.logInfo('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
+                elif sinkiSagi:
+                    # 現在時刻をUTCに変換し、該当アカウントの作成時刻から1日後のものを算出。
+                    # 作成から丸一日以上かつトゥートが10より上であれば作動
+                    now_utc = utc.localize(now)
+                    created_a1d = status['account']['created_at'] + datetime.timedelta(days=1)
+                    if status['account']['statuses_count'] > 10 and created_a1d < now_utc:
+                        # 新規詐欺見破りっ！
+                        if YuChan.msg_hook('sin_sagi', 10800, "新規詐欺はいけませんっ！！(*`ω´*)"):
+                            log.logInfo('新規詐欺っ！:@{0} < {1}'.format(status['account']['acct'], txt))
                 
                 elif nullPoint:
                     # ぬるぽって、言ったら■━⊂( ･∀･)彡ｶﾞｯ☆`Дﾟ)
