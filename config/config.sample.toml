@@ -26,6 +26,7 @@ down_step = 3
 ngword = true
 voteOptout = true
 voteOptoutTag = "ユウちゃん見送り投票"
+newComerGreeting = true
 
 [i18n]
 lang = "ja_JP"

@@ -48,8 +48,8 @@ class local_listener(StreamListener):
                     updated_users.create(ID_Inst=user)
                     log.logInfo(f'覚えたっ！： @{status["account"]["acct"]}')
                     newUser = True
-                    # トゥートカウントが10以下の場合は新規さん向けの挨拶しますっ！
-                    if status['account']['statuses_count'] <= 10:
+                    # トゥートカウントが10以下で、設定で有効な場合は新規さん向けの挨拶しますっ！
+                    if status['account']['statuses_count'] <= 10 and config['features']['newComerGreeting'] == True:
                         log.logInfo(f'新規さん！: @{status["account"]["acct"]}')
                         mastodon.status_reblog(status['id'])
                         time.sleep(0.5)
