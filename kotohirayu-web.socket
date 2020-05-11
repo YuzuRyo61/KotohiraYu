@@ -1,9 +1,9 @@
-; /etc/systemd/system/gunicorn.socket に設置
+; /etc/systemd/system/kotohirayu-web.socket に設置
 [Unit]
-Description=gunicorn socket
+Description=KotohiraYu Web socket
 
 [Socket]
-ListenStream=/run/gunicorn.sock
+ListenStream=/run/kotohirayu-web.sock
 ; ウェブサーバーのユーザーに変更してください
 User=nginx
 

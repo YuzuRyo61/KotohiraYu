@@ -2,7 +2,7 @@
 ; 変更する場所があれば変更してください
 [Unit]
 Description=KotohiraYu Web API System
-Requires=gunicorn.socket
+Requires=kotohirayu-web.socket
 After=network.target
 
 [Service]
