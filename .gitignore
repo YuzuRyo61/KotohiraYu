@@ -116,3 +116,6 @@ tmp/
 
 # usermemos
 USERMEMOS.json
+
+# gunicorn setting file
+wsgi_config.py

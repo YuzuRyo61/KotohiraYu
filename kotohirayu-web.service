@@ -1,0 +1,22 @@
+; /etc/systemd/system/kotohirayu-web.service に設置
+; 変更する場所があれば変更してください
+[Unit]
+Description=KotohiraYu Web API System
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+Type=notify
+User=yu
+Group=yu
+RuntimeDirectory=gunicorn
+WorkingDirectory=/path/to/KotohiraYu
+ExecStart=/usr/bin/env gunicorn Yu.webapi:app -c config/wsgi_config.py
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+; /etc/systemd/system/gunicorn.socket に設置
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+; ウェブサーバーのユーザーに変更してください
+User=nginx
+
+[Install]
+WantedBy=sockets.target
