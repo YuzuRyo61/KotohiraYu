@@ -28,6 +28,16 @@ voteOptout = true
 voteOptoutTag = "ユウちゃん見送り投票"
 newComerGreeting = true
 
+[webapi]
+enable = false
+host = "localhost"
+port = 8787
+secret = "replace_something"
+
+[[webapi.user]]
+username = "username"
+password = "password"
+
 [i18n]
 lang = "ja_JP"
 
