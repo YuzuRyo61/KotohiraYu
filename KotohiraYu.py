@@ -32,6 +32,10 @@ def main():
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.toot_memo, ['**:55'])) )
     features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.meow_time, ['22:22'])) )
 
+    if config["webapi"]["enable"]:
+        from Yu.webapi import WEBRUN
+        features.append( threading.Thread(target=WEBRUN) )
+
     try:
         # スレッド開始
         for ft in features:
