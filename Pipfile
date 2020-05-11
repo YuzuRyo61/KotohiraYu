@@ -8,7 +8,6 @@ pylint = "*"
 
 [packages]
 beautifulsoup4 = "*"
-bottle = "==0.12.16"
 pytz = "*"
 requests = "*"
 six = "*"
@@ -18,6 +17,8 @@ Jinja2 = "*"
 peewee = "*"
 peewee-migrations = "*"
 psycopg2 = "*"
+flask = "*"
+flask-jwt = "*"
 
 [requires]
 python_version = "3.7"
