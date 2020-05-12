@@ -36,11 +36,11 @@ def model_list(model):
     q_offset = request.args.get('offset', default=0, type=int)
 
     if q_limit == -1:
-        memos = model.select().dicts()
+        datas = model.select().dicts()
     else:
-        memos = model.select().limit(q_limit).offset(q_offset).dicts()
+        datas = model.select().limit(q_limit).offset(q_offset).dicts()
 
-    return jsonify([memo for memo in memos])
+    return jsonify([data for data in datas])
 
 def model_get(model, column, query):
     data = model.get_or_none(column == query)
