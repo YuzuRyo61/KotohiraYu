@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from Yu.mastodon import mastodon
 from Yu.config import config
@@ -13,6 +15,8 @@ app.config["SECRET_KEY"] = config["webapi"]["secret"]
 app.config["JSON_AS_ASCII"] = False
 
 jwt = JWT(app, authenticate, identity)
+
+limiter = Limiter(app, key_func=get_remote_address, headers_enabled=True)
 
 @app.errorhandler(404)
 def NotFound(error):
@@ -30,6 +34,15 @@ def MethodNotAllowed(error):
         "status_code": 405
     }), 405
 
+@app.errorhandler(429)
+def TooManyRequests(error):
+    return jsonify({
+        "description": "The API limit has been reached",
+        "limit": error.description,
+        "error": "Too Many Requests",
+        "status_code": 429
+    }), 429
+
 @app.errorhandler(500)
 def InternalError(error):
     return jsonify({
@@ -39,6 +52,7 @@ def InternalError(error):
     }), 500
 
 @app.route("/", methods=["GET"])
+@limiter.limit("60/hour;5/minute")
 def api_index():
     return jsonify({
         "working_server": config["instance"]["address"],
@@ -51,10 +65,12 @@ def api_index():
     })
 
 @app.route("/user_memo", methods=["GET"])
+@limiter.limit("120/hour")
 def list_userMemo():
     return model_list(user_memos)
 
 @app.route("/user_memo/<memo_time>", methods=["GET"])
+@limiter.limit("120/hour")
 def get_userMemo(memo_time=None):
     return model_get(user_memos, user_memos.memo_time, memo_time)
 
