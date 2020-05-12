@@ -27,6 +27,7 @@ python_version = "3.7"
 [scripts]
 start = "python KotohiraYu.py"
 webapi = "gunicorn Yu.webapi:app -c config/wsgi_config.py"
+webapidev = "python patchScripts/runWebAPIdev.py"
 memoconvert = "python patchScripts/UserMemoConverter.py"
 memoexport = "python patchScripts/UserMemoExport.py"
 movementdb = "python patchScripts/movementDB.py"
