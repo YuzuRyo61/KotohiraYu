@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6017faaede1d2a307d8b63e217fce2ded2dcfa0e8cbdceb2cc52218582743420"
+            "sha256": "ce8e59b1bcd56940677fb5200d021202385a9b9f4b6a9e66319b59e0c80a54bc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -75,6 +75,14 @@
             "index": "pypi",
             "version": "==0.3.2"
         },
+        "flask-limiter": {
+            "hashes": [
+                "sha256:d984a57ef37acb6eee29edc864ff22cd4cf090845f06968c015093ffd91e96f1",
+                "sha256:db2a069402977927282b0fcf650753bfcb50488028def9f5b2398e1d525f2f9f"
+            ],
+            "index": "pypi",
+            "version": "==1.2.1"
+        },
         "gunicorn": {
             "hashes": [
                 "sha256:1904bb2b8a43658807108d59c3f3d56c2b6121a701161de0ddf9ad140073c626",
@@ -104,6 +112,13 @@
             ],
             "index": "pypi",
             "version": "==2.11.2"
+        },
+        "limits": {
+            "hashes": [
+                "sha256:0e5f8b10f18dd809eb2342f5046eb9aa5e4e69a0258567b5f4aa270647d438b3",
+                "sha256:f0c3319f032c4bfad68438ed1325c0fac86dac64582c7c25cddc87a0b658fa20"
+            ],
+            "version": "==1.5.1"
         },
         "markupsafe": {
             "hashes": [

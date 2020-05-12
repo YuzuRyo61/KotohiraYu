@@ -20,6 +20,7 @@ psycopg2 = "*"
 flask = "*"
 flask-jwt = "*"
 gunicorn = "*"
+flask-limiter = "*"
 
 [requires]
 python_version = "3.7"
