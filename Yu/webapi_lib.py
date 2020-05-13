@@ -1,4 +1,4 @@
-from flask import request, abort, jsonify
+from flask import request, abort
 from playhouse.shortcuts import model_to_dict
 from werkzeug.security import safe_str_cmp
 
@@ -36,15 +36,19 @@ def model_list(model):
     q_offset = request.args.get('offset', default=0, type=int)
 
     if q_limit == -1:
-        datas = model.select().dicts()
+        query = model.select()
     else:
-        datas = model.select().limit(q_limit).offset(q_offset).dicts()
+        query = model.select().limit(q_limit).offset(q_offset)
 
-    return jsonify([data for data in datas])
+    datas = []
+    for q in query:
+        datas.append(model_to_dict(q, recurse=True))
+
+    return datas
 
 def model_get(model, column, query):
     data = model.get_or_none(column == query)
     if data == None:
         abort(404)
     else:
-        return jsonify(model_to_dict(data))
+        return model_to_dict(data)
