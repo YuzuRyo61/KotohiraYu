@@ -99,6 +99,17 @@ def list_nickname():
 def get_nickname(ID=None):
     return jsonify(model_get(nickname, nickname.ID, ID))
 
+@app.route("/stats", methods=["GET"])
+@limiter.limit("60/hour")
+def api_stats():
+    return jsonify({
+        "count": {
+            "known_users": known_users.select().count(), # pylint: disable=no-value-for-parameter
+            "nickname": nickname.select().count(), # pylint: disable=no-value-for-parameter
+            "user_memo": user_memos.select().count() # pylint: disable=no-value-for-parameter
+        }
+    })
+
 @app.route("/private/known_user", methods=["GET"])
 @jwt_required()
 def list_knownUser():
