@@ -10,7 +10,7 @@ info:
     url: https://github.com/YuzuRyo61/KotohiraYu/blob/master/LICENSE
   version: 1.0.0
 servers:
-- url: https://yuchan-api.yuzulia.work
+- url: https://yuchan-api.yuzulia.work/
   description: Production Server (in best-friends.chat)
 paths:
   /:
@@ -20,6 +20,13 @@ paths:
       responses:
         200:
           description: OK
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/ratelimit_limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/ratelimit_remaining'
+            X-RateLimit-Rest:
+              $ref: '#/components/headers/ratelimit_reset'
           content:
             'application/json':
               schema:
@@ -43,12 +50,15 @@ paths:
                   working_server:
                     type: string
                     example: best-friends.chat
+        429:
+          $ref: '#/components/responses/TooManyRequests'
   /user_memo:
     parameters:
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
     get:
       summary: ユーザーが今までメモしたものの一覧を返します。
+      description: 1時間に120回までAPIリクエストができます。
       responses:
         200:
           description: OK
@@ -58,6 +68,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/user_memo'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
   /user_memo/{memo_time}:
     parameters:
       - name: memo_time
@@ -69,28 +81,48 @@ paths:
         example: '2020_0511_13+0900'
     get:
       summary: ユーザーが今までメモしたものを返します。
+      description: 1時間に120回までAPIリクエストができます。
       responses:
         200:
           description: OK
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/ratelimit_limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/ratelimit_remaining'
+            X-RateLimit-Rest:
+              $ref: '#/components/headers/ratelimit_reset'
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/user_memo'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
   /nickname:
     parameters:
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
     get:
       summary: ユウちゃんが覚えているニックネーム一覧を返します。
+      description: 1時間に120回までAPIリクエストができます。
       responses:
         200:
           description: OK
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/ratelimit_limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/ratelimit_remaining'
+            X-RateLimit-Rest:
+              $ref: '#/components/headers/ratelimit_reset'
           content:
             'application/json':
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/nickname'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
   /nickname/{ID}:
     parameters:
       - name: ID
@@ -102,19 +134,37 @@ paths:
         description: ニックネームのデータベース登録番号を入力します。
     get:
       summary: ユウちゃんが覚えている指定したIDのニックネームを返します。
+      description: 1時間に120回までAPIリクエストができます。
       responses:
         200:
           description: OK
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/ratelimit_limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/ratelimit_remaining'
+            X-RateLimit-Rest:
+              $ref: '#/components/headers/ratelimit_reset'
           content:
             'application/json':
               schema:
                 $ref: '#/components/schemas/nickname'
+        429:
+          $ref: '#/components/responses/TooManyRequests'
   /stats:
     get:
       summary: 各データベースの登録数を返します。
+      description: 1時間に60回までAPIリクエストができます。
       responses:
         200:
           description: OK
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/headers/ratelimit_limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/headers/ratelimit_remaining'
+            X-RateLimit-Rest:
+              $ref: '#/components/headers/ratelimit_reset'
           content:
             'application/json':
               schema:
@@ -132,10 +182,16 @@ paths:
                       user_memo:
                         type: integer
                         example: 2180
+        429:
+          $ref: '#/components/responses/TooManyRequests'
 components:
   schemas:
     user_memo:
       type: object
+      required:
+       - ID
+       - body
+       - memo_time
       properties:
         ID:
           type: integer
@@ -144,6 +200,9 @@ components:
           type: array
           items:
             type: object
+            required:
+              - body
+              - from
             properties:
               body:
                 type: string
@@ -159,6 +218,11 @@ components:
           example: '2020_0514_09+0900'
     known_user:
       type: object
+      required:
+        - ID
+        - ID_Inst
+        - acct
+        - known_at
       properties:
         ID:
           type: integer
@@ -174,6 +238,10 @@ components:
           format: date-time
     nickname:
       type: object
+      required:
+        - ID
+        - ID_Inst
+        - nickname
       properties:
         ID:
           type: integer
@@ -183,6 +251,19 @@ components:
         nickname:
           type: string
           example: 'ユウちゃんの神様'
+    ERROR:
+      type: object
+      required:
+        - description
+        - error
+        - status_code
+      properties:
+        description:
+          type: string
+        error:
+          type: string
+        status_code:
+          type: integer
   parameters:
     limit:
       name: limit
@@ -200,3 +281,34 @@ components:
         type: integer
       example: 0
       description: 始点の項目を設定します。limitが-1以外なら機能します。
+  headers:
+    ratelimit_limit:
+      description: 各APIの上限を返します。
+      schema:
+        type: integer
+    ratelimit_remaining:
+      description: 各APIの残りの上限を返します。
+      schema:
+        type: integer
+    ratelimit_reset:
+      description: 各APIの上限がリセットされる時間を返します。
+      schema:
+        type: integer
+  responses:
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        'application/json':
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ERROR'
+              - properties:
+                  description:
+                    type: string
+                    example: The API limit has been reached
+                  error:
+                    type: string
+                    example: Too Many Requests
+                  status_code:
+                    type: integer
+                    example: 429
