@@ -21,6 +21,8 @@ flask = "*"
 flask-jwt = "*"
 gunicorn = "*"
 flask-limiter = "*"
+flask-swagger-ui = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.7"

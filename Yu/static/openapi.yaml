@@ -1,0 +1,202 @@
+openapi: 3.0.1
+info:
+  title: KotohiraYu-WebAPI
+  description: ユウちゃんのウェブAPI
+  contact:
+    name: YuzuRyo61
+    url: https://yuzulia.com/
+  license:
+    name: MIT
+    url: https://github.com/YuzuRyo61/KotohiraYu/blob/master/LICENSE
+  version: 1.0.0
+servers:
+- url: https://yuchan-api.yuzulia.work
+  description: Production Server (in best-friends.chat)
+paths:
+  /:
+    get:
+      summary: ユウちゃんが使用している機能や、運用しているMastodonサーバーのターゲットアドレスを返します。
+      description: 1分間に5回、1時間に60回までAPIリクエストができます。
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  features:
+                    type: object
+                    properties:
+                      newComerGreeting:
+                        type: boolean
+                        example: true
+                      ngword:
+                        type: boolean
+                        example: true
+                      voteOptout:
+                        type: boolean
+                        example: true
+                      voteOptoutTag:
+                        type: string
+                        example: ユウちゃん見送り投票
+                  working_server:
+                    type: string
+                    example: best-friends.chat
+  /user_memo:
+    parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+    get:
+      summary: ユーザーが今までメモしたものの一覧を返します。
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user_memo'
+  /user_memo/{memo_time}:
+    parameters:
+      - name: memo_time
+        in: path
+        required: true
+        schema:
+          type: string
+        description: メモした時間帯を入力します。
+        example: '2020_0511_13+0900'
+    get:
+      summary: ユーザーが今までメモしたものを返します。
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/user_memo'
+  /nickname:
+    parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+    get:
+      summary: ユウちゃんが覚えているニックネーム一覧を返します。
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/nickname'
+  /nickname/{ID}:
+    parameters:
+      - name: ID
+        in: path
+        required: true
+        schema: 
+          type: string
+        example: 12
+        description: ニックネームのデータベース登録番号を入力します。
+    get:
+      summary: ユウちゃんが覚えている指定したIDのニックネームを返します。
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/nickname'
+  /stats:
+    get:
+      summary: 各データベースの登録数を返します。
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: object
+                    properties:
+                      known_users:
+                        type: integer
+                        example: 1111
+                      nickname:
+                        type: integer
+                        example: 148
+                      user_memo:
+                        type: integer
+                        example: 2180
+components:
+  schemas:
+    user_memo:
+      type: object
+      properties:
+        ID:
+          type: integer
+          example: 1
+        body:
+          type: array
+          items:
+            type: object
+            properties:
+              body:
+                type: string
+                example: 'メモ内容'
+              from:
+                type: string
+                example: 'YuzuRyo61'
+              id:
+                type: integer
+                example: 102383525459228449
+        memo_time:
+          type: string
+          example: '2020_0514_09+0900'
+    known_user:
+      type: object
+      properties:
+        ID:
+          type: integer
+          example: 1
+        ID_Inst:
+          type: integer
+          example: 1136
+        acct:
+          type: string
+          example: YuzuRyo61
+        known_at:
+          type: string
+          format: date-time
+    nickname:
+      type: object
+      properties:
+        ID:
+          type: integer
+          example: 12
+        ID_Inst:
+          $ref: '#/components/schemas/known_user'
+        nickname:
+          type: string
+          example: 'ユウちゃんの神様'
+  parameters:
+    limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+      example: 10
+      description: 一回のAPIリクエストで表示する項目を設定します。-1の場合は全て表示します。
+    offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: integer
+      example: 0
+      description: 始点の項目を設定します。limitが-1以外なら機能します。

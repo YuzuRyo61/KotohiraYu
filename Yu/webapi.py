@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 from flask_jwt import JWT, jwt_required
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_swagger_ui import get_swaggerui_blueprint
+from flask_cors import CORS
 
 from Yu.mastodon import mastodon
 from Yu.config import config
@@ -12,6 +14,7 @@ from Yu.models import user_memos, known_users, fav_rate, nickname
 from Yu.webapi_lib import authenticate, identity, model_list, model_get
 
 app = Flask(__name__)
+CORS(app)
 
 app.config["SECRET_KEY"] = config["webapi"]["secret"]
 app.config["JSON_AS_ASCII"] = False
@@ -19,6 +22,16 @@ app.config["JSON_AS_ASCII"] = False
 jwt = JWT(app, authenticate, identity)
 
 limiter = Limiter(app, key_func=get_remote_address, headers_enabled=True)
+
+APIDOC_URL = "/docs"
+APIDOC_SOURCE = "/static/openapi.yaml"
+
+APIDOC_BP = get_swaggerui_blueprint(
+    APIDOC_URL,
+    APIDOC_SOURCE
+)
+
+app.register_blueprint(APIDOC_BP, url_prefix=APIDOC_URL)
 
 @app.errorhandler(404)
 def NotFound(error):
@@ -40,7 +53,6 @@ def MethodNotAllowed(error):
 def TooManyRequests(error):
     return jsonify({
         "description": "The API limit has been reached",
-        "limit": error.description,
         "error": "Too Many Requests",
         "status_code": 429
     }), 429
