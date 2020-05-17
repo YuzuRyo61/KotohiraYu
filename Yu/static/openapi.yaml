@@ -17,6 +17,9 @@ paths:
     get:
       summary: ユウちゃんが使用している機能や、運用しているMastodonサーバーのターゲットアドレスを返します。
       description: 1分間に5回、1時間に60回までAPIリクエストができます。
+      tags:
+        - public
+        - stats
       responses:
         200:
           description: OK
@@ -59,6 +62,9 @@ paths:
     get:
       summary: ユーザーが今までメモしたものの一覧を返します。
       description: 1時間に120回までAPIリクエストができます。
+      tags:
+        - user_memo
+        - public
       responses:
         200:
           description: OK
@@ -82,6 +88,9 @@ paths:
     get:
       summary: ユーザーが今までメモしたものを返します。
       description: 1時間に120回までAPIリクエストができます。
+      tags:
+        - user_memo
+        - public
       responses:
         200:
           description: OK
@@ -105,6 +114,9 @@ paths:
     get:
       summary: ユウちゃんが覚えているニックネーム一覧を返します。
       description: 1時間に120回までAPIリクエストができます。
+      tags:
+        - nickname
+        - public
       responses:
         200:
           description: OK
@@ -135,6 +147,9 @@ paths:
     get:
       summary: ユウちゃんが覚えている指定したIDのニックネームを返します。
       description: 1時間に120回までAPIリクエストができます。
+      tags:
+        - public
+        - nickname
       responses:
         200:
           description: OK
@@ -155,6 +170,9 @@ paths:
     get:
       summary: 各データベースの登録数を返します。
       description: 1時間に60回までAPIリクエストができます。
+      tags:
+        - stats
+        - public
       responses:
         200:
           description: OK
@@ -184,6 +202,159 @@ paths:
                         example: 2180
         429:
           $ref: '#/components/responses/TooManyRequests'
+  /auth:
+    post:
+      summary: 管理者専用。認証トークンを発行するためのエンドポイント。
+      tags:
+        - private
+      requestBody:
+        description: 認証情報を入力します。
+        content:
+          'application/json':
+            schema:
+              type: object
+              required: 
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        400:
+          description: Bad Request
+          content:
+            'application/json':
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ERROR'
+                  - properties:
+                      description:
+                        type: string
+                        example: Request body (or something) is not valid
+                      error:
+                        type: string
+                        example: Bad Request
+                      status_code:
+                        type: integer
+                        example: 400
+        401:
+          description: Invalid credentials
+          content:
+            'application/json':
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ERROR'
+                  - properties:
+                      description:
+                        type: string
+                        example: Invalid credentials
+                      error:
+                        type: string
+                        example: Bad Request
+                      status_code:
+                        type: integer
+                        example: 401
+  /private/known_user:
+    get:
+      summary: 管理者専用。ユウちゃんが覚えているユーザー一覧を返します。
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      security:
+        - JWTAuth: []
+      tags:
+        - private
+        - known_user
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/known_user'
+        401:
+          $ref: '#/components/responses/AuthRequired'
+  /private/known_user/{ID}:
+    get:
+      summary: 管理者専用。ユウちゃんが覚えている指定したユーザーを返します。
+      parameters:
+        - name: ID
+          in: path
+          required: true
+          schema: 
+            type: integer
+          example: 12
+          description: 登録ユーザーのデータベース登録番号を入力します。
+      security: 
+        - JWTAuth: []
+      tags: 
+        - private
+        - known_user
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/known_user'
+        401:
+          $ref: '#/components/responses/AuthRequired'
+  /private/fav_rate:
+    get:
+      summary: 管理者専用。ユーザーとユウちゃんとの好感度レート一覧を返します。
+      security: 
+        - JWTAuth: []
+      tags:
+        - private
+        - fav_rate
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/fav_rate'
+        401:
+          $ref: '#/components/responses/AuthRequired'
+  /private/fav_rate/{ID}:
+    get:
+      summary: 管理者専用。ユーザーとユウちゃんとの好感度レートを返します。
+      parameters: 
+        - name: ID
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+          description: 登録ユーザーのデータベース登録番号を入力します。
+      security: 
+        - JWTAuth: []
+      tags:
+        - private
+        - fav_rate
+      responses:
+        200:
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/fav_rate'
 components:
   schemas:
     user_memo:
@@ -251,6 +422,21 @@ components:
         nickname:
           type: string
           example: 'ユウちゃんの神様'
+    fav_rate:
+      type: object
+      required:
+        - ID
+        - ID_Inst
+        - rate
+      properties:
+        ID:
+          type: integer
+          example: 1
+        ID_Inst:
+          $ref: '#/components/schemas/known_user'
+        rate:
+          type: integer
+          example: 100
     ERROR:
       type: object
       required:
@@ -312,3 +498,26 @@ components:
                   status_code:
                     type: integer
                     example: 429
+    AuthRequired:
+      description: Authorization Required
+      content:
+        'application/json':
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ERROR'
+              - properties:
+                  description:
+                    type: string
+                    example: Request does not contain an access token
+                  error:
+                    type: string
+                    example: Authorization Required
+                  status_code:
+                    type: integer
+                    example: 401
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: privateのAPIをコールするために必要になります。
