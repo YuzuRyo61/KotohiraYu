@@ -1,7 +1,7 @@
 import json
 
 from flask import Flask, request, jsonify
-from flask_jwt import JWT, jwt_required
+from flask_jwt import JWT, jwt_required, current_identity
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -32,6 +32,14 @@ APIDOC_BP = get_swaggerui_blueprint(
 )
 
 app.register_blueprint(APIDOC_BP, url_prefix=APIDOC_URL)
+
+@app.errorhandler(400)
+def BadRequest(error):
+    return jsonify({
+        "description": "Request body (or something) is not valid",
+        "error": "Bad Request",
+        "status_code": 400
+    }), 400
 
 @app.errorhandler(404)
 def NotFound(error):
