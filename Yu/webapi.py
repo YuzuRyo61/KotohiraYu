@@ -92,12 +92,17 @@ def get_userMemo(memo_time=None):
 @app.route("/nickname", methods=["GET"])
 @limiter.limit("120/hour")
 def list_nickname():
-    return jsonify(model_list(nickname))
+    query = model_list(nickname)
+    for index, _ in enumerate(query):
+        query[index]["ID_Inst"]["known_at"] = query[index]["ID_Inst"]["known_at"].isoformat('T')
+    return jsonify(query)
 
 @app.route("/nickname/<ID>", methods=["GET"])
 @limiter.limit("120/hour")
 def get_nickname(ID=None):
-    return jsonify(model_get(nickname, nickname.ID, ID))
+    query = model_get(nickname, nickname.ID, ID)
+    query["ID_Inst"]["known_at"] = query["ID_Inst"]["known_at"].isoformat('T')
+    return jsonify(query)
 
 @app.route("/stats", methods=["GET"])
 @limiter.limit("60/hour")
@@ -113,12 +118,17 @@ def api_stats():
 @app.route("/private/known_user", methods=["GET"])
 @jwt_required()
 def list_knownUser():
-    return jsonify(model_list(known_users))
+    query = model_list(known_users)
+    for index, _ in enumerate(query):
+        query[index]["ID_Inst"]["known_at"] = query[index]["ID_Inst"]["known_at"].isoformat('T')
+    return jsonify(query)
 
 @app.route("/private/known_user/<ID>", methods=["GET"])
 @jwt_required()
 def get_knownUser(ID=None):
-    return jsonify(model_get(known_users, known_users.ID, ID))
+    query = model_get(known_users, known_users.ID, ID)
+    query["ID_Inst"]["known_at"] = query["ID_Inst"]["known_at"].isoformat('T')
+    return jsonify(query)
 
 @app.route("/private/fav_rate", methods=["GET"])
 @jwt_required()
