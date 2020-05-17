@@ -318,6 +318,9 @@ paths:
       summary: 管理者専用。ユーザーとユウちゃんとの好感度レート一覧を返します。
       security: 
         - JWTAuth: []
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
       tags:
         - private
         - fav_rate
