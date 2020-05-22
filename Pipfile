@@ -25,6 +25,7 @@ flask-swagger-ui = "*"
 flask-cors = "*"
 sseclient-py = "*"
 schedule = "*"
+python-dateutil = "*"
 
 [requires]
 python_version = "3.7"
