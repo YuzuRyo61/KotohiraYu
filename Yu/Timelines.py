@@ -51,6 +51,8 @@ def local():
         log.logErr('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         local()
+    except KeyboardInterrupt:
+        pass
     except:
         KotohiraUtil.PANIC(sys.exc_info())
         log.logErr('ローカルタイムラインを30秒待って読み込みし直しますねっ！')
@@ -95,6 +97,8 @@ def home():
         log.logErr('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         home()
+    except KeyboardInterrupt:
+        pass
     except:
         KotohiraUtil.PANIC(sys.exc_info())
         log.logErr('ホームタイムラインを十秒待って読み込みし直しますねっ！')
