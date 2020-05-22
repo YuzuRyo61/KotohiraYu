@@ -14,6 +14,7 @@ def run_scheduler():
     schedule.every().day.at("22:22").do(meow_time)
 
     try:
+        log.logInfo("Start feature: scheduler")
         while True:
             schedule.run_pending()
             time.sleep(1)
