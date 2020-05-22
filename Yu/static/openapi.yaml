@@ -365,7 +365,6 @@ components:
       type: object
       required:
        - ID
-       - body
        - memo_time
       properties:
         ID:
