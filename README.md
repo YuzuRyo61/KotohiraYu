@@ -49,8 +49,6 @@ The mastodon bot!
 
 - Python 3.7で動作します。（pipenvは3.7指定です）
 
-- CPU負荷がそこそこ高いため、systemdに登録する場合はCPU使用制限を設けることを推奨します。
-
 - Mastodon専用botシステムです。MisskeyなどのSNSには対応しておりません。
 
 - Linuxでの動作を想定した設計になっているため、その他のOSでは上手く動作しない可能性がありますのでご注意ください。
