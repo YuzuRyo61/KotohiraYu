@@ -6,6 +6,7 @@ import time
 
 from mastodon import StreamListener
 from pytz import timezone, utc
+from dateutil import parser as duParser
 
 from Yu import YuChan, Util as KotohiraUtil, log
 from Yu.config import config
@@ -172,7 +173,8 @@ def local_onUpdate(status):
                 # 現在時刻をUTCに変換し、該当アカウントの作成時刻から1日後のものを算出。
                 # 作成から丸一日以上かつトゥートが10より上であれば作動
                 now_utc = utc.localize(now)
-                created_a1d = status['account']['created_at'] + datetime.timedelta(days=1)
+                created_at = duParser.parse(status['account']['created_at'])
+                created_a1d = created_at + datetime.timedelta(days=1)
                 if status['account']['statuses_count'] > 10 and created_a1d < now_utc:
                     # 新規詐欺見破りっ！
                     if YuChan.msg_hook('sin_sagi', 600, "新規詐欺はいけませんっ！！(*`ω´*)"):
