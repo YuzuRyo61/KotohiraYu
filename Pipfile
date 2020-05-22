@@ -23,6 +23,8 @@ gunicorn = "*"
 flask-limiter = "*"
 flask-swagger-ui = "*"
 flask-cors = "*"
+sseclient-py = "*"
+schedule = "*"
 
 [requires]
 python_version = "3.7"
