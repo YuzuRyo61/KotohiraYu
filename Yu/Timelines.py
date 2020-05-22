@@ -82,6 +82,8 @@ def home():
                     home_onUpdate(json.loads(event.data))
                 elif event.event == "notification":
                     home_onNotification(json.loads(event.data))
+                elif event.event == "delete":
+                    pass
                 else:
                     log.logWarn(f"Unknown event: {event.event}")
             log.logErr('サーバーからの通信が切れましたっ！１分後にやり直しますっ！')
