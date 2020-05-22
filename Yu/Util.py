@@ -42,29 +42,6 @@ def PANIC(exc_info):
 def h2t(txt):
     return BeautifulSoup(txt, features='html.parser').get_text()
 
-def schedule(func, doTimeList):
-    # 指定した時間帯に実施する関数。設定時間は24時間表記で設定する
-    log.logInfo(f"Setting feature: {func.__name__} at {doTimeList}")
-    try:
-        while True:
-            now = datetime.datetime.now(timezone('Asia/Tokyo'))
-            nowH = now.strftime("%H")
-            nowM = now.strftime("%M")
-            for time in doTimeList:
-                if len(time.split(":")) == 2:
-                    h, m = time.split(":")
-                    if (h == nowH or h == '**' or h == '*') and m == nowM:
-                        log.logInfo(f"指定した時間になったので実行っ！：{func}")
-                        func()
-                        sleep(60)
-                else:
-                    sleep(10)
-    except:
-        PANIC(sys.exc_info())
-        log.logWarn('五秒待って読み込みし直しますねっ！')
-        sleep(5)
-        schedule(func, doTimeList)
-
 def isVoteOptout(tags):
     if config['features']['voteOptout']:
         for tag in tags:

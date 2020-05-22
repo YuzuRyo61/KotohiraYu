@@ -17,6 +17,7 @@ import configparser
 
 from Yu import YuChan, local, home, log
 from Yu import Util as KotohiraUtil
+from Yu.scheduler import run_scheduler
 from Yu.config import config
 from Yu.mastodon import mastodon
 from Yu.database import DATABASE
@@ -28,9 +29,7 @@ def main():
     features.append( threading.Thread(target=local, name='Timeline-Local') )
     features.append( threading.Thread(target=home, name='Timeline-Home') )
     # cron系
-    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.timeReport,['**:00']), name='Cron-Timereport') )
-    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.toot_memo, ['**:55']), name='Cron-tootMemo') )
-    features.append( threading.Thread(target=KotohiraUtil.schedule, args=(YuChan.meow_time, ['22:22']), name='Cron-MeowTime') )
+    features.append( threading.Thread(target=run_scheduler, name='Schedule'))
 
     try:
         # スレッド開始
