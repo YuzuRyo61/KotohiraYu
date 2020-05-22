@@ -9,8 +9,8 @@ from Yu import log
 
 def run_scheduler():
     # スケジュール一覧
-    schedule.every().minute.at(":00").do(timeReport)
-    schedule.every().minute.at(":55").do(toot_memo)
+    schedule.every().hour.at(":00").do(timeReport)
+    schedule.every().hour.at(":55").do(toot_memo)
     schedule.every().day.at("22:22").do(meow_time)
 
     try:
