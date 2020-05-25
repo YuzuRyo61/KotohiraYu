@@ -35,9 +35,17 @@ paths:
             'application/json':
               schema:
                 type: object
+                required:
+                  - features
+                  - working_server
                 properties:
                   features:
                     type: object
+                    required:
+                      - newComerGreeting
+                      - ngword
+                      - voteOptout
+                      - voteOptoutTag
                     properties:
                       newComerGreeting:
                         type: boolean
