@@ -47,7 +47,7 @@ def local():
     except OperationalError as exc:
         log.logCritical('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
         raise exc
-    except (requests.exceptions.ReadTimeout, MastodonNetworkError, MastodonServerError):
+    except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError):
         log.logErr('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         local()
@@ -93,7 +93,7 @@ def home():
     except OperationalError as exc:
         log.logCritical('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
         raise exc
-    except (requests.exceptions.ReadTimeout, MastodonNetworkError, MastodonServerError):
+    except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError):
         log.logErr('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         home()
