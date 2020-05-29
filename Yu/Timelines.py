@@ -10,7 +10,7 @@ import requests
 import requests.exceptions
 import sseclient
 from mastodon import StreamListener
-from mastodon.Mastodon import MastodonNetworkError, MastodonServerError
+from mastodon.Mastodon import MastodonNetworkError, MastodonServerError, MastodonBadGatewayError
 from pytz import timezone
 from Yu import Util as KotohiraUtil, YuChan, log
 from Yu.listener.local import local_onDelete, local_onUpdate
@@ -47,7 +47,7 @@ def local():
     except OperationalError as exc:
         log.logCritical('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
         raise exc
-    except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError):
+    except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError, MastodonBadGatewayError):
         log.logErr('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         local()
@@ -93,7 +93,7 @@ def home():
     except OperationalError as exc:
         log.logCritical('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
         raise exc
-    except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError):
+    except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError, MastodonBadGatewayError):
         log.logErr('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
         home()
