@@ -9,6 +9,7 @@
     "Yu.models.recent_fav.recent_fav",
     "Yu.models.updated_users.updated_users",
     "Yu.models.user_memos.user_memos",
-    "Yu.models.word_trigger.word_trigger"
+    "Yu.models.word_trigger.word_trigger",
+    "Yu.models.drill_count.drill_count"
   ]
 }

@@ -1,16 +1,18 @@
-import datetime
 import configparser
+import datetime
+import json
 import random
 import re
-import json
 import time
+
 from pytz import timezone
 
-from Yu.config import config
 from Yu import log
-from Yu.mastodon import mastodon
+from Yu.config import config
 from Yu.database import DATABASE
-from Yu.models import nickname, known_users, word_trigger, user_memos, fav_rate
+from Yu.mastodon import mastodon
+from Yu.models import (drill_count as dc_model, fav_rate, known_users, nickname,
+                       user_memos, word_trigger)
 
 # NGワードを予め読み込み（ファイルIOの負荷対策）
 if config['features']['ngword']:
@@ -411,7 +413,7 @@ def unfollow_attempt(targetID_Inst):
     else:
         DATABASE.commit()
 
-def drill_count(targetID, name, statCount):
+def drill_count(target, name, statCount):
     if statCount <= 10000: # トゥート数が10,000以下の場合は1,000トゥート単位で処理しますっ！
         if statCount % 1000 == 0:
             tootable =  True
@@ -424,7 +426,14 @@ def drill_count(targetID, name, statCount):
             tootable = False
 
     if tootable:
-        mastodon.toot(f"@{targetID}\n:@{targetID}: {name}、{statCount:,}トゥート達成おめでとうございますっ！🎉")
+        count_check, created = dc_model.get_or_create(
+            ID_Inst=target,
+            defaults={
+                "tootCount": statCount
+            }
+        )
+        if created or count_check.tootCount > statCount:
+            mastodon.toot(f"@{target.acct}\n:@{target.acct}: {name}、{statCount:,}トゥート達成おめでとうございますっ！🎉")
 
 # あなたとユウちゃんのこと教えますっ！
 def about_you(targetID_Inst, mentionId, visibility):

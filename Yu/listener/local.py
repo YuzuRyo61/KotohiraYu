@@ -233,7 +233,7 @@ def local_onUpdate(status):
                         log.logInfo("こんばんはっ！：@{0} < {1}".format(status['account']['acct'], txt))
                         mastodon.toot(""":@{1}: {0}、こんばんはっ！🌙""".format(name, status['account']['acct']))
 
-                YuChan.drill_count(status['account']['acct'], name, status['account']['statuses_count'])
+                YuChan.drill_count(user, name, status['account']['statuses_count'])
 
                 # 最終更新を変更
                 updated_at.date = now
