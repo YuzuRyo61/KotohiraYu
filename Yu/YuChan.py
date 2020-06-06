@@ -432,7 +432,7 @@ def drill_count(target, name, statCount):
                 "tootCount": statCount
             }
         )
-        if created or count_check.tootCount > statCount:
+        if created or int(count_check.tootCount) > int(statCount):
             mastodon.toot(f"@{target.acct}\n:@{target.acct}: {name}、{statCount:,}トゥート達成おめでとうございますっ！🎉")
 
 # あなたとユウちゃんのこと教えますっ！
