@@ -3,6 +3,7 @@ import datetime
 import random
 import re
 import time
+import threading
 
 from mastodon import StreamListener
 from pytz import timezone, utc
@@ -13,6 +14,9 @@ from Yu.config import config
 from Yu.mastodon import mastodon
 from Yu.database import DATABASE
 from Yu.models import known_users, nickname, updated_users, fav_rate
+
+# 投票再通知用スレッド辞書
+VOTE_RENOTIFY_THREAD = {}
 
 # ローカルタイムラインのリスナー
 def local_onUpdate(status):
@@ -138,6 +142,22 @@ def local_onUpdate(status):
                         # 投票したものをトゥートする
                         log.logInfo('投票っ！：@{0} => {1}'.format(status['account']['acct'], status['poll']['options'][voteChoose]['title']))
                         mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']))
+                        # 投票の再通知機能（設定で有効になっている場合のみ機能）
+                        if config['features']['voteRenotify']:
+                            # 投票締め切り時間を読み取って現在時刻からの差分でおおよその投票時間を逆算
+                            expires_at = duParser.parse(status['poll']['expires_at'])
+                            now_utc = utc.localize(now)
+                            poll_time_delta = expires_at - now_utc
+                            poll_time = poll_time_delta.seconds
+                            # 約5分間投票だったら2分前ぐらいに通知、それ以外は5分前
+                            if poll_time <= 310:
+                                renotify_timer = float(120)
+                            else:
+                                renotify_timer = float(300)
+                            VOTE_RENOTIFY_THREAD[int(status['id'])] = threading.Timer(renotify_timer, YuChan.vote_renotify, kwargs={
+                                "url": status['url']
+                            })
+                            VOTE_RENOTIFY_THREAD[int(status['id'])].start()
 
             elif otherNick:
                 # 他人のニックネームの設定
@@ -250,5 +270,11 @@ def local_onDelete(status_id):
         # メモのトゥートが削除されたらデータベースから削除する
         if YuChan.cancel_memo(status_id):
             log.logInfo(f"メモを削除っ！: {str(status_id)}")
+        
+        # 投票再通知の取り消し（該当する場合）
+        if config['features']['voteRenotify'] and VOTE_RENOTIFY_THREAD.get(int(status_id), False):
+            if type(VOTE_RENOTIFY_THREAD[int(status_id)]) == threading.Timer:
+                VOTE_RENOTIFY_THREAD[int(status_id)].cancel()
+                log.logInfo(f"投票再通知を解除っ！: {str(status_id)}")
     except Exception as e: # 上と同じ
         raise e
