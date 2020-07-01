@@ -3,6 +3,7 @@ import datetime
 import random
 import re
 import time
+import threading
 
 from mastodon import StreamListener
 from pytz import timezone, utc
@@ -13,6 +14,16 @@ from Yu.config import config
 from Yu.mastodon import mastodon
 from Yu.database import DATABASE
 from Yu.models import known_users, nickname, updated_users, fav_rate
+
+# 投票再通知用スレッド辞書
+VOTE_RENOTIFY_THREAD = {}
+
+# 再通知したら該当するスレッドを削除（メモリリーク対策）
+def vote_renotify(url, id):
+    mastodon.status_post(f"もうすぐこの投票が終わるみたいですっ！\n\n{url}")
+    # もしもなかったときのエラー対策
+    if VOTE_RENOTIFY_THREAD.get(int(id)):
+        del VOTE_RENOTIFY_THREAD[int(id)]
 
 # ローカルタイムラインのリスナー
 def local_onUpdate(status):
@@ -90,6 +101,7 @@ def local_onUpdate(status):
 
             # 最終更新を変更
             now = datetime.datetime.now()
+            now_utc = datetime.datetime.now(timezone('UTC'))
 
             # 正規表現チェック
             calledYuChan = re.search(f'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|:@{config["user"]["me"]}:|((ゆう|ユウ|ユゥ|ﾕｳ|ﾕｩ)(ちゃん|チャン|ﾁｬﾝ|くん|クン|君|ｸﾝ))|ユウ)', txt)
@@ -138,6 +150,23 @@ def local_onUpdate(status):
                         # 投票したものをトゥートする
                         log.logInfo('投票っ！：@{0} => {1}'.format(status['account']['acct'], status['poll']['options'][voteChoose]['title']))
                         mastodon.status_post('ユウちゃんは「{0}」がいいと思いますっ！\n\n{1}'.format(status['poll']['options'][voteChoose]['title'], status['url']))
+                        # 投票の再通知機能（設定で有効になっている場合のみ機能）
+                        if config['features']['voteRenotify']:
+                            # 投票締め切り時間を読み取って現在時刻からの差分でおおよその投票時間を逆算
+                            expires_at = duParser.parse(status['poll']['expires_at'])
+                            poll_time_delta = expires_at - now_utc
+                            poll_time = poll_time_delta.seconds
+                            # 約5分間投票だったら2分前ぐらいに通知、それ以外は5分前
+                            if poll_time <= 300:
+                                renotify_timer = float(180)
+                            else:
+                                renotify_timer = float(300)
+                            log.logInfo(f'投票時間は{poll_time}ですので、{str(renotify_timer)}秒後に知らせますっ！')
+                            VOTE_RENOTIFY_THREAD[int(status['id'])] = threading.Timer(renotify_timer, vote_renotify, kwargs={
+                                "url": status['url'],
+                                "id": status['id']
+                            })
+                            VOTE_RENOTIFY_THREAD[int(status['id'])].start()
 
             elif otherNick:
                 # 他人のニックネームの設定
@@ -172,7 +201,6 @@ def local_onUpdate(status):
             elif sinkiSagi:
                 # 現在時刻をUTCに変換し、該当アカウントの作成時刻から1日後のものを算出。
                 # 作成から丸一日以上かつトゥートが10より上であれば作動
-                now_utc = utc.localize(now)
                 created_at = duParser.parse(status['account']['created_at'])
                 created_a1d = created_at + datetime.timedelta(days=1)
                 if status['account']['statuses_count'] > 10 and created_a1d < now_utc:
@@ -250,5 +278,11 @@ def local_onDelete(status_id):
         # メモのトゥートが削除されたらデータベースから削除する
         if YuChan.cancel_memo(status_id):
             log.logInfo(f"メモを削除っ！: {str(status_id)}")
+        
+        # 投票再通知の取り消し（該当する場合）
+        if config['features']['voteRenotify'] and VOTE_RENOTIFY_THREAD.get(int(status_id), False):
+            if type(VOTE_RENOTIFY_THREAD[int(status_id)]) == threading.Timer:
+                VOTE_RENOTIFY_THREAD[int(status_id)].cancel()
+                log.logInfo(f"投票再通知を解除っ！: {str(status_id)}")
     except Exception as e: # 上と同じ
         raise e
