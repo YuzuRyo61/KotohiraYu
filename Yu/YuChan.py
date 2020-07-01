@@ -448,6 +448,3 @@ def about_you(targetID_Inst, mentionId, visibility):
         raise e
     else:
         DATABASE.commit()
-
-def vote_renotify(url):
-    mastodon.status_post(f"もうすぐこの投票が終わるみたいですっ！\n\n{url}")

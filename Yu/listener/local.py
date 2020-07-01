@@ -18,6 +18,13 @@ from Yu.models import known_users, nickname, updated_users, fav_rate
 # 投票再通知用スレッド辞書
 VOTE_RENOTIFY_THREAD = {}
 
+# 再通知したら該当するスレッドを削除（メモリリーク対策）
+def vote_renotify(url, id):
+    mastodon.status_post(f"もうすぐこの投票が終わるみたいですっ！\n\n{url}")
+    # もしもなかったときのエラー対策
+    if VOTE_RENOTIFY_THREAD.get(int(id)):
+        del VOTE_RENOTIFY_THREAD[int(id)]
+
 # ローカルタイムラインのリスナー
 def local_onUpdate(status):
     try:
@@ -155,8 +162,9 @@ def local_onUpdate(status):
                             else:
                                 renotify_timer = float(300)
                             log.logInfo(f'投票時間は{poll_time}ですので、{str(renotify_timer)}秒後に知らせますっ！')
-                            VOTE_RENOTIFY_THREAD[int(status['id'])] = threading.Timer(renotify_timer, YuChan.vote_renotify, kwargs={
-                                "url": status['url']
+                            VOTE_RENOTIFY_THREAD[int(status['id'])] = threading.Timer(renotify_timer, vote_renotify, kwargs={
+                                "url": status['url'],
+                                "id": status['id']
                             })
                             VOTE_RENOTIFY_THREAD[int(status['id'])].start()
 
