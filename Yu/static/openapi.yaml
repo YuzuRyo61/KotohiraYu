@@ -46,6 +46,7 @@ paths:
                       - ngword
                       - voteOptout
                       - voteOptoutTag
+                      - voteRenotify
                     properties:
                       newComerGreeting:
                         type: boolean
@@ -59,6 +60,9 @@ paths:
                       voteOptoutTag:
                         type: string
                         example: ユウちゃん見送り投票
+                      voteRenotify:
+                        type: boolean
+                        example: true
                   working_server:
                     type: string
                     example: best-friends.chat

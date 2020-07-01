@@ -82,7 +82,8 @@ def api_index():
             "ngword": config["features"]["ngword"],
             "voteOptout": config["features"]["voteOptout"],
             "voteOptoutTag": config["features"]["voteOptoutTag"],
-            "newComerGreeting": config["features"]["newComerGreeting"]
+            "voteRenotify": config["features"]["voteRenotify"],
+            "newComerGreeting": config["features"]["newComerGreeting"],
         }
     })
 
