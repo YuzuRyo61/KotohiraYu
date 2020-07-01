@@ -148,7 +148,7 @@ def local_onUpdate(status):
                             expires_at = duParser.parse(status['poll']['expires_at'])
                             now_utc = utc.localize(now)
                             poll_time_delta = expires_at - now_utc
-                            log.logDebug(poll_time_delta)
+                            log.logInfo(poll_time_delta)
                             poll_time = poll_time_delta.seconds
                             # 約5分間投票だったら2分前ぐらいに通知、それ以外は5分前
                             if poll_time <= 310:
