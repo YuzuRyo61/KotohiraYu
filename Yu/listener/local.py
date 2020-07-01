@@ -154,6 +154,7 @@ def local_onUpdate(status):
                                 renotify_timer = float(120)
                             else:
                                 renotify_timer = float(300)
+                            log.logInfo(f'{str(renotify_timer)}秒後に知らせますっ！')
                             VOTE_RENOTIFY_THREAD[int(status['id'])] = threading.Timer(renotify_timer, YuChan.vote_renotify, kwargs={
                                 "url": status['url']
                             })
