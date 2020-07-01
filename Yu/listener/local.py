@@ -94,6 +94,7 @@ def local_onUpdate(status):
 
             # 最終更新を変更
             now = datetime.datetime.now()
+            now_utc = datetime.datetime.now(timezone('UTC'))
 
             # 正規表現チェック
             calledYuChan = re.search(f'(琴平|ことひら|コトヒラ|ｺﾄﾋﾗ|:@{config["user"]["me"]}:|((ゆう|ユウ|ユゥ|ﾕｳ|ﾕｩ)(ちゃん|チャン|ﾁｬﾝ|くん|クン|君|ｸﾝ))|ユウ)', txt)
@@ -146,9 +147,7 @@ def local_onUpdate(status):
                         if config['features']['voteRenotify']:
                             # 投票締め切り時間を読み取って現在時刻からの差分でおおよその投票時間を逆算
                             expires_at = duParser.parse(status['poll']['expires_at'])
-                            now_utc = utc.localize(now)
                             poll_time_delta = expires_at - now_utc
-                            log.logInfo(poll_time_delta)
                             poll_time = poll_time_delta.seconds
                             # 約5分間投票だったら2分前ぐらいに通知、それ以外は5分前
                             if poll_time <= 310:
@@ -194,7 +193,6 @@ def local_onUpdate(status):
             elif sinkiSagi:
                 # 現在時刻をUTCに変換し、該当アカウントの作成時刻から1日後のものを算出。
                 # 作成から丸一日以上かつトゥートが10より上であれば作動
-                now_utc = utc.localize(now)
                 created_at = duParser.parse(status['account']['created_at'])
                 created_a1d = created_at + datetime.timedelta(days=1)
                 if status['account']['statuses_count'] > 10 and created_a1d < now_utc:
