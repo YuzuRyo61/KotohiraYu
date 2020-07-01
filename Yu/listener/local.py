@@ -157,8 +157,8 @@ def local_onUpdate(status):
                             poll_time_delta = expires_at - now_utc
                             poll_time = poll_time_delta.seconds
                             # 約5分間投票だったら2分前ぐらいに通知、それ以外は5分前
-                            if poll_time <= 310:
-                                renotify_timer = float(120)
+                            if poll_time <= 300:
+                                renotify_timer = float(180)
                             else:
                                 renotify_timer = float(300)
                             log.logInfo(f'投票時間は{poll_time}ですので、{str(renotify_timer)}秒後に知らせますっ！')
