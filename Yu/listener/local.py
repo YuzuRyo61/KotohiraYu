@@ -4,6 +4,7 @@ import random
 import re
 import time
 import threading
+import math
 
 from mastodon import StreamListener
 from pytz import timezone, utc
@@ -156,11 +157,13 @@ def local_onUpdate(status):
                             expires_at = duParser.parse(status['poll']['expires_at'])
                             poll_time_delta = expires_at - now_utc
                             poll_time = poll_time_delta.seconds
+                            # 小数点を１桁ずらして切り上げして１桁戻して、投票時間を算出
+                            poll_time_ceil = math.ceil(poll_time / 10) * 10
                             # 約5分間投票だったら2分前ぐらいに通知、それ以外は5分前
                             if poll_time <= 300:
-                                renotify_timer = float(180)
+                                renotify_timer = float(poll_time_ceil - 120)
                             else:
-                                renotify_timer = float(300)
+                                renotify_timer = float(poll_time_ceil - 300)
                             log.logInfo(f'投票時間は{poll_time}ですので、{str(renotify_timer)}秒後に知らせますっ！')
                             VOTE_RENOTIFY_THREAD[int(status['id'])] = threading.Timer(renotify_timer, vote_renotify, kwargs={
                                 "url": status['url'],
