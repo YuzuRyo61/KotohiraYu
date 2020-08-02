@@ -32,15 +32,17 @@ EXCLUDEUSERSID = config['follow']['exclude']
 
 def timeReport():
     now = datetime.datetime.now(timezone('Asia/Tokyo'))
-    nowH = now.strftime("%H")
-    if nowH == "12":
-        mastodon.toot("琴平ユウちゃんが正午をお知らせしますっ！")
-    elif nowH == "23":
-        mastodon.toot("琴平ユウちゃんがテレホタイムをお知らせしますっ！")
-    elif nowH == "00" or nowH == "0":
-        mastodon.toot("琴平ユウちゃんが日付が変わったことをお知らせしますっ！")
-    else:
-        mastodon.toot(f"琴平ユウちゃんが{nowH}時をお知らせしますっ！")
+    trigger, created = word_trigger.get_or_create(trigger_name="time_report")
+    if created or now.hour > trigger.date.hour:
+        nowH = now.strftime("%H")
+        if nowH == "12":
+            mastodon.toot("琴平ユウちゃんが正午をお知らせしますっ！")
+        elif nowH == "23":
+            mastodon.toot("琴平ユウちゃんがテレホタイムをお知らせしますっ！")
+        elif nowH == "00" or nowH == "0":
+            mastodon.toot("琴平ユウちゃんが日付が変わったことをお知らせしますっ！")
+        else:
+            mastodon.toot(f"琴平ユウちゃんが{nowH}時をお知らせしますっ！")
 
 def fortune(mentionId, acctId, visibility):
     # 乱数作成
