@@ -1,32 +1,39 @@
-import sys
 import datetime
+import json
+import os
 import random
 import re
+import signal
+import sys
 import time
-import json
 from sqlite3 import OperationalError
 
 import requests
 import requests.exceptions
 import sseclient
-from mastodon import StreamListener
-from mastodon.Mastodon import MastodonNetworkError, MastodonServerError, MastodonBadGatewayError
 from pytz import timezone
-from Yu import Util as KotohiraUtil, YuChan, log
-from Yu.listener.local import local_onDelete, local_onUpdate
-from Yu.listener.home import home_onUpdate, home_onNotification
+
+from mastodon import StreamListener
+from mastodon.Mastodon import (MastodonBadGatewayError, MastodonNetworkError,
+                               MastodonServerError)
+from Yu import Util as KotohiraUtil
+from Yu import YuChan, log
 from Yu.config import config
+from Yu.listener.home import home_onNotification, home_onUpdate
+from Yu.listener.local import local_onDelete, local_onUpdate
 from Yu.mastodon import mastodon
 
-def local():
+
+def local(main_pid):
     log.logInfo('Initializing feature: local')
     # SSE status test
     try:
         requests.get(f'https://{config["instance"]["address"]}/api/v1/streaming/health').raise_for_status()
     except requests.exceptions.HTTPError as exc:
         log.logCritical('＊Server-sent eventsが使えませんっ！ユウちゃん寝ますっ！')
-        raise exc
-    
+        os.kill(main_pid, signal.SIGKILL)
+        return
+
     try:
         while True:
             client = sseclient.SSEClient(
@@ -46,7 +53,8 @@ def local():
             time.sleep(60)
     except OperationalError as exc:
         log.logCritical('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
-        raise exc
+        os.kill(main_pid, signal.SIGKILL)
+        return
     except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError, MastodonBadGatewayError):
         log.logErr('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
@@ -59,7 +67,7 @@ def local():
         time.sleep(30)
         local()
 
-def home():
+def home(main_pid):
     log.logInfo('Initializing feature: home')
     log.logInfo('Connect address: {}'.format(config['instance']['address']))
     # SSE status test
@@ -67,7 +75,8 @@ def home():
         requests.get(f'https://{config["instance"]["address"]}/api/v1/streaming/health').raise_for_status()
     except requests.exceptions.HTTPError as exc:
         log.logCritical('＊Server-sent eventsが使えませんっ！ユウちゃん寝ますっ！')
-        raise exc
+        os.kill(main_pid, signal.SIGKILL)
+        return
 
     try:
         res = mastodon.account_verify_credentials()
@@ -92,7 +101,8 @@ def home():
             time.sleep(60)
     except OperationalError as exc:
         log.logCritical('＊データベースにアクセスできませんっ！ユウちゃん寝ますっ！')
-        raise exc
+        os.kill(main_pid, signal.SIGKILL)
+        return
     except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError, MastodonBadGatewayError):
         log.logErr('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)

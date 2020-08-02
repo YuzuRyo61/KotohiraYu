@@ -26,8 +26,8 @@ def main():
     # スレッド化するための初期化
     features = []
     # タイムライン系
-    features.append( threading.Thread(target=local, name='Timeline-Local') )
-    features.append( threading.Thread(target=home, name='Timeline-Home') )
+    features.append( threading.Thread(target=local, name='Timeline-Local', args=(os.getpid(), )) )
+    features.append( threading.Thread(target=home, name='Timeline-Home', args=(os.getpid(), )) )
     # cron系
     features.append( threading.Thread(target=run_scheduler, name='Schedule'))
 
