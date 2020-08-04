@@ -58,14 +58,14 @@ def local(main_pid):
     except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError, MastodonBadGatewayError):
         log.logErr('＊ローカルタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
-        local()
+        local(main_pid)
     except KeyboardInterrupt:
         pass
     except:
         KotohiraUtil.PANIC(sys.exc_info())
         log.logErr('ローカルタイムラインを30秒待って読み込みし直しますねっ！')
         time.sleep(30)
-        local()
+        local(main_pid)
 
 def home(main_pid):
     log.logInfo('Initializing feature: home')
@@ -106,11 +106,11 @@ def home(main_pid):
     except (requests.exceptions.ReadTimeout, requests.exceptions.ChunkedEncodingError, MastodonNetworkError, MastodonServerError, MastodonBadGatewayError):
         log.logErr('＊ホームタイムラインが繋がんないみたいですっ・・・。１分後にやり直しますっ！')
         time.sleep(60)
-        home()
+        home(main_pid)
     except KeyboardInterrupt:
         pass
     except:
         KotohiraUtil.PANIC(sys.exc_info())
         log.logErr('ホームタイムラインを十秒待って読み込みし直しますねっ！')
         time.sleep(10)
-        home()
+        home(main_pid)

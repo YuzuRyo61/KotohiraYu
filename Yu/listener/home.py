@@ -48,7 +48,7 @@ def home_onUpdate(status):
                     # 好感度ちょいアップ
                     calledBy = known_users.get(known_users.ID_Inst == status['account']['id'])
                     calledByRate = fav_rate.get(fav_rate.ID_Inst == calledBy)
-                    calledByRate += 1
+                    calledByRate.rate += 5
                     calledByRate.save()
                 else:
                     log.logWarn('ふぁぼってましたっ！')
