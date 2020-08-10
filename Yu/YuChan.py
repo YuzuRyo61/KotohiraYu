@@ -33,9 +33,10 @@ EXCLUDEUSERSID = config['follow']['exclude']
 def timeReport():
     try:
         with DATABASE.transaction():
-            now = datetime.datetime.now(timezone('Asia/Tokyo'))
+            now = datetime.datetime.now()
             trigger, created = word_trigger.get_or_create(trigger_name="time_report")
-            if created or now.hour > trigger.date.hour:
+            if created or now.hour > trigger.date.hour or \
+                (now.hour == 0 and trigger.date.hour == 23):
                 nowH = now.strftime("%H")
                 if nowH == "12":
                     mastodon.toot("琴平ユウちゃんが正午をお知らせしますっ！")
@@ -45,6 +46,9 @@ def timeReport():
                     mastodon.toot("琴平ユウちゃんが日付が変わったことをお知らせしますっ！")
                 else:
                     mastodon.toot(f"琴平ユウちゃんが{nowH}時をお知らせしますっ！")
+
+                trigger.date = now
+                trigger.save()
     except Exception as e:
         DATABASE.rollback()
         raise e
